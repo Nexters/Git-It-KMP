@@ -3,6 +3,7 @@ import org.gradle.accessors.dm.LibrariesForLibs
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("gitit.ktlint")
 }
 
 val libs = the<LibrariesForLibs>()

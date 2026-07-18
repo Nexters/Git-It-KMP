@@ -1,5 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
+    id("gitit.ktlint")
 }
 
 // Android 타겟이 없는 순수 Kotlin 모듈.
