@@ -1,18 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    alias(libs.plugins.kotlinJvm)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-}
-
-dependencies {
-    implementation(project(":shared"))
-
-    implementation(compose.desktop.currentOs)
-    implementation(libs.kotlinx.coroutinesSwing)
-
-    implementation(libs.compose.uiToolingPreview)
+    alias(libs.plugins.gitit.jvm.compose)
 }
 
 compose.desktop {
@@ -25,4 +14,13 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+dependencies {
+    implementation(projects.shared)
+
+    implementation(compose.desktop.currentOs)
+    implementation(libs.kotlinx.coroutinesSwing)
+
+    implementation(libs.compose.uiToolingPreview)
 }
