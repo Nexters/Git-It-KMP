@@ -40,4 +40,5 @@ include(":androidApp")
 include(":desktopApp")
 include(":shared")
 
+include(":core:network")
 include(":domain")
