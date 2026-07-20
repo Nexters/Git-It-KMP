@@ -1,30 +1,82 @@
-This is a Kotlin Multiplatform project targeting Android, Desktop (JVM).
+# Git-It-KMP
 
-* [/shared](./shared/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./shared/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./shared/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./shared/src/jvmMain/kotlin)
-    folder is the appropriate location.
+개발자가 오픈 소스 코드 구조와 핵심 개발 맥락을 AI가 생성한 질문을 기반으로 학습할 수 있도록 돕는 것을 목표로 하는 Kotlin Multiplatform 앱입니다.
 
-### Running the apps
+## 지원 플랫폼
 
-Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
+이 프로젝트는 Kotlin Multiplatform과 Compose Multiplatform을 기반으로 Android와 Desktop 환경을 함께 지원합니다.
 
-- Android app: `./gradlew :androidApp:assembleDebug`
-- Desktop app:
-  - Hot reload: `./gradlew :desktopApp:hotRun --auto`
-  - Standard run: `./gradlew :desktopApp:run`
+## Pain Point
 
-### Running tests
+![Forgetting Curve](https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/ForgettingCurve.svg/500px-ForgettingCurve.svg.png)
 
-Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
+- 복습하지 않으면 빠르게 감소하는 기억 유지율
+- 에빙하우스 망각 곡선으로 설명되는 반복 학습의 필요성
+- repository 이해를 질문과 피드백으로 다시 떠올리는 학습 경험 필요
 
-- Android tests: `./gradlew :shared:testAndroidHostTest`
-- Desktop tests: `./gradlew :shared:jvmTest`
+## 주요 기능 목표
+- 사용자 수준과 프로젝트 이해도 기반 학습 설정
+- 프로젝트 구조, 기능 흐름, 기술 개념, 코드 의도 기반 맞춤형 질문 생성
+- 객관식, 짧은 서술형 답변 채점 및 코드 출처 기반 피드백
+- 틀린 문제 중심 복습
 
----
+## 기술 스택
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+| 구분 | 기술 | 상태 |
+| --- | --- | --- |
+| 아키텍처 | MVI, Clean Architecture | 설계 방향 |
+| 상태 관리 | MVI 기반 UI State | 설계 방향 |
+| 구조 | Kotlin Multiplatform | 현재 구성 |
+| 플랫폼 | Android, Desktop(JVM) | 현재 구성 |
+| UI | Compose Multiplatform, Material 3 | 현재 구성 |
+| 빌드 구성 | Gradle Kotlin DSL, Version Catalog | 현재 구성 |
+| Android | Android Gradle Plugin, Activity Compose | 현재 구성 |
+| Desktop | Compose Desktop | 현재 구성 |
+| 테스트 | Kotlin Test | 현재 구성 |
+| 비동기 | Coroutine, Flow, Kotlinx Coroutines Swing | 일부 구성 / 도입 예정 |
+| 의존성 주입 | Koin | 도입 예정 |
+| 이미지 로딩 | Coil | 도입 예정 |
+| 화면 전환 | Navigation 3 | 도입 예정 |
+| 에러 트래킹 | Sentry | 도입 예정 |
+
+## 시작하기
+
+### 요구 사항
+
+- Android Studio 최신 안정 버전
+- JDK 21 이상 (Daemon JVM Java 21)
+- Kotlin Multiplatform 플러그인
+
+### 실행
+
+Android 앱 실행:
+
+```bash
+./gradlew :androidApp:assembleDebug
+```
+
+Desktop 앱 실행:
+
+```bash
+./gradlew :desktopApp:run
+```
+
+Desktop 앱 Hot Reload 실행:
+
+```bash
+./gradlew :desktopApp:hotRun --auto
+```
+
+### 테스트
+
+Android host test:
+
+```bash
+./gradlew :shared:testAndroidHostTest
+```
+
+Desktop test:
+
+```bash
+./gradlew :shared:jvmTest
+```
