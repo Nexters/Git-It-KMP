@@ -1,0 +1,25 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+max_line_length = 140
+ktlint_code_style = ktlint_official
+
+# Compose 관례상 `import androidx.compose.runtime.*` 같은 와일드카드 import를 허용한다.
+ktlint_standard_no-wildcard-imports = disabled
+
+# @Composable 함수는 관례상 PascalCase이므로 함수 네이밍 규칙에서 제외한다.
+ktlint_function_naming_ignore_when_annotated_with = Composable
+
+[*.{yml,yaml,json,xml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

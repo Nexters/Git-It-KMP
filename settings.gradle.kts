@@ -1,6 +1,8 @@
 rootProject.name = "Git-It-KMP"
 
 pluginManagement {
+    includeBuild("build-logic")
+
     repositories {
         google {
             mavenContent {
@@ -13,6 +15,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+// 모듈 의존성을 문자열 대신 `projects.core.designsystem` 형태로 참조한다.
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
     repositories {
@@ -34,3 +39,7 @@ plugins {
 include(":androidApp")
 include(":desktopApp")
 include(":shared")
+
+include(":core:designsystem")
+include(":core:network")
+include(":domain")
