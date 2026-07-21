@@ -1,8 +1,11 @@
 name: 코드 스타일 검사
 
 on:
-  # 브랜치 필터 없이 모든 브랜치·태그의 push에서 실행한다.
+  # main으로 향하는 PR과 main에 들어오는 push에서 실행한다.
+  pull_request:
+    branches: [ main ]
   push:
+    branches: [ main ]
 
 # 같은 브랜치에서 새 커밋이 올라오면 진행 중인 이전 실행은 취소한다.
 concurrency:
