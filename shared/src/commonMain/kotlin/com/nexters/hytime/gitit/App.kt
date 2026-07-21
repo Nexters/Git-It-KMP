@@ -1,5 +1,7 @@
 package com.nexters.hytime.gitit
 
+import com.nexters.hytime.gitit.logging.gitItLogger
+import com.nexters.hytime.gitit.logging.initLogger
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,6 +23,8 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 @Preview
 fun App() {
+    remember { initLogger() } // 앱 시작 시 1회 (Koin 도입 후엔 플랫폼 시작점으로 이동)
+    val logger = remember { gitItLogger() }
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         Column(
@@ -31,7 +35,10 @@ fun App() {
                     .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Button(onClick = { showContent = !showContent }) {
+            Button(onClick = {
+                showContent = !showContent
+                logger.i { "버튼을 클릭했습니다." }
+            }) {
                 Text("Click me!")
             }
             AnimatedVisibility(showContent) {
