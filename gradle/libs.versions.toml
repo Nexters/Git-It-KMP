@@ -38,6 +38,9 @@ ktlintGradle = "13.1.0"
 # Logging
 kermit = "2.1.0"
 
+# DI
+koin = "4.2.2"
+
 [libraries]
 # Gradle 플러그인 아티팩트 (build-logic 컨벤션에서만 사용)
 android-gradlePlugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -78,6 +81,12 @@ ktor-serialization-kotlinxJson = { module = "io.ktor:ktor-serialization-kotlinx-
 
 # Logging (Kermit)
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+
+# DI (Koin)
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 
 [plugins]
 # Kotlin

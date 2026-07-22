@@ -3,6 +3,8 @@ package com.nexters.hytime.gitit.logging
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.chunked
 import co.touchlab.kermit.platformLogWriter
+import org.koin.core.module.Module
+import org.koin.dsl.module
 
 fun initLogger() {
     Logger.setLogWriters(platformLogWriter().chunked())
@@ -42,3 +44,8 @@ fun Logger.logE(
     throwable: Throwable? = null,
     message: () -> String,
 ) = e(throwable = throwable) { callerLocation() + message() }
+
+val loggingModule: Module =
+    module {
+        single { gitItLogger() }
+    }

@@ -1,11 +1,11 @@
 package com.nexters.hytime.gitit
 
-import com.nexters.hytime.gitit.logging.gitItLogger
+import co.touchlab.kermit.Logger
 import com.nexters.hytime.gitit.logging.logI
 
-class Greeting {
-    private val logger = gitItLogger()
-
+class Greeting(
+    private val logger: Logger,
+) {
     private val platform = getPlatform()
 
     fun greet(): String {
