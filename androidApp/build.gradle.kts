@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(projects.shared)
+    implementation(projects.core.logging)
 
     implementation(libs.androidx.activity.compose)
 

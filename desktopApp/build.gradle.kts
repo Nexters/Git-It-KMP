@@ -18,6 +18,7 @@ compose.desktop {
 
 dependencies {
     implementation(projects.shared)
+    implementation(projects.core.logging)
 
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutinesSwing)
