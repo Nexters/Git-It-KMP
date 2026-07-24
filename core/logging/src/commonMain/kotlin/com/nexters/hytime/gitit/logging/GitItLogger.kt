@@ -43,7 +43,7 @@ private fun callerLocation(): String {
         val cls = frame.className
         if (cls.startsWith("co.touchlab.kermit")) continue
         if (cls.startsWith("java.") || cls.startsWith("jdk.") || cls.startsWith("kotlin.")) continue
-        val file = frame.fileName?.takeUnless { it.isNullOrBlank() || it == "<unknown>" } ?: continue
+        val file = frame.fileName?.takeUnless { it.isBlank() || it == "<unknown>" } ?: continue
         return "($file:${frame.lineNumber}) "
     }
     return ""
