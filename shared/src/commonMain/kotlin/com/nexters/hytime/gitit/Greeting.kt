@@ -1,15 +1,14 @@
 package com.nexters.hytime.gitit
 
-import co.touchlab.kermit.Logger
-import com.nexters.hytime.gitit.logging.logI
+import com.nexters.hytime.gitit.logging.AppLogger
 
 class Greeting(
-    private val logger: Logger,
+    private val logger: AppLogger,
 ) {
     private val platform = getPlatform()
 
     fun greet(): String {
-        logger.logI { "greet() 호출 - platform: ${platform.name}" }
+        logger.i { "greet() 호출 - platform: ${platform.name}" }
         return sayHello(platform.name)
     }
 }
