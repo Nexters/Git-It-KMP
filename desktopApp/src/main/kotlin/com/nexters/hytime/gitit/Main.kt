@@ -2,8 +2,15 @@ package com.nexters.hytime.gitit
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import com.nexters.hytime.gitit.logging.initLogger
+import org.koin.core.context.startKoin
 
-fun main() =
+fun main() {
+    initLogger(isDebug = true)
+    startKoin {
+        modules(appModules)
+    }
+
     application {
         Window(
             onCloseRequest = ::exitApplication,
@@ -12,3 +19,4 @@ fun main() =
             App()
         }
     }
+}

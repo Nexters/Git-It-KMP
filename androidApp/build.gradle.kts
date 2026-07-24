@@ -4,6 +4,8 @@ plugins {
 
 dependencies {
     implementation(projects.shared)
+    implementation(projects.core.logging)
+    implementation(libs.koin.android)
 
     implementation(libs.androidx.activity.compose)
 
@@ -13,6 +15,9 @@ dependencies {
 
 android {
     namespace = "com.nexters.hytime.gitit"
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.nexters.hytime.gitit"
@@ -27,6 +32,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }

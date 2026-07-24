@@ -42,4 +42,5 @@ include(":shared")
 
 include(":core:designsystem")
 include(":core:network")
+include(":core:logging")
 include(":domain")
