@@ -1,13 +1,15 @@
 package com.nexters.hytime.gitit.logging
 
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import co.touchlab.kermit.chunked
 import co.touchlab.kermit.platformLogWriter
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-fun initLogger() {
+fun initLogger(isDebug: Boolean) {
     Logger.setLogWriters(platformLogWriter().chunked())
+    if (!isDebug) Logger.setMinSeverity(Severity.Assert)
 }
 
 fun gitItLogger(tag: String = "GitIt"): AppLogger = AppLogger(Logger.withTag(tag))

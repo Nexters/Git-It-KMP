@@ -6,7 +6,7 @@ import com.nexters.hytime.gitit.logging.initLogger
 import org.koin.core.context.startKoin
 
 fun main() {
-    initLogger()
+    initLogger(isDebug = true)
     startKoin {
         modules(appModules)
     }
