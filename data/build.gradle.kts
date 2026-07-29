@@ -6,10 +6,8 @@ plugins {
 dependencies {
     implementation(projects.domain)
     implementation(projects.core.network)
-    implementation(projects.core.auth)
 
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.ktor.client.core)
     implementation(libs.koin.core)
 
     testImplementation(libs.kotlin.test)

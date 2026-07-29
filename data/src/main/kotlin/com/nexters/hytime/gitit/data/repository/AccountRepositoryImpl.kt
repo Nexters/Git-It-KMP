@@ -10,13 +10,14 @@ import com.nexters.hytime.gitit.network.api.NetworkException
 import com.nexters.hytime.gitit.network.api.NetworkMethod
 import com.nexters.hytime.gitit.network.api.NetworkRequest
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * [AccountRepository]의 구현체다.
  *
  * Google ID Token을 백엔드 `/auth/google` 엔드포인트로 전송하고, 응답을
- * [Account] 도메인 모델로 매핑한다. Ktor 타입은 [NetworkClient] 뒤에 숨겨져
- * 있으므로 이 클래스는 HTTP 구현을 모른다.
+ * [Account] 도메인 모델로 매핑한다. 모든 실패를 [Result.failure]로 감싸
+ * 반환하므로 호출자는 try-catch 없이 [Result]로 처리할 수 있다.
  *
  * @property networkClient HTTP 통신을 수행하는 클라이언트
  * @property baseUrl 백엔드 API 기준 URL
@@ -31,31 +32,45 @@ class AccountRepositoryImpl(
      * Google ID Token을 백엔드로 전송해 계정을 인증한다.
      *
      * @param idToken Google이 발급한 OIDC ID Token
-     * @return 백엔드 검증을 거친 인증된 계정 정보
-     * @throws NetworkException HTTP 통신 자체에 실패한 경우
-     * @throws kotlinx.serialization.SerializationException 응답 본문 파싱에 실패한 경우
+     * @return 백엔드 검증 결과를 담은 [Result]. 성공 시 계정 정보, 실패 시 예외.
      */
-    override suspend fun signInWithGoogle(idToken: String): Account {
-        val request =
-            NetworkRequest(
-                url = "$baseUrl$PATH_SIGN_IN_GOOGLE",
-                method = NetworkMethod.POST,
-                headers = mapOf("Content-Type" to "application/json", "Accept" to "application/json"),
-                body = json.encodeToString(SignInWithGoogleRequest.serializer(), SignInWithGoogleRequest(idToken)),
-            )
-        val response = networkClient.execute(request)
+    override suspend fun signInWithGoogle(idToken: String): Result<Account> =
+        try {
+            val request =
+                NetworkRequest(
+                    url = "$baseUrl$PATH_SIGN_IN_GOOGLE",
+                    method = NetworkMethod.POST,
+                    headers = mapOf("Content-Type" to "application/json", "Accept" to "application/json"),
+                    body =
+                        json.encodeToString(
+                            SignInWithGoogleRequest.serializer(),
+                            SignInWithGoogleRequest(idToken),
+                        ),
+                )
+            val response = networkClient.execute(request)
 
-        if (response.statusCode !in 200..299) {
-            throw NetworkException(
-                message = "백엔드 로그인 실패: ${response.statusCode}",
-                cause = IllegalStateException(response.body),
+            if (response.statusCode !in 200..299) {
+                return Result.failure(
+                    NetworkException(
+                        message = "백엔드 로그인 실패: ${response.statusCode}",
+                        cause =
+                            IllegalStateException(
+                                "응답 본문 ${response.body.length}자 (민감 정보 보호를 위해 생략)",
+                            ),
+                    ),
+                )
+            }
+
+            Result.success(
+                json
+                    .decodeFromString(AccountResponse.serializer(), response.body)
+                    .toDomain(),
             )
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (e: Exception) {
+            Result.failure(e)
         }
-
-        return json
-            .decodeFromString(AccountResponse.serializer(), response.body)
-            .toDomain()
-    }
 
     private companion object {
         private const val PATH_SIGN_IN_GOOGLE = "/auth/google"
