@@ -14,8 +14,7 @@ interface AccountRepository {
      * Google ID Token으로 로그인을 수행한다.
      *
      * @param idToken Google이 발급한 OIDC ID Token (JWT)
-     * @return 백엔드 검증을 거친 인증된 계정 정보
-     * @throws Exception 네트워크 오류, 토큰 검증 실패, 백엔드 오류 등
+     * @return 백엔드 검증 결과를 담은 [Result]. 성공 시 계정 정보, 실패 시 예외.
      */
-    suspend fun signInWithGoogle(idToken: String): Account
+    suspend fun signInWithGoogle(idToken: String): Result<Account>
 }
