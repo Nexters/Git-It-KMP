@@ -46,6 +46,9 @@ val generateAuthConfig =
         val clientId = googleDesktopClientId
         val secret = googleDesktopClientSecret
         val url = backendBaseUrl
+        inputs.property("clientId", clientId)
+        inputs.property("secret", secret)
+        inputs.property("url", url)
         outputs.dir(outputDir)
         doLast {
             val targetFile = outputDir.get().asFile.resolve("com/nexters/hytime/gitit/AuthConfig.kt")

@@ -49,8 +49,11 @@ fun App(
                 scope.launch {
                     runCatching { authFactory.create().signIn() }
                         .onSuccess { result ->
-                            logger.i { "ID Token: ${result.idToken}" }
+                            println("🔑 GoogleAuth: 로그인 성공")
+                            logger.i { "Google 로그인 성공" }
                         }.onFailure { error ->
+                            println("🔑 GoogleAuth: 로그인 실패 — ${error.message}")
+                            error.printStackTrace()
                             logger.e(throwable = error) { "로그인 실패" }
                         }
                 }

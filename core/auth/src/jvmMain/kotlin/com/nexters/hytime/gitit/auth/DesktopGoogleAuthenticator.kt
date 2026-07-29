@@ -1,22 +1,16 @@
 package com.nexters.hytime.gitit.auth
 
-import com.sun.net.httpserver.HttpExchange
-import com.sun.net.httpserver.HttpServer
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import java.awt.Desktop
-import java.net.InetSocketAddress
 import java.net.URI
 import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import java.security.MessageDigest
-import java.security.SecureRandom
-import java.util.Base64
-import kotlin.math.absoluteValue
+import java.time.Duration
 
 /**
  * OAuth 2.0 Authorization Code + PKCE 플로우로 [GoogleAuthenticator]를 구현한다.
@@ -27,10 +21,9 @@ import kotlin.math.absoluteValue
  * 3. `127.0.0.1` 루프백 HTTP 서버에서 authorization code 수신
  * 4. authorization code를 ID Token으로 교환
  *
- * Google "Desktop 앱" 유형 OAuth 클라이언트를 사용하므로 client secret이 필요 없다.
- *
  * @property clientId Google OAuth "Desktop 앱" 클라이언트 ID
  * (`xxxxx.apps.googleusercontent.com`)
+ * @property clientSecret Google OAuth "Desktop 앱" 클라이언트 보안 비밀. 토큰 교환에 필요하다.
  * @property redirectUriPort 루프백 콜백 서버가 바인딩할 포트. 기본값 0은 사용 가능한 포트를
  * 자동 할당한다.
  */
@@ -50,16 +43,20 @@ class DesktopGoogleAuthenticator(
             withContext(Dispatchers.IO) {
                 val pkce = PkceUtil.generate()
                 val redirectUri = startCallbackServer()
-                val state = randomState()
-                val authUrl = buildAuthorizationUrl(pkce.challenge, redirectUri.url, state)
+                try {
+                    val state = randomState()
+                    val authUrl = buildAuthorizationUrl(pkce.challenge, redirectUri.url, state)
 
-                openBrowser(authUrl)
-                val code =
-                    withTimeout(CALLBACK_TIMEOUT_MS) {
-                        redirectUri.waitForCode(state)
-                    }
+                    openBrowser(authUrl)
+                    val code =
+                        withTimeout(CALLBACK_TIMEOUT_MS) {
+                            redirectUri.waitForCode(state)
+                        }
 
-                exchangeCodeForIdToken(code, pkce.verifier, redirectUri.url)
+                    exchangeCodeForIdToken(code, pkce.verifier, redirectUri.url)
+                } finally {
+                    redirectUri.stop()
+                }
             }
         } catch (cancellation: CancellationException) {
             throw cancellation
@@ -106,13 +103,16 @@ class DesktopGoogleAuthenticator(
             HttpRequest
                 .newBuilder()
                 .uri(URI.create(TOKEN_URL))
+                .timeout(Duration.ofSeconds(30))
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(form))
                 .build()
 
         val response =
             HttpClient
-                .newHttpClient()
+                .newBuilder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .build()
                 .send(request, HttpResponse.BodyHandlers.ofString())
 
         if (response.statusCode() != 200) {

@@ -71,12 +71,6 @@ enum class GoogleAuthFailureReason {
     /** 사용자가 로그인을 명시적으로 취소했다. */
     CANCELED,
 
-    /** 네트워크 연결 문제로 로그인에 실패했다. */
-    NETWORK_ERROR,
-
-    /** OAuth 클라이언트 ID 등 설정 값이 누락되었거나 잘못되었다. */
-    CONFIG_ERROR,
-
     /** 분류할 수 없는 기타 오류. */
     UNKNOWN,
 }

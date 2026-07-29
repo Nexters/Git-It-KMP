@@ -81,7 +81,9 @@ internal class CallbackServer private constructor(
         val (status, html) =
             when {
                 error == "access_denied" -> {
-                    deferred.complete(Pair("", state))
+                    deferred.completeExceptionally(
+                        GoogleAuthException(GoogleAuthFailureReason.CANCELED),
+                    )
                     200 to htmlPage("로그인 취소", "로그인이 취소되었습니다. 이 창을 닫아도 됩니다.")
                 }
                 error != null -> {

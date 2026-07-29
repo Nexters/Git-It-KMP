@@ -10,6 +10,7 @@ import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.CancellationException
 
 /**
@@ -37,13 +38,17 @@ class AndroidGoogleAuthenticator(
      */
     override suspend fun signIn(): GoogleAuthResult {
         val credential = getCredential()
-        val googleCredential =
-            credential.toGoogleIdToken()
+        return try {
+            credential
+                .toGoogleIdToken()
+                ?.toAuthResult()
                 ?: throw GoogleAuthException(
                     GoogleAuthFailureReason.UNKNOWN,
                     IllegalStateException("Google ID Token 자격 증명이 아닙니다"),
                 )
-        return googleCredential.toAuthResult()
+        } catch (e: GoogleIdTokenParsingException) {
+            throw GoogleAuthException(GoogleAuthFailureReason.UNKNOWN, e)
+        }
     }
 
     private suspend fun getCredential(): Credential =
