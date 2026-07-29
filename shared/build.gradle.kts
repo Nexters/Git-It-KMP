@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.gitit.kmp.library.compose)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -21,15 +22,15 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.designsystem)
             implementation(projects.core.logging)
+            implementation(projects.feature.home)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
 
             implementation(libs.compose.material3)
-            implementation(libs.compose.components.resources)
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.androidx.navigation3.runtime)
+            implementation(libs.androidx.navigation3.ui)
         }
     }
 }

@@ -40,6 +40,8 @@ include(":androidApp")
 include(":desktopApp")
 include(":shared")
 
+include(":feature:home")
+
 include(":core:designsystem")
 include(":core:network")
 include(":core:logging")

@@ -40,13 +40,14 @@ UI는 Compose Multiplatform(Material 3)으로 공유합니다.
 androidApp/          Android 진입점 (MainActivity)
 desktopApp/          Desktop 진입점 (Main.kt, Compose Desktop)
 shared/              공유 UI + 앱 로직 (KMP: commonMain/androidMain/jvmMain)
+feature/home/         홈 화면 기능 (KMP + Compose)
 core/designsystem/   디자인 시스템 (KMP + Compose)
 core/network/        Ktor + kotlinx.serialization (순수 JVM)
 domain/              도메인 레이어 (순수 JVM)
 build-logic/         Gradle 컨벤션 플러그인 (included build)
 ```
 
-의존 방향: `androidApp`/`desktopApp` → `shared` → `core:*` / `domain`.
+의존 방향: `androidApp`/`desktopApp` → `shared` → `feature:*` → `core:*` / `domain`.
 역방향 의존이나 `core` 모듈 간 순환 의존을 만들지 않습니다.
 
 모듈 의존성은 타입 세이프 프로젝트 액세서(`enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")`)로
@@ -210,6 +211,8 @@ Repository 구현체를 `core:network`나 `shared`에 임시로 두지 않습니
 
 - 브랜치: `<type>/Task-<번호>-<요약>` (예: `feature/Task-19-kmp-logging`, `chore/Task-22-ktlint-workflow`)
 - 커밋 메시지: `<type>: <한국어 요약>` (`feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`)
+- 커밋 본문: 한 줄을 비운 뒤 `-` 목록으로 변경 배경, 선택 이유, 검증 내용을 작성합니다.
+  `Constraint:`, `Rejected:`, `Confidence:`, `Scope-risk:`, `Directive:`, `Tested:`, `Not-tested:` 같은 trailer 패턴은 사용하지 않습니다.
 - PR 제목: `Feature: [Task-10] 유저 프로필 스크린 추가` 형식. 템플릿은 `.github/pull_request_template.md`
 - PR 대상 브랜치는 `main`이고 CODEOWNERS 리뷰가 붙습니다.
 - 커밋과 푸시는 사용자가 요청할 때만 합니다.
