@@ -1,0 +1,23 @@
+## local.properties 템플릿
+##
+## 이 파일을 복사해서 local.properties를 만들고 실제 값을 채우세요.
+## local.properties는 .gitignore에 의해 버전 관리에서 제외됩니다.
+##
+## 값 발급: Google Cloud Console → API 및 서비스 → 사용자 인증 정보
+## https://console.cloud.google.com/apis/credentials
+
+# Android SDK 경로 (로컬 환경에 맞게 수정)
+sdk.dir=/Users/your-name/Library/Android/sdk
+
+# Google OAuth 클라이언트 ID
+# - Web Client ID: "웹 애플리케이션" 유형. Android 앱에서 ID Token을 요청할 때 사용
+google.webClientId=xxxxxxxx.apps.googleusercontent.com
+
+# - Desktop Client ID: "데스크톱 앱" 유형. Desktop 앱의 OAuth 웹 플로우에 사용
+google.desktopClientId=yyyyyyyy.apps.googleusercontent.com
+
+# - Desktop Client Secret: "데스크톱 앱" 클라이언트의 보안 비밀. 토큰 교환에 필요
+google.desktopClientSecret=zzzzzzzzzzzzzzzzzzzzzzzzzz
+
+# 백엔드 API 기준 URL
+google.backendUrl=https://api.gitit.example.com

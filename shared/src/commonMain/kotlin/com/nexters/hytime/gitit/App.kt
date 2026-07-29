@@ -14,14 +14,22 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.nexters.hytime.gitit.auth.GoogleAuthenticatorFactory
 import com.nexters.hytime.gitit.logging.gitItLogger
 import git_it_kmp.shared.generated.resources.Res
 import git_it_kmp.shared.generated.resources.compose_multiplatform
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
 @Composable
-fun App(greeting: Greeting = koinInject()) {
+fun App(
+    greeting: Greeting = koinInject(),
+    authFactory: GoogleAuthenticatorFactory = koinInject(),
+) {
+    val logger = remember { gitItLogger() }
+    val scope = rememberCoroutineScope()
+
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         Column(
@@ -36,6 +44,18 @@ fun App(greeting: Greeting = koinInject()) {
                 showContent = !showContent
             }) {
                 Text("Click me!")
+            }
+            Button(onClick = {
+                scope.launch {
+                    runCatching { authFactory.create().signIn() }
+                        .onSuccess { result ->
+                            logger.i { "ID Token: ${result.idToken}" }
+                        }.onFailure { error ->
+                            logger.e(throwable = error) { "로그인 실패" }
+                        }
+                }
+            }) {
+                Text("Google 로그인")
             }
             AnimatedVisibility(showContent) {
                 val message = remember { greeting.greet() }
