@@ -40,6 +40,9 @@ kermit = "2.1.0"
 
 # DI
 koin = "4.2.2"
+# Auth (Google Sign-In)
+androidx-credentials = "1.6.0"
+google-identity = "1.2.0"
 
 [libraries]
 # Gradle 플러그인 아티팩트 (build-logic 컨벤션에서만 사용)
@@ -68,6 +71,7 @@ compose-components-resources = { module = "org.jetbrains.compose.components:comp
 
 # KotlinX
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
 # Serialization
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
@@ -89,6 +93,10 @@ koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 
+# Auth (Google Sign-In) — Android Credential Manager + Google Identity Services
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "androidx-credentials" }
+androidx-credentials-playServicesAuth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidx-credentials" }
+google-identity-googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "google-identity" }
 [plugins]
 # Kotlin
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
