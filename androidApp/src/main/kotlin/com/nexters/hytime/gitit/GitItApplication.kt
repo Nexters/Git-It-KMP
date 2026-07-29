@@ -1,9 +1,14 @@
 package com.nexters.hytime.gitit
 
+import android.content.Context
 import android.app.Application
 import com.nexters.hytime.gitit.BuildConfig
 import com.nexters.hytime.gitit.logging.initLogger
+import com.nexters.hytime.gitit.auth.AndroidGoogleAuthenticatorFactory
+import com.nexters.hytime.gitit.auth.GoogleAuthenticatorFactory
+import com.nexters.hytime.gitit.baseUrlQualifier
 import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.module
 import org.koin.core.context.startKoin
 
 class GitItApplication : Application() {
@@ -12,7 +17,24 @@ class GitItApplication : Application() {
         initLogger(BuildConfig.DEBUG)
         startKoin {
             androidContext(this@GitItApplication)
-            modules(appModules)
+            modules(appModules + platformModule)
         }
     }
 }
+
+/**
+ * Android 플랫폼 전용 DI 바인딩이다.
+ *
+ * Credential Manager에 필요한 [android.content.Context]와 백엔드 검증용
+ * Web Client ID로 [AndroidGoogleAuthenticatorFactory]를 생성한다.
+ */
+private val platformModule =
+    module {
+        single<GoogleAuthenticatorFactory> {
+            AndroidGoogleAuthenticatorFactory(
+                context = get<Context>(),
+                serverClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID,
+            )
+        }
+        single(baseUrlQualifier) { BuildConfig.BACKEND_BASE_URL }
+    }

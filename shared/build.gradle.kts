@@ -22,6 +22,9 @@ kotlin {
             implementation(projects.core.designsystem)
             implementation(projects.core.logging)
             implementation(projects.core.network)
+            implementation(projects.core.auth)
+            implementation(projects.domain)
+            implementation(projects.data)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
