@@ -13,5 +13,11 @@ import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 class GoogleAuthTokenProvider(
     private val authenticator: GoogleAuthenticator,
 ) : AuthTokenProvider {
+    /**
+     * 인증 토큰(ID Token)을 획득한다.
+     *
+     * @return 백엔드 검증에 사용할 ID Token
+     * @throws GoogleAuthException 사용자 취소·설정 오류·기타 인증 실패
+     */
     override suspend fun obtainToken(): String = authenticator.signIn().idToken
 }

@@ -2,9 +2,11 @@ package com.nexters.hytime.gitit
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.nexters.hytime.gitit.auth.DesktopGoogleAuthenticatorFactory
-import com.nexters.hytime.gitit.auth.GoogleAuthenticatorFactory
+import com.nexters.hytime.gitit.auth.DesktopGoogleAuthenticator
+import com.nexters.hytime.gitit.auth.GoogleAuthTokenProvider
+import com.nexters.hytime.gitit.auth.GoogleAuthenticator
 import com.nexters.hytime.gitit.data.di.dataModule
+import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.logging.initLogger
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -33,15 +35,16 @@ fun main() {
 /**
  * 데스크톱 플랫폼 전용 DI 바인딩이다.
  *
- * Google "Desktop 앱" 유형 OAuth 클라이언트 ID로 [DesktopGoogleAuthenticatorFactory]를 생성한다.
+ * Google "Desktop 앱" 유형 OAuth 클라이언트 ID로 [DesktopGoogleAuthenticator]를 생성하고,
+ * 이를 [AuthTokenProvider] 포트에 [GoogleAuthTokenProvider] 어댑터로 연결한다.
  * 설정 값은 빌드 시점에 생성되는 [AuthConfig]에서 가져온다.
  */
 private val platformModule =
     module {
-        single<GoogleAuthenticatorFactory> {
-            DesktopGoogleAuthenticatorFactory(
+        single<GoogleAuthenticator> {
+            DesktopGoogleAuthenticator(
                 clientId = AuthConfig.GOOGLE_DESKTOP_CLIENT_ID,
-                clientSecret = AuthConfig.GOOGLE_DESKTOP_CLIENT_SECRET,
             )
         }
+        single<AuthTokenProvider> { GoogleAuthTokenProvider(get()) }
     }
