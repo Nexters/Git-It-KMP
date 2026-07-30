@@ -46,31 +46,9 @@ interface GoogleAuthenticator {
 /**
  * Google 로그인 과정에서 발생하는 모든 오류의 상위 타입이다.
  *
- * @property reason 오류 원인을 분류한다.
- * @param cause 원본 예외
+ * @param cause 원본 예외. 없으면 `null`이다.
  */
-open class GoogleAuthException(
-    val reason: GoogleAuthFailureReason,
+class GoogleAuthException(
+    message: String,
     cause: Throwable? = null,
-) : Exception(buildMessage(reason, cause), cause) {
-    companion object {
-        private fun buildMessage(
-            reason: GoogleAuthFailureReason,
-            cause: Throwable?,
-        ): String =
-            if (cause != null) {
-                "${reason.name}: ${cause.message}"
-            } else {
-                reason.name
-            }
-    }
-}
-
-/** Google 로그인 실패 원인을 분류한다. */
-enum class GoogleAuthFailureReason {
-    /** 사용자가 로그인을 명시적으로 취소했다. */
-    CANCELED,
-
-    /** 분류할 수 없는 기타 오류. */
-    UNKNOWN,
-}
+) : Exception(message, cause)

@@ -10,12 +10,8 @@ import java.net.URLDecoder
  * OAuth 2.0 authorization code를 수신하기 위한 루프백 HTTP 서버다.
  *
  * `127.0.0.1:{port}` 에 바인딩되고, Google 리다이렉트 콜백을 단 한 번 수신한 뒤 종료한다.
- *
- * @property url 브라우저에 등록할 redirect_uri (`http://127.0.0.1:{port}`)
- * @property server 바인딩된 [HttpServer]
  */
 internal class CallbackServer private constructor(
-    val url: String,
     private val server: HttpServer,
 ) {
     /**
@@ -30,10 +26,7 @@ internal class CallbackServer private constructor(
         val deferred = codeDeferred ?: error("콜백 핸들러가 초기화되지 않았습니다")
         val (code, state) = deferred.await()
         if (state != expectedState) {
-            throw GoogleAuthException(
-                GoogleAuthFailureReason.UNKNOWN,
-                IllegalStateException("state 불일치: CSRF가 의심됩니다"),
-            )
+            throw GoogleAuthException("state 불일치: CSRF가 의심됩니다")
         }
         return code
     }
@@ -50,21 +43,20 @@ internal class CallbackServer private constructor(
          * 지정한 포트에 콜백 서버를 시작한다.
          *
          * @param port 바인딩할 포트. 0이면 운영체제가 사용 가능한 포트를 할당한다.
-         * @return 시작된 [CallbackServer]
+         * @return 브라우저에 등록할 redirect_uri와 시작된 [CallbackServer] 쌍
          */
-        fun start(port: Int = 0): CallbackServer {
+        fun start(port: Int = 0): Pair<String, CallbackServer> {
             val server = HttpServer.create(InetSocketAddress("127.0.0.1", port), 0)
-            val actualPort = server.address.port
-            val url = "http://127.0.0.1:$actualPort"
+            val url = "http://127.0.0.1:${server.address.port}"
 
-            val holder = CallbackServer(url, server)
+            val holder = CallbackServer(server)
             val deferred = CompletableDeferred<Pair<String, String?>>()
             holder.codeDeferred = deferred
 
             server.createContext("/") { exchange -> holder.handle(exchange, deferred) }
             server.start()
 
-            return holder
+            return url to holder
         }
     }
 
@@ -78,29 +70,24 @@ internal class CallbackServer private constructor(
         val state = params["state"]
         val error = params["error"]
 
-        val (status, html) =
+        // favicon 요청·스캐너 프로브 등 code/error가 없는 잡 요청은 서버를 끄지 않고 무시한다.
+        // deferred가 완료된(유효한 콜백) 경우에만 서버를 종료한다.
+        val (status, html, shouldStop) =
             when {
                 error == "access_denied" -> {
-                    deferred.completeExceptionally(
-                        GoogleAuthException(GoogleAuthFailureReason.CANCELED),
-                    )
-                    200 to htmlPage("로그인 취소", "로그인이 취소되었습니다. 이 창을 닫아도 됩니다.")
+                    deferred.completeExceptionally(GoogleAuthException("로그인이 취소되었습니다"))
+                    Triple(200, htmlPage("로그인 취소", "로그인이 취소되었습니다. 이 창을 닫아도 됩니다."), true)
                 }
                 error != null -> {
-                    deferred.completeExceptionally(
-                        GoogleAuthException(
-                            GoogleAuthFailureReason.UNKNOWN,
-                            IllegalStateException("OAuth 오류: $error"),
-                        ),
-                    )
-                    400 to htmlPage("오류", "로그인 중 오류가 발생했습니다: $error")
+                    deferred.completeExceptionally(GoogleAuthException("OAuth 오류: $error"))
+                    Triple(400, htmlPage("오류", "로그인 중 오류가 발생했습니다: $error"), true)
                 }
                 code != null -> {
-                    deferred.complete(Pair(code, state))
-                    200 to htmlPage("로그인 성공", "로그인에 성공했습니다. 이 창을 닫아도 됩니다.")
+                    deferred.complete(code to state)
+                    Triple(200, htmlPage("로그인 성공", "로그인에 성공했습니다. 이 창을 닫아도 됩니다."), true)
                 }
                 else -> {
-                    400 to htmlPage("오류", "잘못된 요청입니다.")
+                    Triple(400, htmlPage("오류", "잘못된 요청입니다."), false)
                 }
             }
 
@@ -109,8 +96,7 @@ internal class CallbackServer private constructor(
         exchange.responseBody.use { it.write(body) }
         exchange.close()
 
-        // 응답 후 즉시 서버 종료
-        stop()
+        if (shouldStop) stop()
     }
 
     private fun parseQuery(query: String): Map<String, String> =
@@ -132,5 +118,14 @@ internal class CallbackServer private constructor(
         message: String,
     ): String =
         "<html><body style='font-family:sans-serif;text-align:center;padding:40px'>" +
-            "<h2>$title</h2><p>$message</p></body></html>"
+            "<h2>${escapeHtml(title)}</h2><p>${escapeHtml(message)}</p></body></html>"
+
+    /** 외부 입력을 HTML에 안전하게 넣기 위해 최소 이스케이프를 수행한다. */
+    private fun escapeHtml(value: String): String =
+        value
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&#39;")
 }

@@ -5,7 +5,6 @@ import androidx.credentials.Credential
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -42,12 +41,9 @@ class AndroidGoogleAuthenticator(
             credential
                 .toGoogleIdToken()
                 ?.toAuthResult()
-                ?: throw GoogleAuthException(
-                    GoogleAuthFailureReason.UNKNOWN,
-                    IllegalStateException("Google ID Token 자격 증명이 아닙니다"),
-                )
+                ?: throw GoogleAuthException("Google ID Token 자격 증명이 아닙니다")
         } catch (e: GoogleIdTokenParsingException) {
-            throw GoogleAuthException(GoogleAuthFailureReason.UNKNOWN, e)
+            throw GoogleAuthException("Google ID Token 파싱에 실패했습니다", e)
         }
     }
 
@@ -70,15 +66,13 @@ class AndroidGoogleAuthenticator(
                 .credential
         } catch (cancellation: CancellationException) {
             throw cancellation
-        } catch (cancellation: GetCredentialCancellationException) {
-            throw GoogleAuthException(GoogleAuthFailureReason.CANCELED, cancellation)
         } catch (noCredential: NoCredentialException) {
-            throw GoogleAuthException(GoogleAuthFailureReason.UNKNOWN, noCredential)
+            throw GoogleAuthException("사용 가능한 Google 계정이 없습니다", noCredential)
         } catch (e: GetCredentialException) {
-            throw GoogleAuthException(e.toFailureReason(), e)
+            throw GoogleAuthException("Credential Manager 오류: ${e.message}", e)
         } catch (e: Exception) {
             // Play Services 내부 오류 등 GetCredentialException 계열이 아닌 예외를 잡는다.
-            throw GoogleAuthException(GoogleAuthFailureReason.UNKNOWN, e)
+            throw GoogleAuthException("Google 로그인 중 오류가 발생했습니다", e)
         }
 
     /**
@@ -99,10 +93,4 @@ class AndroidGoogleAuthenticator(
             email = id,
             photoUrl = profilePictureUri?.toString(),
         )
-
-    private fun GetCredentialException.toFailureReason(): GoogleAuthFailureReason =
-        when (this) {
-            is GetCredentialCancellationException -> GoogleAuthFailureReason.CANCELED
-            else -> GoogleAuthFailureReason.UNKNOWN
-        }
 }
