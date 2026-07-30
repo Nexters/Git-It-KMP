@@ -5,8 +5,15 @@ plugins {
     alias(libs.plugins.gitit.jvm.compose)
 }
 
-// local.properties에서 민감한 설정 값을 읽는다.
-// providers API를 사용해 설정 캐시와 호환된다.
+/**
+ * local.properties에서 민감한 설정 값을 읽는다.
+ *
+ * providers API를 사용해 설정 캐시와 호환된다.
+ *
+ * @param key 읽을 프로퍼티 키
+ * @param default 값이 없을 때 사용할 기본값. 기본값은 빈 문자열이다.
+ * @return 읽은 프로퍼티 값. 없으면 [default]를 공백 제거해 반환한다.
+ */
 fun localProperty(
     key: String,
     default: String = "",
@@ -21,8 +28,7 @@ fun localProperty(
         .trim()
 
 val googleDesktopClientId = localProperty("google.desktopClientId")
-val googleDesktopClientSecret = localProperty("google.desktopClientSecret")
-val backendBaseUrl = localProperty("google.backendUrl")
+val backendBaseUrl = localProperty("api.baseUrl")
 
 compose.desktop {
     application {
@@ -44,10 +50,8 @@ val generateAuthConfig =
     tasks.register("generateAuthConfig") {
         val outputDir = generatedDir
         val clientId = googleDesktopClientId
-        val secret = googleDesktopClientSecret
         val url = backendBaseUrl
         inputs.property("clientId", clientId)
-        inputs.property("secret", secret)
         inputs.property("url", url)
         outputs.dir(outputDir)
         doLast {
@@ -59,7 +63,6 @@ val generateAuthConfig =
 
                 internal object AuthConfig {
                     const val GOOGLE_DESKTOP_CLIENT_ID = "$clientId"
-                    const val GOOGLE_DESKTOP_CLIENT_SECRET = "$secret"
                     const val BACKEND_BASE_URL = "$url"
                 }
                 """.trimIndent(),

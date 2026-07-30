@@ -25,6 +25,7 @@ class SignInUseCase(
      * 로그인을 수행하고 인증된 계정을 반환한다.
      *
      * @return 백엔드 검증 결과를 담은 [Result]. 성공 시 계정 정보, 실패 시 예외.
+     * @throws CancellationException 호출 코루틴이 취소된 경우. [Result]로 감싸지지 않고 그대로 전파된다.
      */
     suspend operator fun invoke(): Result<Account> {
         val idToken =

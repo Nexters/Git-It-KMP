@@ -73,6 +73,7 @@ class AccountRepositoryImpl(
         }
 
     private companion object {
+        /** Google ID Token 로그인 엔드포인트 경로다. */
         private const val PATH_SIGN_IN_GOOGLE = "/auth/google"
     }
 }
