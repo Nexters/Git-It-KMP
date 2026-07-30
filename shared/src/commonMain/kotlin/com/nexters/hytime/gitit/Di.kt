@@ -21,10 +21,6 @@ import org.koin.dsl.module
  */
 val appModule: Module =
     module {
-        single<NetworkLogger> {
-            val logger = gitItLogger(tag = "🌐 Network")
-            NetworkLogger { message -> logger.d { message } }
-        }
         single {
             SignInUseCase(
                 tokenProvider = get<AuthTokenProvider>(),
@@ -37,7 +33,7 @@ val appModule: Module =
 /**
  * 앱 전체 Koin 모듈 목록이다.
  *
- * [loggingModule], [networkModule], [appModule]을 조합한다.
+ * [loggingModule], [appModule]을 조합한다.
  * `dataModule`은 composition root(플랫폼 앱)에서 URL과 함께 등록한다.
  */
-val appModules: List<Module> = listOf(loggingModule, networkModule, appModule)
+val appModules: List<Module> = listOf(loggingModule, appModule)

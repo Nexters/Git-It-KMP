@@ -7,8 +7,13 @@ import com.nexters.hytime.gitit.network.logging.NetworkLogger
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-/** Git-It 네트워크 의존성을 제공하는 Koin 모듈이다. */
-val networkModule: Module =
+/**
+ * Git-It 네트워크 의존성을 제공하는 Koin 모듈을 생성한다.
+ *
+ * @param networkLogger HTTP 통신 로그를 전달할 로거
+ * @return 네트워크 클라이언트 의존성을 제공하는 Koin 모듈
+ */
+fun networkModule(networkLogger: NetworkLogger): Module =
     module {
-        single<NetworkClient> { KtorNetworkClient(createGitItHttpClient(get())) }
+        single<NetworkClient> { KtorNetworkClient(createGitItHttpClient(networkLogger)) }
     }

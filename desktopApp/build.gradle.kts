@@ -91,6 +91,7 @@ dependencies {
     implementation(projects.core.auth)
     implementation(projects.domain)
     implementation(projects.data)
+    implementation(projects.core.network)
     implementation(libs.koin.core)
 
     implementation(compose.desktop.currentOs)
