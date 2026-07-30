@@ -4,9 +4,6 @@ plugins {
 
 kotlin {
     android {
-        androidResources {
-            enable = true
-        }
         withHostTest {
             isIncludeAndroidResources = true
         }
@@ -22,7 +19,6 @@ kotlin {
             implementation(projects.core.designsystem)
             implementation(projects.core.logging)
             implementation(projects.core.network)
-            implementation(projects.core.auth)
             implementation(projects.domain)
 
             implementation(libs.koin.core)
@@ -30,7 +26,6 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
 
             implementation(libs.compose.material3)
-            implementation(libs.compose.components.resources)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
         }
