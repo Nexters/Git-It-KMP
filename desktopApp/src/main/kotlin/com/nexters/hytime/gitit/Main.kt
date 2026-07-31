@@ -43,6 +43,7 @@ private val platformModule =
         single<GoogleAuthenticator> {
             DesktopGoogleAuthenticator(
                 clientId = AuthConfig.GOOGLE_DESKTOP_CLIENT_ID,
+                clientSecret = AuthConfig.GOOGLE_DESKTOP_CLIENT_SECRET,
             )
         }
         single<AuthTokenProvider> { GoogleAuthTokenProvider(get()) }

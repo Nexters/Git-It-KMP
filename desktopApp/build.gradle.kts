@@ -28,6 +28,7 @@ fun localProperty(
         .trim()
 
 val googleDesktopClientId = localProperty("google.desktopClientId")
+val googleDesktopClientSecret = localProperty("google.desktopClientSecret")
 val backendBaseUrl = localProperty("api.baseUrl")
 
 compose.desktop {
@@ -50,6 +51,7 @@ val generateAuthConfig =
     tasks.register("generateAuthConfig") {
         val outputDir = generatedDir
         val clientId = googleDesktopClientId
+        val secret = googleDesktopClientSecret
         val url = backendBaseUrl
         inputs.property("clientId", clientId)
         inputs.property("url", url)
@@ -59,11 +61,12 @@ val generateAuthConfig =
             targetFile.parentFile.mkdirs()
             targetFile.writeText(
                 """
-                package com.nexters.hytime.gitit
+                 package com.nexters.hytime.gitit
 
                 internal object AuthConfig {
                     const val GOOGLE_DESKTOP_CLIENT_ID = "$clientId"
-                    const val BACKEND_BASE_URL = "$url"
+                     const val GOOGLE_DESKTOP_CLIENT_SECRET = "$secret"
+                     const val BACKEND_BASE_URL = "$url"
                 }
                 """.trimIndent(),
             )

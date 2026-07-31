@@ -33,6 +33,7 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 class DesktopGoogleAuthenticator(
     private val clientId: String,
+    private val clientSecret: String,
     private val redirectUriPort: Int = 0,
 ) : GoogleAuthenticator {
     /**
@@ -103,6 +104,7 @@ class DesktopGoogleAuthenticator(
                 "code_verifier" to codeVerifier,
                 "grant_type" to "authorization_code",
                 "redirect_uri" to redirectUri,
+                "client_secret" to clientSecret,
             ).toQueryString()
 
         val request =
