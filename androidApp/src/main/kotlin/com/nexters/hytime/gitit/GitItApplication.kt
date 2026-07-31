@@ -2,19 +2,18 @@ package com.nexters.hytime.gitit
 
 import android.content.Context
 import android.app.Application
-import com.nexters.hytime.gitit.logging.gitItLogger
 import com.nexters.hytime.gitit.BuildConfig
 import com.nexters.hytime.gitit.auth.AndroidGoogleAuthenticator
 import com.nexters.hytime.gitit.auth.GoogleAuthenticator
 import com.nexters.hytime.gitit.auth.GoogleAuthTokenProvider
-import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.data.di.dataModule
+import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
+import com.nexters.hytime.gitit.logging.gitItLogger
 import com.nexters.hytime.gitit.logging.initLogger
 import com.nexters.hytime.gitit.network.di.networkModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
-import kotlin.collections.plus
 
 class GitItApplication : Application() {
     override fun onCreate() {
@@ -23,18 +22,19 @@ class GitItApplication : Application() {
         val logger = gitItLogger(tag = "🌐 Network")
         startKoin {
             androidContext(this@GitItApplication)
-            modules(appModules + dataModule(BuildConfig.BACKEND_BASE_URL) + platformModule + networkModule { message -> logger.d { message } })
+            modules(
+                appModules +
+                    dataModule +
+                    platformModule +
+                    networkModule(
+                        networkLogger = { message -> logger.d { message } },
+                        baseUrl = BuildConfig.BACKEND_BASE_URL,
+                    ),
+            )
         }
     }
 }
 
-/**
- * Android 플랫폼 전용 DI 바인딩이다.
- *
- * Credential Manager에 필요한 [Context]와 백엔드 검증용
- * Web Client ID로 [AndroidGoogleAuthenticator]를 생성하고, 이를
- * [AuthTokenProvider] 포트에 [GoogleAuthTokenProvider] 어댑터로 연결한다.
- */
 private val platformModule =
     module {
         single<GoogleAuthenticator> {

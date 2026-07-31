@@ -13,16 +13,19 @@ import com.nexters.hytime.gitit.network.di.networkModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
-/**
- * 데스크톱 애플리케이션 진입점이다.
- *
- * Kermit 로거를 초기화하고 Koin DI를 시작한 뒤, Compose Desktop 윈도우를 띄운다.
- */
 fun main() {
     initLogger(isDebug = true)
     val logger = gitItLogger(tag = "🌐 Network")
     startKoin {
-        modules(appModules + dataModule(AuthConfig.BACKEND_BASE_URL) + platformModule + networkModule { message -> logger.d { message } })
+        modules(
+            appModules +
+                dataModule +
+                platformModule +
+                networkModule(
+                    networkLogger = { message -> logger.d { message } },
+                    baseUrl = AuthConfig.BACKEND_BASE_URL,
+                ),
+        )
     }
 
     application {
@@ -35,13 +38,6 @@ fun main() {
     }
 }
 
-/**
- * 데스크톱 플랫폼 전용 DI 바인딩이다.
- *
- * Google "Desktop 앱" 유형 OAuth 클라이언트 ID로 [DesktopGoogleAuthenticator]를 생성하고,
- * 이를 [AuthTokenProvider] 포트에 [GoogleAuthTokenProvider] 어댑터로 연결한다.
- * 설정 값은 빌드 시점에 생성되는 [AuthConfig]에서 가져온다.
- */
 private val platformModule =
     module {
         single<GoogleAuthenticator> {
