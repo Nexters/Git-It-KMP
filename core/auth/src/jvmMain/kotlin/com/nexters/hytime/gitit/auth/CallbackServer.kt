@@ -92,6 +92,7 @@ internal class CallbackServer private constructor(
             }
 
         val body = html.toByteArray(Charsets.UTF_8)
+        exchange.responseHeaders.set("Content-Type", "text/html; charset=UTF-8")
         exchange.sendResponseHeaders(status, body.size.toLong())
         exchange.responseBody.use { it.write(body) }
         exchange.close()
