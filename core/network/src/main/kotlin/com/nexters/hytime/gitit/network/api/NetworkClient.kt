@@ -1,13 +1,43 @@
 package com.nexters.hytime.gitit.network.api
 
-/** Ktor 같은 HTTP 구현 세부 사항을 숨기는 네트워크 통신 경계다. */
+import kotlinx.serialization.KSerializer
+
+/**
+ * Ktor 같은 HTTP 구현 세부 사항을 숨기는 네트워크 통신 경계다.
+ *
+ * 요청 본문은 [KSerializer]를 통해 자동 직렬화되고, 응답 본문은 자동 역직렬화된다.
+ * 호출자는 문자열 encode/decode를 다루지 않는다.
+ */
 interface NetworkClient {
     /**
-     * 서버에 요청을 전송하고 응답을 반환한다.
+     * 타입 안전한 POST 요청을 보내고 응답 본문을 역직렬화해 반환한다.
+     * [path]는 baseUrl 뒤에 붙는 경로다 (예: `"/auth/google"`).
      *
-     * @param request 서버에 전송할 요청 정보
-     * @return HTTP 구현에 독립적인 응답 정보
-     * @throws NetworkException HTTP 통신 자체에 실패한 경우
+     * @param path baseUrl 뒤에 붙는 요청 경로
+     * @param body 요청 본문. [requestSerializer]로 직렬화된다.
+     * @param requestSerializer 요청 본문의 직렬화기
+     * @param responseSerializer 응답 본문의 역직렬화기
+     * @return 역직렬화된 응답
+     * @throws NetworkException HTTP 통신 실패 또는 2xx 외 응답
      */
-    suspend fun execute(request: NetworkRequest): NetworkResponse
+    suspend fun <Req : Any, Res : Any> post(
+        path: String,
+        body: Req,
+        requestSerializer: KSerializer<Req>,
+        responseSerializer: KSerializer<Res>,
+    ): Res
 }
+
+/**
+ * [NetworkClient.post]의 reified 편의 확장이다. 직렬화기를 명시하지 않아도 된다.
+ */
+suspend inline fun <reified Req : Any, reified Res : Any> NetworkClient.post(
+    path: String,
+    body: Req,
+): Res =
+    post(
+        path = path,
+        body = body,
+        requestSerializer = kotlinx.serialization.serializer(),
+        responseSerializer = kotlinx.serialization.serializer(),
+    )

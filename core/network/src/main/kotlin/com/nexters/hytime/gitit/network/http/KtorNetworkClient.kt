@@ -2,54 +2,50 @@ package com.nexters.hytime.gitit.network.http
 
 import com.nexters.hytime.gitit.network.api.NetworkClient
 import com.nexters.hytime.gitit.network.api.NetworkException
-import com.nexters.hytime.gitit.network.api.NetworkMethod
-import com.nexters.hytime.gitit.network.api.NetworkRequest
-import com.nexters.hytime.gitit.network.api.NetworkResponse
 import io.ktor.client.HttpClient
-import io.ktor.client.request.request
+import io.ktor.client.call.body
+import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpMethod
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.CancellationException
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
 
-/** Ktor를 사용해 [NetworkClient] 계약을 구현한다. */
+/**
+ * Ktor의 ContentNegotiation으로 직렬화/역직렬화를 수행하는 [NetworkClient] 구현체다.
+ *
+ * @property client ContentNegotiation(json)이 설치된 Ktor HttpClient
+ * @property json 직렬화에 사용할 Json 인스턴스
+ * @property baseUrl 모든 요청의 기준 URL. [post]에 전달하는 path 앞에 붙는다.
+ */
 internal class KtorNetworkClient(
     private val client: HttpClient,
+    private val json: Json,
+    private val baseUrl: String,
 ) : NetworkClient {
-    /**
-     * [request]를 Ktor 요청으로 변환해 전송한다.
-     *
-     * @param request 서버에 전송할 구현 독립적인 요청 정보
-     * @return Ktor 타입을 포함하지 않는 응답 정보
-     * @throws NetworkException 요청을 전송하거나 응답을 읽지 못한 경우
-     */
-    override suspend fun execute(request: NetworkRequest): NetworkResponse =
+    override suspend fun <Req : Any, Res : Any> post(
+        path: String,
+        body: Req,
+        requestSerializer: KSerializer<Req>,
+        responseSerializer: KSerializer<Res>,
+    ): Res =
         try {
-            client
-                .request(request.url) {
-                    method = request.method.toKtorHttpMethod()
-                    request.headers.forEach { (name, value) -> headers.append(name, value) }
-                    request.body?.let(::setBody)
-                }.let { response ->
-                    NetworkResponse(
-                        statusCode = response.status.value,
-                        headers = response.headers.names().associateWith { name -> response.headers.getAll(name).orEmpty() },
-                        body = response.bodyAsText(),
-                    )
+            val response =
+                client.post("$baseUrl$path") {
+                    contentType(ContentType.Application.Json)
+                    setBody(json.encodeToString(requestSerializer, body))
                 }
-        } catch (exception: CancellationException) {
-            throw exception
-        } catch (exception: Exception) {
-            throw NetworkException(message = "네트워크 요청에 실패했습니다.", cause = exception)
+            if (!response.status.isSuccess()) {
+                throw NetworkException("요청 실패: ${response.status.value}")
+            }
+            json.decodeFromString(responseSerializer, response.body())
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (e: NetworkException) {
+            throw e
+        } catch (e: Exception) {
+            throw NetworkException("네트워크 요청에 실패했습니다.", e)
         }
 }
-
-/** [NetworkMethod]를 Ktor 내부 HTTP 메서드로 변환한다. */
-private fun NetworkMethod.toKtorHttpMethod(): HttpMethod =
-    when (this) {
-        NetworkMethod.GET -> HttpMethod.Get
-        NetworkMethod.POST -> HttpMethod.Post
-        NetworkMethod.PUT -> HttpMethod.Put
-        NetworkMethod.PATCH -> HttpMethod.Patch
-        NetworkMethod.DELETE -> HttpMethod.Delete
-    }
