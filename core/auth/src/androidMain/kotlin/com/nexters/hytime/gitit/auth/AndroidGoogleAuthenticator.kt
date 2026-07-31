@@ -15,32 +15,17 @@ import kotlinx.coroutines.CancellationException
 /**
  * Credential Manager와 Google Identity Services를 사용해 [GoogleAuthenticator]를 구현한다.
  *
- * Android에서는 시스템 수준의 Credential Manager가 Google 계정 선택 UI를 제공하고,
- * [GoogleIdTokenCredential]을 통해 ID Token을 직접 반환한다.
- *
- * 보안상 권장되는 패턴대로 서버 측 OAuth 클라이언트(Web Client ID)의 ID Token을
- * 요청한다. Android OAuth Client는 APK 서명으로 연결되므로 별도의 비밀 키가 필요 없다.
- *
- * @property context Android 컨텍스트. Credential Manager API 호출에 필요하다.
- * @property serverClientId 백엔드 검증에 사용할 Google OAuth Web Client ID.
- * `xxxxx.apps.googleusercontent.com` 형식이다.
+ * @property context Android 컨텍스트
+ * @property serverClientId 백엔드 검증에 사용할 Google OAuth Web Client ID
  */
 class AndroidGoogleAuthenticator(
     private val context: Context,
     private val serverClientId: String,
 ) : GoogleAuthenticator {
-    /**
-     * Credential Manager를 통해 Google 로그인을 수행한다.
-     *
-     * @return ID Token과 프로필 정보를 담은 인증 결과
-     * @throws GoogleAuthException 사용자 취소, 설정 오류, 기타 Credential Manager 오류
-     */
-    override suspend fun signIn(): GoogleAuthResult {
+    override suspend fun signIn(): String {
         val credential = getCredential()
         return try {
-            credential
-                .toGoogleIdToken()
-                ?.toAuthResult()
+            credential.toGoogleIdToken()?.idToken
                 ?: throw GoogleAuthException("Google ID Token 자격 증명이 아닙니다")
         } catch (e: GoogleIdTokenParsingException) {
             throw GoogleAuthException("Google ID Token 파싱에 실패했습니다", e)
@@ -71,26 +56,12 @@ class AndroidGoogleAuthenticator(
         } catch (e: GetCredentialException) {
             throw GoogleAuthException("Credential Manager 오류: ${e.message}", e)
         } catch (e: Exception) {
-            // Play Services 내부 오류 등 GetCredentialException 계열이 아닌 예외를 잡는다.
             throw GoogleAuthException("Google 로그인 중 오류가 발생했습니다", e)
         }
 
-    /**
-     * Credential Manager 결과를 Google ID Token 자격 증명으로 변환한다.
-     *
-     * @return Google ID Token 자격 증명. 타입이 맞지 않으면 `null`.
-     */
     private fun Credential.toGoogleIdToken(): GoogleIdTokenCredential? {
         if (this !is CustomCredential) return null
         if (type != GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) return null
         return GoogleIdTokenCredential.createFrom(data)
     }
-
-    private fun GoogleIdTokenCredential.toAuthResult() =
-        GoogleAuthResult(
-            idToken = idToken,
-            displayName = displayName,
-            email = id,
-            photoUrl = profilePictureUri?.toString(),
-        )
 }

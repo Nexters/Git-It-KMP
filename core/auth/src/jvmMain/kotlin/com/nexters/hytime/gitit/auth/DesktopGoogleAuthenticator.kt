@@ -41,7 +41,7 @@ class DesktopGoogleAuthenticator(
      * @return ID Token과 프로필 정보를 담은 인증 결과
      * @throws GoogleAuthException 사용자 취소, 콜백 시간 초과, 토큰 교환 실패, 설정 오류
      */
-    override suspend fun signIn(): GoogleAuthResult =
+    override suspend fun signIn(): String =
         try {
             withContext(Dispatchers.IO) {
                 val pkce = PkceUtil.generate()
@@ -95,7 +95,7 @@ class DesktopGoogleAuthenticator(
         code: String,
         codeVerifier: String,
         redirectUri: String,
-    ): GoogleAuthResult {
+    ): String {
         val form =
             linkedMapOf(
                 "client_id" to clientId,
