@@ -16,9 +16,9 @@ class AccountRepositoryImpl(
         runCatchingResult {
             networkClient
                 .post<SignInWithGoogleRequest, AccountResponse>(
-                PATH_SIGN_IN_GOOGLE,
-                SignInWithGoogleRequest(idToken),
-            ).toDomain()
+                    PATH_SIGN_IN_GOOGLE,
+                    SignInWithGoogleRequest(idToken),
+                ).toDomain()
         }
 
     private companion object {
