@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation(projects.shared)
     implementation(projects.core.logging)
+    implementation(projects.core.network)
     implementation(libs.koin.android)
 
     implementation(libs.androidx.activity.compose)

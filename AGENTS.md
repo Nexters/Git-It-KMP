@@ -41,7 +41,7 @@ androidApp/          Android 진입점 (MainActivity)
 desktopApp/          Desktop 진입점 (Main.kt, Compose Desktop)
 shared/              공유 UI + 앱 로직 (KMP: commonMain/androidMain/jvmMain)
 core/designsystem/   디자인 시스템 (KMP + Compose)
-core/network/        Ktor + kotlinx.serialization (순수 JVM)
+core/network/        Ktor 기반 HTTP 클라이언트 (순수 JVM)
 domain/              도메인 레이어 (순수 JVM)
 build-logic/         Gradle 컨벤션 플러그인 (included build)
 ```
@@ -147,14 +147,14 @@ fun generateQuestions(
 MVI + Clean Architecture를 지향합니다. 도입 예정 스택은 Koin(DI), Coil, Navigation 3, Sentry입니다.
 아직 코드에 없는 라이브러리를 임의로 끌어오지 말고, 필요하면 먼저 제안합니다.
 
-현재 `domain`, `core:network`, `core:designsystem`은 `build.gradle.kts`만 있고 소스가 비어 있습니다.
+현재 `domain`, `core:designsystem`은 `build.gradle.kts`만 있고 소스가 비어 있습니다.
 아래는 첫 코드가 들어갈 때부터 지킬 규칙입니다.
 
 | 레이어 | 위치 | 책임 |
 | --- | --- | --- |
 | domain | `domain` | 도메인 모델, UseCase, Repository **인터페이스**. 다른 모듈에 의존하지 않음 |
-| data | **아직 없음 — `data` 모듈로 신설 예정** | Repository **구현체**, DTO↔도메인 매핑, 캐싱·재시도 정책 |
-| network | `core:network` | Ktor 클라이언트, API 정의, DTO. HTTP를 아는 유일한 곳 |
+| data | **아직 없음 — `data` 모듈로 신설 예정** | Repository **구현체**, API 정의, DTO, DTO↔도메인 매핑, 캐싱·재시도 정책 |
+| network | `core:network` | Ktor 클라이언트와 공통 HTTP 설정. Ktor를 아는 유일한 곳 |
 | presentation | `shared` | Compose UI, ViewModel, UiState |
 
 의존 방향은 `presentation → domain ← data → network` 입니다. 안쪽(`domain`)은 바깥을 모릅니다.
@@ -168,12 +168,14 @@ Repository 구현체를 `core:network`나 `shared`에 임시로 두지 않습니
 
 ### 레이어 규칙
 
-- Repository 인터페이스는 `domain`에, 구현체는 `data`에 둡니다. `shared`는 인터페이스에만 의존합니다.
-- DTO(`@Serializable`)는 `core:network` 밖으로 나가지 않습니다. `data`가 경계에서 도메인 모델로
-  매핑합니다. DTO를 UI나 UseCase까지 흘려보내지 않습니다.
+- Repository 인터페이스는 `domain`에, 구현체·API 정의·DTO(`@Serializable`)는 `data`에 둡니다.
+  `shared`는 Repository 인터페이스에만 의존합니다.
+- `data`는 DTO를 도메인 모델로 매핑하고, DTO를 UI나 UseCase까지 흘려보내지 않습니다.
+- `core:network`의 공개 API에는 Ktor 타입을 노출하지 않습니다. `data`는
+  `implementation(projects.core.network)`만 참조하며 Ktor에 직접 의존하지 않습니다.
 - `domain`은 Ktor·Compose·Android를 몰라야 합니다 (`gitit.jvm.library`가 이미 빌드로 강제).
-- 네트워크·직렬화 예외는 `data` 경계에서 잡아 도메인 타입(`Result` 등)으로 변환합니다.
-  Ktor 예외가 ViewModel까지 올라오지 않게 합니다.
+- `core:network`은 Ktor 예외를 자체 네트워크 오류 타입으로 변환합니다. `data`는 HTTP 상태·응답 본문과
+  네트워크 오류를 도메인 타입(`Result` 등)으로 변환하며, Ktor 예외가 ViewModel까지 올라오지 않게 합니다.
 - 모듈을 새로 나눌지 애매하면 먼저 제안하고 확인을 받습니다.
 
 ## 테스트 규칙

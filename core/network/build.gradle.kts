@@ -13,4 +13,9 @@ dependencies {
 
     // OkHttp 엔진은 Android와 데스크톱 양쪽에서 동작하므로 엔진을 하나만 쓴다.
     implementation(libs.ktor.client.okhttp)
+
+    implementation(libs.koin.core)
+
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.ktor.client.mock)
 }
