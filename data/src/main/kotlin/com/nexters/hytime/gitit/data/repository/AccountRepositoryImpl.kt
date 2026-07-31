@@ -14,7 +14,8 @@ class AccountRepositoryImpl(
 ) : AccountRepository {
     override suspend fun signInWithGoogle(idToken: String): Result<Account> =
         runCatchingResult {
-            networkClient.post<SignInWithGoogleRequest, AccountResponse>(
+            networkClient
+                .post<SignInWithGoogleRequest, AccountResponse>(
                 PATH_SIGN_IN_GOOGLE,
                 SignInWithGoogleRequest(idToken),
             ).toDomain()
