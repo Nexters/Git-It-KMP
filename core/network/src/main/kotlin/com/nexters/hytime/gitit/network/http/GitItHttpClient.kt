@@ -56,7 +56,6 @@ private val sensitiveFieldRegex = Regex(""""(id_token|access_token|refresh_token
 
 private fun sanitizeSensitiveFields(message: String): String = message.replace(sensitiveFieldRegex, """"$1":"***"""")
 
-
 /**
  * [networkLogger]를 Ktor HTTP 로거로 변환한다.
  *
