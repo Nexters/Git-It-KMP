@@ -52,6 +52,11 @@ internal fun HttpClientConfig<*>.configureGitItHttpClient(networkLogger: Network
     }
 }
 
+private val sensitiveFieldRegex = Regex(""""(id_token|access_token|refresh_token)":"[^"]*"""")
+
+private fun sanitizeSensitiveFields(message: String): String = message.replace(sensitiveFieldRegex, """"$1":"***"""")
+
+
 /**
  * [networkLogger]를 Ktor HTTP 로거로 변환한다.
  *
@@ -61,6 +66,6 @@ internal fun HttpClientConfig<*>.configureGitItHttpClient(networkLogger: Network
 private fun createKtorLogger(networkLogger: NetworkLogger): KtorLogger =
     object : KtorLogger {
         override fun log(message: String) {
-            networkLogger.log(message)
+            networkLogger.log(sanitizeSensitiveFields(message))
         }
     }
