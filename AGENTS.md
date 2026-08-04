@@ -42,12 +42,14 @@ desktopApp/          Desktop 진입점 (Main.kt, Compose Desktop)
 shared/              공유 UI + 앱 로직 (KMP: commonMain/androidMain/jvmMain)
 feature/home/         홈 화면 기능 (KMP + Compose)
 core/designsystem/   디자인 시스템 (KMP + Compose)
+core/auth/           Google 로그인 인증 추상화 (KMP: commonMain/androidMain/jvmMain)
 core/network/        Ktor 기반 HTTP 클라이언트 (순수 JVM)
+data/                Repository 구현체, API DTO, DTO↔도메인 매핑 (순수 JVM)
 domain/              도메인 레이어 (순수 JVM)
 build-logic/         Gradle 컨벤션 플러그인 (included build)
 ```
 
-의존 방향: `androidApp`/`desktopApp` → `shared` → `feature:*` → `core:*` / `domain`.
+의존 방향: `androidApp`/`desktopApp` → `shared` → `feature:*` / `core:*` / `domain` / `data`.
 역방향 의존이나 `core` 모듈 간 순환 의존을 만들지 않습니다.
 
 모듈 의존성은 타입 세이프 프로젝트 액세서(`enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")`)로
@@ -154,18 +156,17 @@ MVI + Clean Architecture를 지향합니다. 도입 예정 스택은 Koin(DI), C
 | 레이어 | 위치 | 책임 |
 | --- | --- | --- |
 | domain | `domain` | 도메인 모델, UseCase, Repository **인터페이스**. 다른 모듈에 의존하지 않음 |
-| data | **아직 없음 — `data` 모듈로 신설 예정** | Repository **구현체**, API 정의, DTO, DTO↔도메인 매핑, 캐싱·재시도 정책 |
+| data | `data` | Repository **구현체**, API 정의, DTO, DTO↔도메인 매핑, 캐싱·재시도 정책 |
 | network | `core:network` | Ktor 클라이언트와 공통 HTTP 설정. Ktor를 아는 유일한 곳 |
 | presentation | `shared` | Compose UI, ViewModel, UiState |
 
 의존 방향은 `presentation → domain ← data → network` 입니다. 안쪽(`domain`)은 바깥을 모릅니다.
 
-### 데이터 레이어는 별도 모듈로 신설한다
+### 데이터 레이어
 
-**데이터 레이어가 필요해지는 시점에 미루지 말고 `data` 모듈을 새로 만듭니다.**
-Repository 구현체를 `core:network`나 `shared`에 임시로 두지 않습니다. 한번 섞이면 나중에
-떼어내는 비용이 훨씬 커집니다. 모듈을 만들 때는 [새 모듈 추가 절차](#새-모듈-추가-절차)를 따르고,
-플랫폼 비의존을 강제하도록 `gitit.jvm.library`를 적용합니다.
+`data` 모듈은 이미 신설되어 있다. Repository 구현체를 `core:network`나 `shared`에 두지 않는다.
+새 Repository 구현체가 필요하면 `data` 모듈에 추가한다. 모듈을 만들 때는
+[새 모듈 추가 절차](#새-모듈-추가-절차)를 따르고, 플랫폼 비의존을 강제하도록 `gitit.jvm.library`를 적용한다.
 
 ### 레이어 규칙
 

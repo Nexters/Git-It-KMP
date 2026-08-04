@@ -8,5 +8,5 @@ package com.nexters.hytime.gitit.network.api
  */
 class NetworkException(
     message: String,
-    cause: Throwable,
+    cause: Throwable? = null,
 ) : RuntimeException(message, cause)

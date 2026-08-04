@@ -1,0 +1,31 @@
+package com.nexters.hytime.gitit.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
+import com.nexters.hytime.gitit.feature.home.HomeRoute
+import com.nexters.hytime.gitit.presentation.signin.SignInScreen
+
+@Composable
+actual fun AppNavHost() {
+    val backStack =
+        rememberNavBackStack(
+            appRouteSavedStateConfiguration,
+            AppRoute.SignIn,
+        )
+
+    NavDisplay(
+        backStack = backStack,
+        onBack = { backStack.removeLastOrNull() },
+        entryProvider =
+            entryProvider {
+                entry<AppRoute.SignIn> {
+                    SignInScreen()
+                }
+                entry<AppRoute.Home> {
+                    HomeRoute()
+                }
+            },
+    )
+}
