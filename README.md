@@ -36,7 +36,7 @@
 | 비동기 | Coroutine, Flow, Kotlinx Coroutines Swing | 일부 구성 / 도입 예정 |
 | 의존성 주입 | Koin | 도입 예정 |
 | 이미지 로딩 | Coil | 도입 예정 |
-| 화면 전환 | Navigation 3 | 도입 예정 |
+| 화면 전환 | Navigation 3 | 현재 구성 |
 | 에러 트래킹 | Sentry | 도입 예정 |
 
 ## 시작하기
