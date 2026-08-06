@@ -19,4 +19,10 @@ sealed interface AppRoute : NavKey {
      */
     @Serializable
     data object Home : AppRoute
+
+    /**
+     * 리퀴드 글래스 백버튼 확인용 예제 화면이다.
+     */
+    @Serializable
+    data object LiquidGlassBackButtonExample : AppRoute
 }
