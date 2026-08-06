@@ -15,11 +15,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 
@@ -74,7 +78,7 @@ private fun NavPreviewHomeIcon() =
         val w = size.width
         val h = size.height
         val path =
-            androidx.compose.ui.graphics.Path().apply {
+            Path().apply {
                 moveTo(w * 0.5f, h * 0.15f)
                 lineTo(w * 0.85f, h * 0.45f)
                 lineTo(w * 0.85f, h * 0.85f)
@@ -95,7 +99,7 @@ private fun NavPreviewFileIcon() =
         val w = size.width
         val h = size.height
         val path =
-            androidx.compose.ui.graphics.Path().apply {
+            Path().apply {
                 moveTo(w * 0.2f, h * 0.1f)
                 lineTo(w * 0.65f, h * 0.1f)
                 lineTo(w * 0.8f, h * 0.3f)
@@ -114,7 +118,7 @@ private fun NavPreviewBookmarkIcon() =
         val w = size.width
         val h = size.height
         val path =
-            androidx.compose.ui.graphics.Path().apply {
+            Path().apply {
                 moveTo(w * 0.25f, h * 0.1f)
                 lineTo(w * 0.75f, h * 0.1f)
                 lineTo(w * 0.75f, h * 0.9f)
@@ -132,7 +136,7 @@ private fun NavPreviewUserIcon() =
         val h = size.height
         drawCircle(color, radius = h * 0.2f, center = Offset(w * 0.5f, h * 0.32f), style = Stroke(width = stroke.toPx()))
         val bodyPath =
-            androidx.compose.ui.graphics.Path().apply {
+            Path().apply {
                 moveTo(w * 0.15f, h * 0.9f)
                 cubicTo(w * 0.15f, h * 0.6f, w * 0.85f, h * 0.6f, w * 0.85f, h * 0.9f)
             }
@@ -140,10 +144,10 @@ private fun NavPreviewUserIcon() =
     }
 
 private typealias NavIconDrawer =
-    androidx.compose.ui.graphics.drawscope.DrawScope.(
-        size: androidx.compose.ui.geometry.Size,
+    DrawScope.(
+        size: Size,
         color: Color,
-        stroke: androidx.compose.ui.unit.Dp,
+        stroke: Dp,
     ) -> Unit
 
 @Composable
