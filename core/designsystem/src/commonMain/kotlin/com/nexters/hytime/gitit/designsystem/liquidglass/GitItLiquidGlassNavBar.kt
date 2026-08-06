@@ -1,5 +1,8 @@
 package com.nexters.hytime.gitit.designsystem.liquidglass
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,17 +10,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
@@ -35,8 +46,8 @@ class GitItLiquidGlassNavBarItem(
  * Figma의 리퀴드 글래스 네비게이션 바(네비바)를 Compose로 렌더링한다.
  *
  * 4개 탭을 pill 형태 글래스 컨테이너에 가로로 배치하며, 선택된 탭 뒤에는
- * [GitItTheme.colors.grey400] 20% 하이라이트를 그린다. 아이콘과 라벨은 모두
- * [GitItTheme.colors.blue100] 색상으로 표시된다.
+ * [GitItTheme.colors.grey400] 20% 하이라이트가 슬라이드 애니메이션으로 이동한다.
+ * 아이콘과 라벨은 모두 [GitItTheme.colors.blue100] 색상으로 표시된다.
  *
  * [sky]를 전달하면 [GitItLiquidGlassContainer]로 흐림(liquid glass) 효과가 추가된다.
  *
@@ -54,8 +65,10 @@ fun GitItLiquidGlassNavBar(
     modifier: Modifier = Modifier,
     sky: Sky? = null,
 ) {
+    val itemLayoutInfos = remember { mutableStateMapOf<Int, NavItemLayoutInfo>() }
+
     val navBarContent: @Composable () -> Unit = {
-        Row(
+        Box(
             modifier =
                 Modifier
                     .height(NAV_BAR_HEIGHT)
@@ -66,14 +79,45 @@ fun GitItLiquidGlassNavBar(
                         color = GitItTheme.colors.blue300.copy(alpha = NAV_BAR_BORDER_ALPHA),
                         shape = NAV_BAR_SHAPE,
                     ).padding(horizontal = NAV_BAR_HORIZONTAL_PADDING),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            items.forEachIndexed { index, item ->
-                GitItLiquidGlassNavBarItemView(
-                    item = item,
-                    selected = index == selectedIndex,
-                    onClick = { onSelectedIndexChange(index) },
+            val selectedInfo = itemLayoutInfos[selectedIndex]
+            if (selectedInfo != null) {
+                val density = LocalDensity.current
+                val animatedX by animateDpAsState(
+                    targetValue = with(density) { selectedInfo.offsetPx.toDp() },
+                    animationSpec = tween(durationMillis = NAV_BAR_ANIMATION_DURATION, easing = FastOutSlowInEasing),
+                    label = "navHighlightX",
                 )
+                val animatedWidth by animateDpAsState(
+                    targetValue = with(density) { selectedInfo.widthPx.toDp() },
+                    animationSpec = tween(durationMillis = NAV_BAR_ANIMATION_DURATION, easing = FastOutSlowInEasing),
+                    label = "navHighlightWidth",
+                )
+                Box(
+                    modifier =
+                        Modifier
+                            .offset(x = animatedX)
+                            .width(animatedWidth)
+                            .fillMaxHeight()
+                            .padding(vertical = NAV_BAR_ITEM_VERTICAL_INSET)
+                            .clip(NAV_BAR_SHAPE)
+                            .background(GitItTheme.colors.grey400.copy(alpha = NAV_BAR_ITEM_HIGHLIGHT_ALPHA)),
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxHeight(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                items.forEachIndexed { index, item ->
+                    GitItLiquidGlassNavBarItemView(
+                        item = item,
+                        onClick = { onSelectedIndexChange(index) },
+                        onPositioned = { offsetPx, widthPx ->
+                            itemLayoutInfos[index] = NavItemLayoutInfo(offsetPx, widthPx)
+                        },
+                    )
+                }
             }
         }
     }
@@ -90,31 +134,30 @@ fun GitItLiquidGlassNavBar(
 /**
  * 네비게이션 바의 단일 탭을 그린다.
  *
- * 선택된 탭은 [GitItTheme.colors.grey400] 20% pill 배경을 가지며,
- * 미선택 탭은 투명 배경에 아이콘과 라벨만 표시한다.
+ * 배경은 슬라이드 애니메이션 하이라이트가 담당하므로 이 항목 자체는 투명하며,
+ * 클릭 처리와 아이콘·라벨 렌더링만 수행한다.
  *
  * @param item 탭 라벨과 아이콘
- * @param selected 현재 선택된 탭인지 여부
  * @param onClick 탭 클릭 시 실행할 동작
+ * @param onPositioned 레이아웃 이후 이 항목의 x 오프셋(px)과 너비(px)를 전달하는 콜백
  */
 @Composable
 private fun GitItLiquidGlassNavBarItemView(
     item: GitItLiquidGlassNavBarItem,
-    selected: Boolean,
     onClick: () -> Unit,
+    onPositioned: (offsetPx: Float, widthPx: Float) -> Unit,
 ) {
     Box(
         modifier =
             Modifier
                 .clip(NAV_BAR_SHAPE)
-                .background(
-                    if (selected) {
-                        GitItTheme.colors.grey400.copy(alpha = NAV_BAR_ITEM_HIGHLIGHT_ALPHA)
-                    } else {
-                        Color.Transparent
-                    },
-                ).clickable(role = Role.Tab, onClick = onClick)
-                .padding(horizontal = NAV_BAR_ITEM_HORIZONTAL_PADDING, vertical = NAV_BAR_ITEM_VERTICAL_PADDING),
+                .clickable(role = Role.Tab, onClick = onClick)
+                .onGloballyPositioned { coords ->
+                    onPositioned(
+                        coords.positionInParent().x,
+                        coords.size.width.toFloat(),
+                    )
+                }.padding(horizontal = NAV_BAR_ITEM_HORIZONTAL_PADDING, vertical = NAV_BAR_ITEM_VERTICAL_PADDING),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -133,11 +176,21 @@ private fun GitItLiquidGlassNavBarItemView(
     }
 }
 
+/** 네비게이션 바 항목의 레이아웃 측정 결과다. */
+private data class NavItemLayoutInfo(
+    /** 부모(Row) 기준 x 오프셋(px). */
+    val offsetPx: Float,
+    /** 항목 너비(px). */
+    val widthPx: Float,
+)
+
 private val NAV_BAR_SHAPE = RoundedCornerShape(99.dp)
 private val NAV_BAR_HEIGHT = 64.dp
 private val NAV_BAR_HORIZONTAL_PADDING = 7.dp
 private val NAV_BAR_ITEM_HORIZONTAL_PADDING = 14.5.dp
 private val NAV_BAR_ITEM_VERTICAL_PADDING = 3.dp
+private val NAV_BAR_ITEM_VERTICAL_INSET = 7.dp
 private const val NAV_BAR_BACKGROUND_ALPHA = 0.1f
 private const val NAV_BAR_BORDER_ALPHA = 0.26f
 private const val NAV_BAR_ITEM_HIGHLIGHT_ALPHA = 0.2f
+private const val NAV_BAR_ANIMATION_DURATION = 300
