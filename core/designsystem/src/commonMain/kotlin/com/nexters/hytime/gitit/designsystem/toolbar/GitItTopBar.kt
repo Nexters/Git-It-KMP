@@ -18,9 +18,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.icons.GitItBackIcon
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassContainer
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonSize
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonVariant
+import com.skydoves.cloudy.Sky
 
 /** Figma Toolbar Top 컴포넌트의 4가지 레이아웃 변형이다. */
 enum class GitItTopBarType {
@@ -48,6 +50,7 @@ enum class GitItTopBarType {
  *
  * @param type 툴바 레이아웃 변형
  * @param modifier 툴바의 외부 배치와 추가 수식자
+ * @param sky 흐림 배경을 캡처하는 Cloudy 상태. null이면 백드롭 없이 정적 배경만 그린다
  * @param title LargeTitle·InlineTitle 변형에서 표시할 제목
  * @param subtitle 제목 아래에 표시할 부제목
  * @param userName InlineUser 변형에서 표시할 사용자 이름
@@ -61,6 +64,7 @@ enum class GitItTopBarType {
 fun GitItTopBar(
     type: GitItTopBarType = GitItTopBarType.Default,
     modifier: Modifier = Modifier,
+    sky: Sky? = null,
     title: String = "",
     subtitle: String = "",
     userName: String = "",
@@ -94,13 +98,20 @@ fun GitItTopBar(
                 }
 
                 else -> {
-                    if (onBackClick != null) {
-                        GitItLiquidGlassIconButton(
-                            onClick = onBackClick,
-                            size = GitItLiquidGlassIconButtonSize.Md,
-                            variant = GitItLiquidGlassIconButtonVariant.Secondary,
-                        ) {
-                            GitItBackIcon(size = GitItLiquidGlassIconButtonSize.Md)
+                    onBackClick?.let { callback ->
+                        val backButton: @Composable () -> Unit = {
+                            GitItLiquidGlassIconButton(
+                                onClick = callback,
+                                size = GitItLiquidGlassIconButtonSize.Md,
+                                variant = GitItLiquidGlassIconButtonVariant.Secondary,
+                            ) {
+                                GitItBackIcon(size = GitItLiquidGlassIconButtonSize.Md)
+                            }
+                        }
+                        if (sky != null) {
+                            GitItLiquidGlassContainer(sky = sky) { backButton() }
+                        } else {
+                            backButton()
                         }
                     }
                     Spacer(Modifier.weight(1f))

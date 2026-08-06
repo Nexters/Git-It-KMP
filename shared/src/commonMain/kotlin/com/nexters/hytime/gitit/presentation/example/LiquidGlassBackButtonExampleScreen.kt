@@ -1,32 +1,31 @@
 package com.nexters.hytime.gitit.presentation.example
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.icons.GitItBackIcon
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonSize
-import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonState
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonVariant
-import com.nexters.hytime.gitit.designsystem.liquidglass.gitItLiquidGlassBackdrop
+import com.nexters.hytime.gitit.designsystem.toolbar.GitItLiquidGlassButtonGroup
+import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
+import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
+import com.skydoves.cloudy.Sky
 import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
 
@@ -36,12 +35,6 @@ fun LiquidGlassBackButtonExampleScreen(
     modifier: Modifier = Modifier,
 ) {
     val sky = rememberSky()
-
-    val buttonStart = 20.dp
-    val buttonTop = 56.dp
-    val buttonSize = GitItLiquidGlassIconButtonSize.Md
-    val glassShape = RoundedCornerShape(99.dp)
-    var backdropSize by remember { mutableStateOf(IntSize.Zero) }
 
     Box(
         modifier =
@@ -56,32 +49,69 @@ fun LiquidGlassBackButtonExampleScreen(
                     .sky(sky),
         )
 
-        Box(
+        Column(
             modifier =
                 Modifier
-                    .align(Alignment.TopStart)
-                    .padding(start = buttonStart, top = buttonTop),
+                    .align(Alignment.TopCenter)
+                    .padding(top = 56.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .matchParentSize()
-                        .onSizeChanged { backdropSize = it }
-                        .gitItLiquidGlassBackdrop(
-                            sky = sky,
-                            backdropSize = backdropSize,
-                            shape = glassShape,
-                        ),
+            GitItTopBar(
+                type = GitItTopBarType.Default,
+                sky = sky,
+                onBackClick = onBackClick,
+                actions = { LiquidGlassExampleActions(sky = sky) },
             )
+            GitItTopBar(
+                type = GitItTopBarType.LargeTitle,
+                sky = sky,
+                title = "저장소",
+                subtitle = "12개의 저장소",
+                onBackClick = onBackClick,
+                actions = { LiquidGlassExampleActions(sky = sky) },
+            )
+            GitItTopBar(
+                type = GitItTopBarType.InlineUser,
+                sky = sky,
+                userName = "김이박",
+                userSubtitle = "Junior Developer",
+                userAvatar = {
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(40.dp)
+                                .background(GitItTheme.colors.grey500),
+                    )
+                },
+                actions = { LiquidGlassExampleActions(sky = sky) },
+            )
+            GitItTopBar(
+                type = GitItTopBarType.InlineTitle,
+                sky = sky,
+                title = "저장소",
+                subtitle = "12개의 저장소",
+                actions = { LiquidGlassExampleActions(sky = sky) },
+            )
+        }
+    }
+}
 
-            GitItLiquidGlassIconButton(
-                onClick = onBackClick,
-                size = buttonSize,
-                variant = GitItLiquidGlassIconButtonVariant.Secondary,
-                state = GitItLiquidGlassIconButtonState.Default,
-            ) {
-                GitItBackIcon(size = buttonSize)
-            }
+@Composable
+private fun LiquidGlassExampleActions(sky: Sky) {
+    GitItLiquidGlassButtonGroup(sky = sky) {
+        GitItLiquidGlassIconButton(
+            onClick = {},
+            size = GitItLiquidGlassIconButtonSize.Sm,
+            variant = GitItLiquidGlassIconButtonVariant.Text,
+        ) {
+            GitItBackIcon(size = GitItLiquidGlassIconButtonSize.Sm)
+        }
+        GitItLiquidGlassIconButton(
+            onClick = {},
+            size = GitItLiquidGlassIconButtonSize.Sm,
+            variant = GitItLiquidGlassIconButtonVariant.Text,
+        ) {
+            GitItBackIcon(size = GitItLiquidGlassIconButtonSize.Sm)
         }
     }
 }
