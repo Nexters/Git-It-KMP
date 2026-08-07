@@ -14,20 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.sin
 
 /** 리퀴드 글래스 아이콘 버튼의 크기 토큰이다. */
 enum class GitItLiquidGlassIconButtonSize {
@@ -193,17 +184,8 @@ internal data class GitItLiquidGlassIconButtonStyle(
 private val GitItLiquidGlassIconButtonSize.containerSize: Dp
     get() = if (this == GitItLiquidGlassIconButtonSize.Md) 40.dp else 36.dp
 
-/** 리퀴드 글래스 테두리 하이라이트 방향이다. */
-internal enum class GitItLiquidGlassBorderKind {
-    /** 상단과 하단이 강조되고 좌우가 흐려지는 형태다. */
-    TopBottom,
-
-    /** 좌상단과 우하단이 강조되고 우상단과 좌하단이 흐려지는 형태다. */
-    Diagonal,
-}
-
 /**
- * 리퀴드 글래스 버튼 표면과 그라디언트 테두리를 그리는 수식자를 만든다.
+* 리퀴드 글래스 버튼 표면과 그라디언트 테두리를 그리는 수식자를 만든다.
  *
  * @param style 버튼 변형에서 계산한 시각 스타일
  * @return 버튼 표면 효과가 적용된 수식자
@@ -222,57 +204,3 @@ private fun Modifier.gitItLiquidGlass(style: GitItLiquidGlassIconButtonStyle): M
             }
         }
 }
-
-/** FoodDiary Glassmorphism처럼 투명 stop이 포함된 전체 stroke를 그린다. */
-internal fun DrawScope.drawGitItLiquidGlassBorder(borderKind: GitItLiquidGlassBorderKind) {
-    val strokeWidth = 2.2.dp.toPx()
-    val angleDegrees =
-        when (borderKind) {
-            GitItLiquidGlassBorderKind.TopBottom -> GIT_IT_LIQUID_GLASS_TOP_BOTTOM_BORDER_ANGLE_DEGREES
-            GitItLiquidGlassBorderKind.Diagonal -> GIT_IT_LIQUID_GLASS_DIAGONAL_BORDER_ANGLE_DEGREES
-        }
-    val (start, end) = gradientOffsetsForAngle(size, angleDegrees)
-    val borderBrush =
-        Brush.linearGradient(
-            colorStops = GIT_IT_LIQUID_GLASS_BORDER_STOPS,
-            start = start,
-            end = end,
-        )
-
-    drawRoundRect(
-        brush = borderBrush,
-        cornerRadius = CornerRadius(size.height / 2f, size.height / 2f),
-        style = Stroke(width = strokeWidth),
-    )
-}
-
-/** 지정한 각도를 선형 그라디언트가 컴포넌트 전체를 덮는 시작점과 끝점으로 변환한다. */
-private fun gradientOffsetsForAngle(
-    size: Size,
-    angleDegrees: Float,
-): Pair<Offset, Offset> {
-    val radians = Math.toRadians(angleDegrees.toDouble())
-    val directionX = sin(radians).toFloat()
-    val directionY = -cos(radians).toFloat()
-    val halfProjection = abs(directionX) * size.width / 2f + abs(directionY) * size.height / 2f
-    val center = Offset(size.width / 2f, size.height / 2f)
-
-    return Offset(
-        x = center.x - directionX * halfProjection,
-        y = center.y - directionY * halfProjection,
-    ) to
-        Offset(
-            x = center.x + directionX * halfProjection,
-            y = center.y + directionY * halfProjection,
-        )
-}
-
-private const val GIT_IT_LIQUID_GLASS_TOP_BOTTOM_BORDER_ANGLE_DEGREES = 180f
-private const val GIT_IT_LIQUID_GLASS_DIAGONAL_BORDER_ANGLE_DEGREES = 135f
-
-private val GIT_IT_LIQUID_GLASS_BORDER_STOPS =
-    arrayOf(
-        0f to Color.White.copy(alpha = 0.62f),
-        0.5f to Color.White.copy(alpha = 0f),
-        1f to Color.White.copy(alpha = 0.28f),
-    )

@@ -5,7 +5,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.nexters.hytime.gitit.feature.home.HomeRoute
-import com.nexters.hytime.gitit.presentation.example.LiquidGlassBackButtonExampleScreen
+import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
 import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 
 @Composable
@@ -13,7 +13,7 @@ actual fun AppNavHost() {
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
-            AppRoute.LiquidGlassBackButtonExample,
+            AppRoute.LiquidGlassExample,
         )
 
     NavDisplay(
@@ -27,8 +27,8 @@ actual fun AppNavHost() {
                 entry<AppRoute.Home> {
                     HomeRoute()
                 }
-                entry<AppRoute.LiquidGlassBackButtonExample> {
-                    LiquidGlassBackButtonExampleScreen(onBackClick = { backStack.removeLastOrNull() })
+                entry<AppRoute.LiquidGlassExample> {
+                    LiquidGlassExampleScreen(onBackClick = { backStack.removeLastOrNull() })
                 }
             },
     )

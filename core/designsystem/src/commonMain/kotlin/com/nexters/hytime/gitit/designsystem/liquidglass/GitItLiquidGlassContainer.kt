@@ -29,7 +29,7 @@ import com.skydoves.cloudy.liquidGlass
  * @param shape 배경과 흐림 효과를 자를 형태
  */
 @Composable
-fun Modifier.gitItLiquidGlassBackdrop(
+private fun Modifier.gitItLiquidGlassBackdrop(
     sky: Sky,
     backdropSize: IntSize,
     shape: Shape = RoundedCornerShape(99.dp),
@@ -51,7 +51,8 @@ fun Modifier.gitItLiquidGlassBackdrop(
         .liquidGlass(
             lensCenter = Offset(lensWidth / 2f, lensHeight / 2f),
             lensSize = Size(lensWidth, lensHeight),
-            refraction = 0.5f,
+            refraction = 0.8f,
+            curve = 2f,
             glow = LiquidGlassDefaults.NoGlow,
             enabled = true,
         ).cloudy(

@@ -4,13 +4,13 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
@@ -71,14 +72,18 @@ fun GitItLiquidGlassNavBar(
         Box(
             modifier =
                 Modifier
+                    .fillMaxWidth()
                     .height(NAV_BAR_HEIGHT)
                     .clip(NAV_BAR_SHAPE)
                     .background(GitItTheme.colors.blue300.copy(alpha = NAV_BAR_BACKGROUND_ALPHA))
-                    .border(
-                        width = 1.dp,
-                        color = GitItTheme.colors.blue300.copy(alpha = NAV_BAR_BORDER_ALPHA),
-                        shape = NAV_BAR_SHAPE,
-                    ).padding(horizontal = NAV_BAR_HORIZONTAL_PADDING),
+                    .drawWithContent {
+                        drawContent()
+                        drawGitItLiquidGlassBorder(
+                            borderKind = GitItLiquidGlassBorderKind.NavBar,
+                            color = GitItTheme.colors.blue300,
+                            endAlpha = NAV_BAR_BORDER_END_ALPHA,
+                        )
+                    }.padding(horizontal = NAV_BAR_HORIZONTAL_PADDING),
         ) {
             val selectedInfo = itemLayoutInfos[selectedIndex]
             if (selectedInfo != null) {
@@ -106,28 +111,31 @@ fun GitItLiquidGlassNavBar(
             }
 
             Row(
-                modifier = Modifier.fillMaxHeight(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 items.forEachIndexed { index, item ->
                     GitItLiquidGlassNavBarItemView(
                         item = item,
+                        modifier = Modifier.weight(1f),
                         onClick = { onSelectedIndexChange(index) },
-                        onPositioned = { offsetPx, widthPx ->
-                            itemLayoutInfos[index] = NavItemLayoutInfo(offsetPx, widthPx)
-                        },
-                    )
+                    ) { offsetPx, widthPx ->
+                        itemLayoutInfos[index] = NavItemLayoutInfo(offsetPx, widthPx)
+                    }
                 }
             }
         }
     }
 
     if (sky != null) {
-        GitItLiquidGlassContainer(sky = sky, modifier = modifier, shape = NAV_BAR_SHAPE) {
+        GitItLiquidGlassContainer(sky = sky, modifier = modifier.fillMaxWidth(), shape = NAV_BAR_SHAPE) {
             navBarContent()
         }
     } else {
-        Box(modifier = modifier) { navBarContent() }
+        Box(modifier = modifier.fillMaxWidth()) { navBarContent() }
     }
 }
 
@@ -138,18 +146,20 @@ fun GitItLiquidGlassNavBar(
  * 클릭 처리와 아이콘·라벨 렌더링만 수행한다.
  *
  * @param item 탭 라벨과 아이콘
+ * @param modifier 항목의 외부 배치와 추가 수식자
  * @param onClick 탭 클릭 시 실행할 동작
  * @param onPositioned 레이아웃 이후 이 항목의 x 오프셋(px)과 너비(px)를 전달하는 콜백
  */
 @Composable
 private fun GitItLiquidGlassNavBarItemView(
     item: GitItLiquidGlassNavBarItem,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
     onPositioned: (offsetPx: Float, widthPx: Float) -> Unit,
 ) {
     Box(
         modifier =
-            Modifier
+            modifier
                 .clip(NAV_BAR_SHAPE)
                 .clickable(role = Role.Tab, onClick = onClick)
                 .onGloballyPositioned { coords ->
@@ -191,6 +201,6 @@ private val NAV_BAR_ITEM_HORIZONTAL_PADDING = 14.5.dp
 private val NAV_BAR_ITEM_VERTICAL_PADDING = 3.dp
 private val NAV_BAR_ITEM_VERTICAL_INSET = 7.dp
 private const val NAV_BAR_BACKGROUND_ALPHA = 0.1f
-private const val NAV_BAR_BORDER_ALPHA = 0.26f
+private const val NAV_BAR_BORDER_END_ALPHA = 0.6f
 private const val NAV_BAR_ITEM_HIGHLIGHT_ALPHA = 0.2f
 private const val NAV_BAR_ANIMATION_DURATION = 300

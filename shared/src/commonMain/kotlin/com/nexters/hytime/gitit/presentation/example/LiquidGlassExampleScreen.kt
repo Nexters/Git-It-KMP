@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,16 +14,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.icons.GitItBackIcon
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassButtonGroup
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonSize
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonVariant
-import com.nexters.hytime.gitit.designsystem.toolbar.GitItLiquidGlassButtonGroup
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassNavBar
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassNavBarItem
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
 import com.skydoves.cloudy.Sky
@@ -30,7 +37,7 @@ import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
 
 @Composable
-fun LiquidGlassBackButtonExampleScreen(
+fun LiquidGlassExampleScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -53,6 +60,7 @@ fun LiquidGlassBackButtonExampleScreen(
             modifier =
                 Modifier
                     .align(Alignment.TopCenter)
+                    .fillMaxWidth()
                     .padding(top = 56.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
@@ -93,6 +101,15 @@ fun LiquidGlassBackButtonExampleScreen(
                 actions = { LiquidGlassExampleActions(sky = sky) },
             )
         }
+
+        LiquidGlassExampleNavBar(
+            sky = sky,
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(bottom = 40.dp),
+        )
     }
 }
 
@@ -117,10 +134,42 @@ private fun LiquidGlassExampleActions(sky: Sky) {
 }
 
 @Composable
+private fun LiquidGlassExampleNavBar(
+    sky: Sky,
+    modifier: Modifier = Modifier,
+) {
+    var selectedIndex by remember { mutableStateOf(0) }
+    val items =
+        listOf(
+            GitItLiquidGlassNavBarItem(label = "홈", icon = { LiquidGlassExampleNavIcon("H") }),
+            GitItLiquidGlassNavBarItem(label = "프로젝트", icon = { LiquidGlassExampleNavIcon("P") }),
+            GitItLiquidGlassNavBarItem(label = "저장", icon = { LiquidGlassExampleNavIcon("S") }),
+            GitItLiquidGlassNavBarItem(label = "마이", icon = { LiquidGlassExampleNavIcon("M") }),
+        )
+
+    GitItLiquidGlassNavBar(
+        items = items,
+        selectedIndex = selectedIndex,
+        onSelectedIndexChange = { selectedIndex = it },
+        modifier = modifier,
+        sky = sky,
+    )
+}
+
+@Composable
+private fun LiquidGlassExampleNavIcon(label: String) {
+    Text(
+        text = label,
+        color = GitItTheme.colors.blue100,
+        style = GitItTheme.typography.caption2,
+    )
+}
+
+@Composable
 private fun LiquidGlassExampleTextList(modifier: Modifier = Modifier) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+        contentPadding = PaddingValues(start = 20.dp, top = 24.dp, end = 20.dp, bottom = 140.dp),
     ) {
         items(LIQUID_GLASS_EXAMPLE_PARAGRAPHS) { paragraph ->
             Text(

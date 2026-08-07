@@ -1,4 +1,4 @@
-package com.nexters.hytime.gitit.designsystem.toolbar
+package com.nexters.hytime.gitit.designsystem.liquidglass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,9 +14,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
-import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassBorderKind
-import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassContainer
-import com.nexters.hytime.gitit.designsystem.liquidglass.drawGitItLiquidGlassBorder
 import com.skydoves.cloudy.Sky
 
 /**
