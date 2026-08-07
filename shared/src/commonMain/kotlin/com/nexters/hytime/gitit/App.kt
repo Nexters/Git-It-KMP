@@ -1,8 +1,8 @@
 package com.nexters.hytime.gitit
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.navigation.AppNavHost
 
 /**
@@ -10,7 +10,7 @@ import com.nexters.hytime.gitit.navigation.AppNavHost
  */
 @Composable
 fun App() {
-    MaterialTheme {
+    GitItTheme {
         AppNavHost()
     }
 }
