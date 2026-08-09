@@ -92,11 +92,11 @@ class ProjectDetailViewModel(
     }
 
     /**
-     * 레포 바로가기 인텐트. 외부 브라우저 연동은 아직 미구현이다.
+     * 문제풀이 바로가기 인텐트. 아직 미구현이다.
      */
-    fun onRepoLinkClick() {
+    fun onQuestionSolvingShortcutClick() {
         onDismissMoreMenu()
-        // TODO: platform 모듈 연동 후 외부 인텐트를 발행한다.
+        // TODO: 문제풀이 화면 연동 후 네비게이션 이벤트를 발행한다.
     }
 
     /**

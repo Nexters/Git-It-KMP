@@ -47,7 +47,7 @@ import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
  * @param onDismissMoreMenu 더보기 메뉴 닫기 콜백
  * @param onSavedQuestionsClick 저장한 문제 콜백
  * @param onQuestionSolvingClick 문제풀이 바로가기 콜백
- * @param onRepoLinkClick 레포 바로가기 콜백
+ * @param onQuestionSolvingShortcutClick 더보기 메뉴의 문제풀이 바로가기 콜백
  * @param onDeleteProjectClick 삭제 콜백
  * @param onLearningSetClick 학습 세트 진입 콜백
  * @param onReviewStartClick 복습 시작 콜백
@@ -61,7 +61,7 @@ fun ProjectDetailScreen(
     onDismissMoreMenu: () -> Unit,
     onSavedQuestionsClick: () -> Unit,
     onQuestionSolvingClick: () -> Unit,
-    onRepoLinkClick: () -> Unit,
+    onQuestionSolvingShortcutClick: () -> Unit,
     onDeleteProjectClick: () -> Unit,
     onLearningSetClick: (String) -> Unit,
     onReviewStartClick: () -> Unit,
@@ -116,7 +116,7 @@ fun ProjectDetailScreen(
             expanded = uiState.showMoreMenu,
             onDismiss = onDismissMoreMenu,
             onSavedQuestionsClick = onSavedQuestionsClick,
-            onRepoLinkClick = onRepoLinkClick,
+            onQuestionSolvingShortcutClick = onQuestionSolvingShortcutClick,
             onDeleteProjectClick = onDeleteProjectClick,
         )
     }
@@ -441,7 +441,7 @@ private fun ReviewCard(onReviewStartClick: () -> Unit) {
  * @param expanded 메뉴 노출 여부
  * @param onDismiss 닫기 콜백
  * @param onSavedQuestionsClick 저장한 문제 콜백
- * @param onRepoLinkClick 레포 바로가기 콜백
+ * @param onQuestionSolvingShortcutClick 문제풀이 바로가기 콜백
  * @param onDeleteProjectClick 삭제 콜백
  */
 @Composable
@@ -449,7 +449,7 @@ private fun ProjectDetailMoreMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     onSavedQuestionsClick: () -> Unit,
-    onRepoLinkClick: () -> Unit,
+    onQuestionSolvingShortcutClick: () -> Unit,
     onDeleteProjectClick: () -> Unit,
 ) {
     DropdownMenu(
@@ -458,7 +458,7 @@ private fun ProjectDetailMoreMenu(
         modifier = Modifier.background(GitItTheme.colors.grey600),
     ) {
         MoreMenuItem(text = "저장한 문제", onClick = onSavedQuestionsClick)
-        MoreMenuItem(text = "레포 바로가기", onClick = onRepoLinkClick)
+        MoreMenuItem(text = "문제풀이 바로가기", onClick = onQuestionSolvingShortcutClick)
         MoreMenuItem(
             text = "삭제하기",
             color = GitItTheme.colors.grey300,
@@ -607,7 +607,7 @@ private fun ProjectDetailScreenPreview() {
             onDismissMoreMenu = {},
             onSavedQuestionsClick = {},
             onQuestionSolvingClick = {},
-            onRepoLinkClick = {},
+            onQuestionSolvingShortcutClick = {},
             onDeleteProjectClick = {},
             onLearningSetClick = {},
             onReviewStartClick = {},
