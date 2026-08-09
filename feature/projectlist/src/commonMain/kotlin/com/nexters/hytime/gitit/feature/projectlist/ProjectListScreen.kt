@@ -35,10 +35,10 @@ import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconBut
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonSize
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
+import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
+import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
-import com.skydoves.cloudy.rememberSky
-import com.skydoves.cloudy.sky
 import git_it_kmp.feature.projectlist.generated.resources.Res
 import git_it_kmp.feature.projectlist.generated.resources.projectlist_thumbnail_base
 import git_it_kmp.feature.projectlist.generated.resources.projectlist_thumbnail_mark
@@ -59,7 +59,7 @@ fun ProjectListScreen(
     showBackButton: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val sky = rememberSky()
+    val sky = rememberGitItMainNavSky()
 
     Box(
         modifier =
@@ -72,7 +72,7 @@ fun ProjectListScreen(
                 Modifier
                     .fillMaxSize()
                     .background(GitItTheme.colors.grey700)
-                    .sky(sky)
+                    .gitItMainNavSky(sky)
                     .statusBarsPadding(),
         ) {
             GitItTopBar(

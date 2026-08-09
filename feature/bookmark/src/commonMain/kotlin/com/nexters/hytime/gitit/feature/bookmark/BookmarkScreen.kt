@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
-import com.skydoves.cloudy.rememberSky
-import com.skydoves.cloudy.sky
+import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
+import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
 
 /**
  * 저장한 문제 화면의 순수 UI 영역이다.
@@ -51,7 +51,7 @@ fun BookmarkScreen(
     onIntent: (BookmarkIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val sky = rememberSky()
+    val sky = rememberGitItMainNavSky()
 
     Box(
         modifier =
@@ -64,7 +64,7 @@ fun BookmarkScreen(
                 Modifier
                     .fillMaxSize()
                     .background(GitItTheme.colors.grey700)
-                    .sky(sky)
+                    .gitItMainNavSky(sky)
                     .statusBarsPadding()
                     .padding(horizontal = 20.dp),
             contentPadding = PaddingValues(top = 18.dp, bottom = 120.dp),
