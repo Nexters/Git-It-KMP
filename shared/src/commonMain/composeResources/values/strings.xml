@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="onboarding_title_1">오픈소스를 문제화하고\n나만의 덱으로 만들어보세요</string>
+  <string name="onboarding_title_2">복잡한 코드말고 자연어로\n언제 어디서든 가볍게!</string>
+  <string name="onboarding_title_3">다시보고 싶은 문제는\n저장하고 나중에 확인해요</string>
+  <string name="onboarding_google_login">Google로 시작하기</string>
+  <string name="onboarding_version">버전 0.0.0</string>
+  <string name="onboarding_signup_tooltip">3초만에 가입하기</string>
+</resources>

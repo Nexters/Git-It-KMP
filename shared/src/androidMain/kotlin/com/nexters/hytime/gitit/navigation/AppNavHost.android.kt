@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.nexters.hytime.gitit.feature.home.HomeRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
+import com.nexters.hytime.gitit.presentation.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 
 @Composable
@@ -13,7 +14,7 @@ actual fun AppNavHost() {
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
-            AppRoute.LiquidGlassExample,
+            AppRoute.Onboarding,
         )
 
     NavDisplay(
@@ -23,6 +24,9 @@ actual fun AppNavHost() {
             entryProvider {
                 entry<AppRoute.SignIn> {
                     SignInScreen()
+                }
+                entry<AppRoute.Onboarding> {
+                    OnboardingRoute(onSignInSuccess = { backStack.add(AppRoute.Home) })
                 }
                 entry<AppRoute.Home> {
                     HomeRoute()

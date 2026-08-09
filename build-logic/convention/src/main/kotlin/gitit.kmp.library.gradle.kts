@@ -19,6 +19,13 @@ kotlin {
         namespace = "com.nexters.hytime.gitit.${project.name}"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
+
+        // com.android.kotlin.multiplatform.library는 기본으로 Android 리소스 처리를 켜지 않는다.
+        // 켜지 않으면 Compose Multiplatform 리소스(drawable/font)가 그룹 경로(
+        // git_it_kmp.<모듈>.generated.resources) 없이 루트로 묶여 런타임 MissingResourceException 발생.
+        androidResources {
+            enable = true
+        }
     }
 
     sourceSets {
