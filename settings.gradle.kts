@@ -43,6 +43,7 @@ include(":shared")
 include(":feature:home")
 include(":feature:onboarding")
 
+include(":feature:my")
 include(":feature:projectdetail")
 include(":feature:projectlist")
 

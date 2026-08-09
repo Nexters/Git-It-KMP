@@ -3,6 +3,7 @@ package com.nexters.hytime.gitit.navigation
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.nexters.hytime.gitit.feature.home.HomeRoute
+import com.nexters.hytime.gitit.feature.my.MyRoute
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
@@ -18,10 +19,30 @@ actual fun AppNavHost() {
             AppRoute.Home,
         )
 
+    fun navigateToMainRoute(route: AppRoute) {
+        while (backStack.size > 1) {
+            backStack.removeLastOrNull()
+        }
+        if (route != AppRoute.Home && backStack.lastOrNull() != route) {
+            backStack.add(route)
+        }
+    }
+
     when (val route = backStack.lastOrNull()) {
         AppRoute.SignIn -> SignInScreen()
         AppRoute.Onboarding -> OnboardingRoute(onNavigateToHome = { backStack.add(AppRoute.Home) })
-        AppRoute.Home -> HomeRoute(onNavigateToProjectList = { backStack.add(AppRoute.ProjectList) })
+        AppRoute.Home -> {
+            HomeRoute(
+                onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
+                onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
+            )
+        }
+        AppRoute.My -> {
+            MyRoute(
+                onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
+                onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
+            )
+        }
         AppRoute.ProjectList -> {
             ProjectListRoute(
                 onBackClick =
@@ -30,7 +51,8 @@ actual fun AppNavHost() {
                     } else {
                         null
                     },
-                onNavigateToHome = { backStack.removeLastOrNull() },
+                onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
+                onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
             )
         }
         is AppRoute.ProjectDetail -> {

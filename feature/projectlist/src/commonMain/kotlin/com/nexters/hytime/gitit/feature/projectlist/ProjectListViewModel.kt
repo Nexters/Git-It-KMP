@@ -41,9 +41,7 @@ class ProjectListViewModel : ViewModel() {
             ProjectListIntent.SavedTabClick -> {
                 // TODO: 저장 화면 route 추가 후 연결한다.
             }
-            ProjectListIntent.MyTabClick -> {
-                // TODO: 마이 화면 route 추가 후 연결한다.
-            }
+            ProjectListIntent.MyTabClick -> emit(ProjectListSideEffect.NavigateToMy)
             is ProjectListIntent.PlayProjectClick -> {
                 // TODO: 문제풀이 화면 route 추가 후 연결한다.
             }
