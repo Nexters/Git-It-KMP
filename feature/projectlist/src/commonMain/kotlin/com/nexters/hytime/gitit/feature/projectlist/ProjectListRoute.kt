@@ -12,11 +12,13 @@ import kotlinx.coroutines.flow.collectLatest
  *
  * @param onBackClick 이전 화면으로 이동하는 콜백. null이면 뒤로가기 버튼을 표시하지 않는다
  * @param onNavigateToHome 홈 화면으로 이동하는 콜백
+ * @param onNavigateToMy 마이 화면으로 이동하는 콜백
  */
 @Composable
 fun ProjectListRoute(
     onBackClick: (() -> Unit)?,
     onNavigateToHome: () -> Unit,
+    onNavigateToMy: () -> Unit,
 ) {
     val viewModel = viewModel { ProjectListViewModel() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -26,6 +28,7 @@ fun ProjectListRoute(
             when (sideEffect) {
                 ProjectListSideEffect.NavigateBack -> onBackClick?.invoke()
                 ProjectListSideEffect.NavigateToHome -> onNavigateToHome()
+                ProjectListSideEffect.NavigateToMy -> onNavigateToMy()
             }
         }
     }

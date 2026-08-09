@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.nexters.hytime.gitit.feature.home.HomeRoute
+import com.nexters.hytime.gitit.feature.my.MyRoute
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
@@ -19,6 +20,15 @@ actual fun AppNavHost() {
             AppRoute.Home,
         )
 
+    fun navigateToMainRoute(route: AppRoute) {
+        while (backStack.size > 1) {
+            backStack.removeLastOrNull()
+        }
+        if (route != AppRoute.Home && backStack.lastOrNull() != route) {
+            backStack.add(route)
+        }
+    }
+
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
@@ -31,7 +41,16 @@ actual fun AppNavHost() {
                     OnboardingRoute(onNavigateToHome = { backStack.add(AppRoute.Home) })
                 }
                 entry<AppRoute.Home> {
-                    HomeRoute(onNavigateToProjectList = { backStack.add(AppRoute.ProjectList) })
+                    HomeRoute(
+                        onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
+                        onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
+                    )
+                }
+                entry<AppRoute.My> {
+                    MyRoute(
+                        onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
+                        onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
+                    )
                 }
                 entry<AppRoute.ProjectList> {
                     ProjectListRoute(
@@ -41,7 +60,8 @@ actual fun AppNavHost() {
                             } else {
                                 null
                             },
-                        onNavigateToHome = { backStack.removeLastOrNull() },
+                        onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
+                        onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                     )
                 }
                 entry<AppRoute.ProjectDetail> { route ->
