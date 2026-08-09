@@ -37,6 +37,8 @@ import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
+import com.skydoves.cloudy.rememberSky
+import com.skydoves.cloudy.sky
 import git_it_kmp.feature.projectlist.generated.resources.Res
 import git_it_kmp.feature.projectlist.generated.resources.projectlist_thumbnail_base
 import git_it_kmp.feature.projectlist.generated.resources.projectlist_thumbnail_mark
@@ -57,6 +59,8 @@ fun ProjectListScreen(
     showBackButton: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val sky = rememberSky()
+
     Box(
         modifier =
             modifier
@@ -67,6 +71,8 @@ fun ProjectListScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
+                    .background(GitItTheme.colors.grey700)
+                    .sky(sky)
                     .statusBarsPadding(),
         ) {
             GitItTopBar(
@@ -114,6 +120,7 @@ fun ProjectListScreen(
                 Modifier
                     .align(Alignment.BottomCenter)
                     .padding(start = 27.dp, end = 27.dp, bottom = 29.dp),
+            sky = sky,
         )
     }
 }
