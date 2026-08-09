@@ -73,4 +73,7 @@ sealed interface ProjectListSideEffect {
 
     /** 마이 화면으로 이동. */
     data object NavigateToMy : ProjectListSideEffect
+
+    /** 저장한 문제 화면으로 이동. */
+    data object NavigateToBookmark : ProjectListSideEffect
 }

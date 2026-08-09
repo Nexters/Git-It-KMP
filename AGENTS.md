@@ -40,6 +40,7 @@ UI는 Compose Multiplatform(Material 3)으로 공유합니다.
 androidApp/          Android 진입점 (MainActivity)
 desktopApp/          Desktop 진입점 (Main.kt, Compose Desktop)
 shared/              공유 UI + 앱 로직 (KMP: commonMain/androidMain/jvmMain)
+feature/bookmark/     저장한 문제 화면 기능 (KMP + Compose)
 feature/home/         홈 화면 기능 (KMP + Compose)
 feature/my/           마이 화면 기능 (KMP + Compose)
 feature/onboarding/   온보딩 화면 기능 (KMP + Compose)

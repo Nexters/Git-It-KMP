@@ -52,4 +52,9 @@ sealed interface HomeSideEffect {
      * 마이 화면으로 이동한다.
      */
     data object NavigateToMy : HomeSideEffect
+
+    /**
+     * 저장한 문제 화면으로 이동한다.
+     */
+    data object NavigateToBookmark : HomeSideEffect
 }

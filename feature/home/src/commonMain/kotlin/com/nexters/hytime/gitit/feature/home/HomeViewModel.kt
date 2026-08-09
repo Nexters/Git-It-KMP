@@ -38,9 +38,7 @@ class HomeViewModel : ViewModel() {
             HomeIntent.Refresh -> Unit
             HomeIntent.HomeTabClick -> Unit
             HomeIntent.ProjectTabClick -> emit(HomeSideEffect.NavigateToProjectList)
-            HomeIntent.SavedTabClick -> {
-                // TODO: 저장 화면 route 추가 후 연결한다.
-            }
+            HomeIntent.SavedTabClick -> emit(HomeSideEffect.NavigateToBookmark)
             HomeIntent.MyTabClick -> emit(HomeSideEffect.NavigateToMy)
         }
     }

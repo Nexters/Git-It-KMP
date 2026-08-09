@@ -9,6 +9,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface AppRoute : NavKey {
     /**
+     * 사용자가 저장한 문제 목록 화면이다.
+     */
+    @Serializable
+    data object Bookmark : AppRoute
+
+    /**
      * Google 로그인을 수행하는 로그인 화면이다.
      */
     @Serializable

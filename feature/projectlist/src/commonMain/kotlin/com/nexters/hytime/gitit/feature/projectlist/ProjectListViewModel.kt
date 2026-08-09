@@ -38,9 +38,7 @@ class ProjectListViewModel : ViewModel() {
             ProjectListIntent.BackClick -> emit(ProjectListSideEffect.NavigateBack)
             ProjectListIntent.HomeTabClick -> emit(ProjectListSideEffect.NavigateToHome)
             ProjectListIntent.ProjectTabClick -> Unit
-            ProjectListIntent.SavedTabClick -> {
-                // TODO: 저장 화면 route 추가 후 연결한다.
-            }
+            ProjectListIntent.SavedTabClick -> emit(ProjectListSideEffect.NavigateToBookmark)
             ProjectListIntent.MyTabClick -> emit(ProjectListSideEffect.NavigateToMy)
             is ProjectListIntent.PlayProjectClick -> {
                 // TODO: 문제풀이 화면 route 추가 후 연결한다.
