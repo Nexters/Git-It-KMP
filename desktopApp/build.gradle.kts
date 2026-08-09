@@ -39,6 +39,10 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.nexters.hytime.gitit"
             packageVersion = "1.0.0"
+
+            macOS {
+                bundleID = "com.nexters.hytime.gitit"
+            }
         }
     }
 }
