@@ -43,6 +43,7 @@ include(":shared")
 include(":feature:home")
 
 include(":feature:projectdetail")
+include(":feature:projectlist")
 
 include(":core:designsystem")
 include(":core:network")
