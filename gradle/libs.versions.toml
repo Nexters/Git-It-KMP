@@ -1,10 +1,10 @@
 [versions]
 # Android Gradle & Kotlin
-agp = "9.0.1"
+agp = "9.2.1"
 kotlin = "2.4.10"
 
 # Android SDK
-android-compileSdk = "36"
+android-compileSdk = "37"
 android-minSdk = "24"
 android-targetSdk = "36"
 
@@ -22,6 +22,8 @@ androidx-navigation3 = "1.1.4"
 # Compose Multiplatform
 composeMultiplatform = "1.11.1"
 material3 = "1.11.0-alpha07"
+
+cloudy = "1.0.0-alpha01"
 
 # KotlinX
 kotlinx-coroutines = "1.11.0"
@@ -71,6 +73,7 @@ compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMul
 compose-uiTooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "composeMultiplatform" }
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
+compose-cloudy = { module = "com.github.skydoves:cloudy", version.ref = "cloudy" }
 
 # KotlinX
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
