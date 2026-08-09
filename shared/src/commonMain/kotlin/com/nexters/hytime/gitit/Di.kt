@@ -3,11 +3,7 @@ package com.nexters.hytime.gitit
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.repository.AccountRepository
 import com.nexters.hytime.gitit.domain.usecase.SignInUseCase
-import com.nexters.hytime.gitit.logging.gitItLogger
 import com.nexters.hytime.gitit.logging.loggingModule
-import com.nexters.hytime.gitit.network.di.networkModule
-import com.nexters.hytime.gitit.network.logging.NetworkLogger
-import com.nexters.hytime.gitit.presentation.onboarding.OnboardingViewModel
 import com.nexters.hytime.gitit.presentation.signin.SignInViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
@@ -29,7 +25,6 @@ val appModule: Module =
             )
         }
         viewModel { SignInViewModel(get()) }
-        viewModel { OnboardingViewModel(get()) }
     }
 
 /**

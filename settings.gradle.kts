@@ -41,6 +41,7 @@ include(":desktopApp")
 include(":shared")
 
 include(":feature:home")
+include(":feature:onboarding")
 
 include(":core:designsystem")
 include(":core:network")

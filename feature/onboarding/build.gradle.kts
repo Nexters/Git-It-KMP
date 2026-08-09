@@ -1,31 +1,15 @@
 plugins {
     alias(libs.plugins.gitit.kmp.library.compose)
-    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
-    android {
-        withHostTest {
-            isIncludeAndroidResources = true
-        }
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }.configure {
-            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
-    }
-
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.designsystem)
             implementation(projects.core.logging)
-            implementation(projects.feature.home)
-            implementation(projects.feature.onboarding)
-            implementation(projects.core.network)
             implementation(projects.domain)
 
             implementation(libs.koin.core)
-            implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
 
             implementation(libs.compose.material3)
@@ -33,10 +17,6 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.androidx.navigation3.runtime)
-        }
-        androidMain.dependencies {
-            implementation(libs.androidx.navigation3.runtime)
-            implementation(libs.androidx.navigation3.ui)
         }
     }
 }

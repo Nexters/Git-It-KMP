@@ -28,6 +28,7 @@ fun localProperty(
 
 dependencies {
     implementation(projects.shared)
+    implementation(projects.feature.onboarding)
     implementation(projects.core.logging)
     implementation(projects.core.auth)
     implementation(projects.domain)
