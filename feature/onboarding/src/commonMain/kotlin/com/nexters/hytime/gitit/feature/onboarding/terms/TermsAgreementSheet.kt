@@ -1,4 +1,4 @@
-package com.nexters.hytime.gitit.presentation.terms
+package com.nexters.hytime.gitit.feature.onboarding.terms
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -38,13 +38,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
-import git_it_kmp.shared.generated.resources.Res
-import git_it_kmp.shared.generated.resources.terms_agreement_all
-import git_it_kmp.shared.generated.resources.terms_agreement_cancel
-import git_it_kmp.shared.generated.resources.terms_agreement_next
-import git_it_kmp.shared.generated.resources.terms_agreement_privacy
-import git_it_kmp.shared.generated.resources.terms_agreement_service
-import git_it_kmp.shared.generated.resources.terms_agreement_title
+import git_it_kmp.feature.onboarding.generated.resources.Res
+import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_all
+import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_cancel
+import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_next
+import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_privacy
+import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_service
+import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_title
 import org.jetbrains.compose.resources.stringResource
 
 /**
