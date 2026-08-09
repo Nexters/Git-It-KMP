@@ -48,7 +48,7 @@ fun ProjectDetailRoute(
         onDismissMoreMenu = viewModel::onDismissMoreMenu,
         onSavedQuestionsClick = viewModel::onSavedQuestionsClick,
         onQuestionSolvingClick = viewModel::onQuestionSolvingClick,
-        onRepoLinkClick = viewModel::onRepoLinkClick,
+        onQuestionSolvingShortcutClick = viewModel::onQuestionSolvingShortcutClick,
         onDeleteProjectClick = viewModel::onDeleteProjectClick,
         onLearningSetClick = viewModel::onLearningSetClick,
         onReviewStartClick = viewModel::onReviewStartClick,
