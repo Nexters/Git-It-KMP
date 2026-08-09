@@ -26,6 +26,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,7 +39,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.presentation.terms.TermsAgreementSheet
+import com.nexters.hytime.gitit.presentation.terms.TermsAgreementState
 import git_it_kmp.shared.generated.resources.Res
 import git_it_kmp.shared.generated.resources.ic_google_logo
 import git_it_kmp.shared.generated.resources.onboarding_google_login
@@ -46,10 +54,12 @@ import git_it_kmp.shared.generated.resources.onboarding_version
 import git_it_kmp.shared.generated.resources.task2_01
 import git_it_kmp.shared.generated.resources.task3_04
 import git_it_kmp.shared.generated.resources.task4_06
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * 온보딩 한 페이지의 제목 문자열과 미리보기 이미지를 묶는다.
@@ -73,49 +83,115 @@ private val onboardingPages: List<OnboardingPage> =
 /**
  * 앱 최초 실행 시 주요 기능을 소개하는 온보딩 화면이다.
  *
- * 세 장의 미리보기 이미지를 가로로 넘기며 보여주고, 마지막 페이지에서 구글 로그인
- * 버튼 위에 가입 유도 툴팁을 띄운다. 상태와 이벤트는 [OnboardingRoute]에서
- * 주입하며 이 화면은 상태를 소유하지 않는다.
+ * [OnboardingViewModel]을 직접 생성하고 단일 [OnboardingUiState]를 수집한다.
+ * 약관 동의 바텀 시트 노출 여부(`showTermsSheet`)는 다이얼로그 성격의
+ * UI 제어 값이므로 Composable 로컬 상태(`rememberSaveable`)로 관리한다.
+ * 네비게이션 등 일회성 부작용은 [OnboardingViewModel.events]를 구독해 처리한다.
  *
- * @param uiState 로그인 진행 상태
- * @param onGoogleLoginClick 구글 로그인 버튼 클릭 시 호출될 콜백
- * @param modifier 화면의 크기와 배치를 지정할 수식자
+ * @param onNavigateToHome 로그인 성공 후 홈 화면으로 이동하는 콜백
  */
 @Composable
-fun OnboardingScreen(
+fun OnboardingScreen(onNavigateToHome: () -> Unit) {
+    val viewModel = koinViewModel<OnboardingViewModel>()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showTermsSheet by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                OnboardingEvent.NavigateToHome -> onNavigateToHome()
+            }
+        }
+    }
+
+    OnboardingContent(
+        uiState = uiState,
+        showTermsSheet = showTermsSheet,
+        onGoogleLoginClick = { showTermsSheet = true },
+        onToggleAllTerms = viewModel::toggleAllTerms,
+        onToggleServiceTerm = viewModel::toggleServiceTerm,
+        onTogglePrivacyTerm = viewModel::togglePrivacyTerm,
+        onDismissTermsSheet = { showTermsSheet = false },
+        onCancelTerms = {
+            showTermsSheet = false
+            viewModel.resetTerms()
+        },
+        onConfirmTerms = {
+            showTermsSheet = false
+            viewModel.confirmTerms()
+        },
+    )
+}
+
+/**
+ * 온보딩 화면의 순수 UI 렌더링을 담당한다. 상태와 콜백만 주입받아 상태를 소유하지 않는다.
+ *
+ * @param uiState 온보딩 단일 UI 상태
+ * @param showTermsSheet 약관 동의 시트 노출 여부
+ * @param onGoogleLoginClick 구글 로그인 버튼 클릭 콜백 (약관 시트 오픈)
+ * @param onToggleAllTerms 전체 동의 토글 콜백
+ * @param onToggleServiceTerm 서비스 약관 체크 토글 콜백
+ * @param onTogglePrivacyTerm 개인정보 약관 체크 토글 콜백
+ * @param onDismissTermsSheet 시트 닫기 콜백
+ * @param onCancelTerms 취소 버튼 콜백
+ * @param onConfirmTerms 다음 버튼 콜백
+ */
+@Composable
+private fun OnboardingContent(
     uiState: OnboardingUiState,
+    showTermsSheet: Boolean,
     onGoogleLoginClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    onToggleAllTerms: () -> Unit,
+    onToggleServiceTerm: () -> Unit,
+    onTogglePrivacyTerm: () -> Unit,
+    onDismissTermsSheet: () -> Unit,
+    onCancelTerms: () -> Unit,
+    onConfirmTerms: () -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { onboardingPages.size })
 
-    Column(modifier = modifier.fillMaxSize().background(GitItTheme.colors.grey700)) {
-        HorizontalPager(
-            state = pagerState,
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier =
                 Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .background(GitItTheme.colors.blue500),
-        ) { pageIndex ->
-            OnboardingPage(page = onboardingPages[pageIndex])
+                    .fillMaxSize()
+                    .background(GitItTheme.colors.grey700),
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(GitItTheme.colors.blue500),
+            ) { pageIndex ->
+                OnboardingPage(page = onboardingPages[pageIndex])
+            }
+            OnboardingBottomSection(
+                pageCount = onboardingPages.size,
+                currentPage = pagerState.currentPage,
+                showTooltip = pagerState.currentPage == onboardingPages.lastIndex,
+                isLoginLoading = uiState.loginStep is LoginStep.Loading,
+                onGoogleLoginClick = onGoogleLoginClick,
+            )
+            Spacer(Modifier.height(29.dp))
         }
-        OnboardingBottomSection(
-            pageCount = onboardingPages.size,
-            currentPage = pagerState.currentPage,
-            showTooltip = pagerState.currentPage == onboardingPages.lastIndex,
-            isLoginLoading = uiState is OnboardingUiState.Loading,
-            onGoogleLoginClick = onGoogleLoginClick,
+
+        TermsAgreementSheet(
+            visible = showTermsSheet,
+            state = uiState.termsAgreement,
+            onDismiss = onDismissTermsSheet,
+            onToggleAllTerms = onToggleAllTerms,
+            onServiceClick = onToggleServiceTerm,
+            onPrivacyClick = onTogglePrivacyTerm,
+            onCancelClick = onCancelTerms,
+            onConfirmClick = onConfirmTerms,
         )
-        Spacer(Modifier.height(29.dp))
     }
 }
 
 /**
  * 온보딩 한 페이지의 제목과 미리보기 이미지를 세로로 배치한다.
- *
- * 상단에 제목을, 남은 공간에 이미지를 채워 넣는다. 호출하는 쪽(페이저)이
- * 이미 블루 배경을 제공하므로 별도 배경을 지정하지 않는다.
  *
  * @param page 표시할 온보딩 페이지 데이터
  */
@@ -148,7 +224,7 @@ private fun OnboardingPage(page: OnboardingPage) {
  * @param currentPage 현재 페이지 인덱스
  * @param showTooltip 가입 유도 툴팁 표시 여부
  * @param isLoginLoading 로그인 진행 중 여부
- * @param onGoogleLoginClick 구글 로그인 버튼 클릭 시 호출될 콜백
+ * @param onGoogleLoginClick 구글 로그인 버튼 클릭 콜백
  */
 @Composable
 private fun OnboardingBottomSection(
@@ -167,12 +243,11 @@ private fun OnboardingBottomSection(
             currentPage = currentPage,
             modifier = Modifier.padding(top = 12.dp),
         )
-        // 툴팁 영역을 항상 확보해 버튼 위치가 페이지마다 바뀌지 않게 한다.
         Box(
             modifier = Modifier.height(57.dp),
             contentAlignment = Alignment.BottomCenter,
         ) {
-            if (!showTooltip) {
+            if (showTooltip) {
                 OnboardingSignUpTooltip()
             }
         }
@@ -193,8 +268,6 @@ private fun OnboardingBottomSection(
 
 /**
  * 현재 페이지 위치를 나타내는 점 인디케이터를 그린다.
- *
- * 선택된 페이지 점은 흰색, 나머지는 30% 불투명도 흰색으로 표시한다.
  *
  * @param pageCount 전체 점 개수
  * @param currentPage 선택된 점 인덱스
@@ -225,9 +298,7 @@ private fun OnboardingPageIndicator(
 /**
  * 구글 계정으로 시작하는 로그인 버튼이다.
  *
- * 흰색 둥근 배경에 구글 로고와 "Google로 시작하기" 문구를 가로 중앙에 배치한다.
- *
- * @param onClick 버튼 클릭 시 호출될 콜백
+ * @param onClick 버튼 클릭 콜백
  * @param enabled 버튼 활성화 여부
  * @param modifier 버튼의 크기와 배치를 지정할 수식자
  */
@@ -265,8 +336,6 @@ private fun GoogleLoginButton(
 
 /**
  * 마지막 페이지에서 구글 로그인 버튼에 표시하는 가입 유도 툴팁이다.
- *
- * 둥근 말풍선과 아래를 향하는 꼬리로 구성하며, 어두운 배경에 흰색 텍스트를 표시한다.
  *
  * @param modifier 툴팁의 크기와 배치를 지정할 수식자
  */
@@ -310,11 +379,18 @@ private fun OnboardingSignUpTooltip(modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-private fun OnboardingScreenPreview() {
+private fun OnboardingContentPreview() {
     GitItTheme {
-        OnboardingScreen(
-            uiState = OnboardingUiState.Idle,
+        OnboardingContent(
+            uiState = OnboardingUiState(),
+            showTermsSheet = false,
             onGoogleLoginClick = {},
+            onToggleAllTerms = {},
+            onToggleServiceTerm = {},
+            onTogglePrivacyTerm = {},
+            onDismissTermsSheet = {},
+            onCancelTerms = {},
+            onConfirmTerms = {},
         )
     }
 }

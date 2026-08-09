@@ -26,7 +26,7 @@ actual fun AppNavHost() {
                     SignInScreen()
                 }
                 entry<AppRoute.Onboarding> {
-                    OnboardingRoute(onSignInSuccess = { backStack.add(AppRoute.Home) })
+                    OnboardingRoute(onNavigateToHome = { backStack.add(AppRoute.Home) })
                 }
                 entry<AppRoute.Home> {
                     HomeRoute()

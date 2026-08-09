@@ -18,7 +18,7 @@ actual fun AppNavHost() {
 
     when (backStack.lastOrNull()) {
         AppRoute.SignIn -> SignInScreen()
-        AppRoute.Onboarding -> OnboardingRoute(onSignInSuccess = { backStack.add(AppRoute.Home) })
+        AppRoute.Onboarding -> OnboardingRoute(onNavigateToHome = { backStack.add(AppRoute.Home) })
         AppRoute.Home -> HomeRoute()
         AppRoute.LiquidGlassExample -> {
             LiquidGlassExampleScreen(onBackClick = { backStack.removeLastOrNull() })

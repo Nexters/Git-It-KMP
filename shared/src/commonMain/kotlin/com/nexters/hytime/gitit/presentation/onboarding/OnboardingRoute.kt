@@ -1,33 +1,16 @@
 package com.nexters.hytime.gitit.presentation.onboarding
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * 온보딩 기능의 상태와 이벤트를 화면에 연결하는 진입점이다.
+ * 온보딩 화면의 진입점(Route)이다.
  *
- * [OnboardingViewModel]을 주입해 로그인 상태를 수집하고, 성공 시
- * [onSignInSuccess]를 호출한다. 화면 자체는 상태를 소유하지 않는
- * [OnboardingScreen]에 상태와 이벤트를 넘긴다.
+ * 네비게이션 파라미터(savedStateHandle)를 읽어 Screen에 전달하는 역할만 한다.
+ * ViewModel 생성, 상태 수집, 이벤트 구독은 [OnboardingScreen]이 담당한다.
  *
- * @param onSignInSuccess 로그인 성공 시 호출될 콜백
+ * @param onNavigateToHome 로그인 성공 후 홈 화면으로 이동하는 콜백
  */
 @Composable
-fun OnboardingRoute(onSignInSuccess: () -> Unit) {
-    val viewModel = koinViewModel<OnboardingViewModel>()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(uiState) {
-        if (uiState is OnboardingUiState.Success) {
-            onSignInSuccess()
-        }
-    }
-
-    OnboardingScreen(
-        uiState = uiState,
-        onGoogleLoginClick = viewModel::signIn,
-    )
+fun OnboardingRoute(onNavigateToHome: () -> Unit) {
+    OnboardingScreen(onNavigateToHome = onNavigateToHome)
 }
