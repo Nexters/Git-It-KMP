@@ -20,6 +20,7 @@ kotlin {
             implementation(projects.core.designsystem)
             implementation(projects.core.logging)
             implementation(projects.feature.home)
+            implementation(projects.feature.projectdetail)
             implementation(projects.core.network)
             implementation(projects.domain)
 

@@ -31,4 +31,14 @@ sealed interface AppRoute : NavKey {
      */
     @Serializable
     data object LiquidGlassExample : AppRoute
+
+    /**
+     * 프로젝트 상세 화면이다. [projectId]로 특정 프로젝트를 식별한다.
+     *
+     * @property projectId 대상 프로젝트 식별자
+     */
+    @Serializable
+    data class ProjectDetail(
+        val projectId: String,
+    ) : AppRoute
 }

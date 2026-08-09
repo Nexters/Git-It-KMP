@@ -16,6 +16,7 @@ internal val appRouteSavedStateConfiguration =
                     subclass(AppRoute.LiquidGlassExample.serializer())
                     subclass(AppRoute.SignIn.serializer())
                     subclass(AppRoute.Onboarding.serializer())
+                    subclass(AppRoute.ProjectDetail.serializer())
                 }
             }
     }
