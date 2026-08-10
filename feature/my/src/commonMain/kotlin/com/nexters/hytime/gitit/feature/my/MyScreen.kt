@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
+import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
+import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
 
 /**
  * 마이 학습 화면의 순수 UI 영역이다.
@@ -45,6 +47,8 @@ fun MyScreen(
     onIntent: (MyIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val sky = rememberGitItMainNavSky()
+
     Box(
         modifier =
             modifier
@@ -55,6 +59,8 @@ fun MyScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
+                    .background(GitItTheme.colors.grey700)
+                    .gitItMainNavSky(sky)
                     .statusBarsPadding()
                     .padding(horizontal = 20.dp),
         ) {
@@ -88,6 +94,7 @@ fun MyScreen(
                 Modifier
                     .align(Alignment.BottomCenter)
                     .padding(start = 27.dp, end = 27.dp, bottom = 29.dp),
+            sky = sky,
         )
     }
 }

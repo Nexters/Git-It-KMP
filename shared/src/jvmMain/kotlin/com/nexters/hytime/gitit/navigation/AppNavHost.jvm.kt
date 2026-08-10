@@ -2,6 +2,7 @@ package com.nexters.hytime.gitit.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.rememberNavBackStack
+import com.nexters.hytime.gitit.feature.bookmark.BookmarkRoute
 import com.nexters.hytime.gitit.feature.home.HomeRoute
 import com.nexters.hytime.gitit.feature.my.MyRoute
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
@@ -35,12 +36,21 @@ actual fun AppNavHost() {
             HomeRoute(
                 onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
+                onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+            )
+        }
+        AppRoute.Bookmark -> {
+            BookmarkRoute(
+                onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
+                onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
+                onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
             )
         }
         AppRoute.My -> {
             MyRoute(
                 onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                 onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
+                onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
             )
         }
         AppRoute.ProjectList -> {
@@ -53,6 +63,7 @@ actual fun AppNavHost() {
                     },
                 onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
+                onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
             )
         }
         is AppRoute.ProjectDetail -> {

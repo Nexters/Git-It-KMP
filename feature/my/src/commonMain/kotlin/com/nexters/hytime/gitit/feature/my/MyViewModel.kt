@@ -37,9 +37,7 @@ class MyViewModel : ViewModel() {
         when (intent) {
             MyIntent.HomeTabClick -> emit(MySideEffect.NavigateToHome)
             MyIntent.ProjectTabClick -> emit(MySideEffect.NavigateToProjectList)
-            MyIntent.SavedTabClick -> {
-                // TODO: 저장 화면 route 추가 후 연결한다.
-            }
+            MyIntent.SavedTabClick -> emit(MySideEffect.NavigateToBookmark)
             MyIntent.MyTabClick -> Unit
         }
     }

@@ -12,6 +12,8 @@ import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
+import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
+import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
 
 /**
  * 홈 기능이 준비되기 전 하단 탭바만 표시하는 화면이다.
@@ -26,12 +28,21 @@ fun HomeScreen(
     onIntent: (HomeIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val sky = rememberGitItMainNavSky()
+
     Box(
         modifier =
             modifier
-                .fillMaxSize()
-                .background(GitItTheme.colors.grey700),
+                .fillMaxSize(),
     ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(GitItTheme.colors.grey700)
+                    .gitItMainNavSky(sky),
+        )
+
         GitItMainNavBar(
             selectedDestination = GitItMainNavDestination.Home,
             onDestinationClick = { destination ->
@@ -46,6 +57,7 @@ fun HomeScreen(
                 Modifier
                     .align(Alignment.BottomCenter)
                     .padding(start = 27.dp, end = 27.dp, bottom = 29.dp),
+            sky = sky,
         )
     }
 }

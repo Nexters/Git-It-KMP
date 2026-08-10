@@ -12,6 +12,7 @@ internal val appRouteSavedStateConfiguration =
         serializersModule =
             SerializersModule {
                 polymorphic(NavKey::class) {
+                    subclass(AppRoute.Bookmark.serializer())
                     subclass(AppRoute.Home.serializer())
                     subclass(AppRoute.My.serializer())
                     subclass(AppRoute.LiquidGlassExample.serializer())

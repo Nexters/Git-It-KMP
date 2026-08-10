@@ -40,6 +40,7 @@ include(":androidApp")
 include(":desktopApp")
 include(":shared")
 
+include(":feature:bookmark")
 include(":feature:home")
 include(":feature:onboarding")
 

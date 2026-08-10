@@ -12,9 +12,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassNavBar
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassNavBarItem
+import com.skydoves.cloudy.Sky
+import com.skydoves.cloudy.rememberSky
+import com.skydoves.cloudy.sky
 
 /** 앱 하단 탭바의 목적지다. */
 enum class GitItMainNavDestination {
@@ -37,12 +41,14 @@ enum class GitItMainNavDestination {
  * @param selectedDestination 현재 선택된 목적지
  * @param onDestinationClick 탭을 눌렀을 때 목적지를 전달하는 콜백
  * @param modifier 탭바의 외부 배치와 추가 수식자
+ * @param sky 흐림 배경을 캡처하는 Cloudy 상태. null이면 정적 배경만 그린다
  */
 @Composable
 fun GitItMainNavBar(
     selectedDestination: GitItMainNavDestination,
     onDestinationClick: (GitItMainNavDestination) -> Unit,
     modifier: Modifier = Modifier,
+    sky: Sky? = null,
 ) {
     val items = mainNavItems()
 
@@ -57,8 +63,39 @@ fun GitItMainNavBar(
         selectedIndex = items.indexOfFirst { it.destination == selectedDestination }.coerceAtLeast(0),
         onSelectedIndexChange = { index -> onDestinationClick(items[index].destination) },
         modifier = modifier.navigationBarsPadding(),
+        sky = sky,
     )
 }
+
+/**
+ * 하단 탭바에 사용할 Cloudy 상태를 만든다.
+ *
+ * Compose Preview에서는 Cloudy 렌더링이 깨질 수 있어 null을 반환하고,
+ * 실제 실행 환경에서만 리퀴드 글래스 캡처를 활성화한다.
+ *
+ * @return 실제 실행 환경의 [Sky], Preview에서는 null
+ */
+@Composable
+fun rememberGitItMainNavSky(): Sky? =
+    if (LocalInspectionMode.current) {
+        null
+    } else {
+        rememberSky()
+    }
+
+/**
+ * [sky]가 있을 때만 현재 Modifier를 Cloudy 캡처 대상으로 만든다.
+ *
+ * @param sky 흐림 배경을 캡처하는 Cloudy 상태. null이면 원본 Modifier를 반환한다
+ * @return Cloudy 캡처가 조건부로 적용된 Modifier
+ */
+@Composable
+fun Modifier.gitItMainNavSky(sky: Sky?): Modifier =
+    if (sky == null) {
+        this
+    } else {
+        sky(sky)
+    }
 
 /** 하단 탭바의 내부 항목이다. */
 private data class MainNavItem(
