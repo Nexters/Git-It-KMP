@@ -21,6 +21,7 @@ kotlin {
             implementation(projects.core.logging)
             implementation(projects.core.permission)
             implementation(projects.feature.home)
+            implementation(projects.feature.projectdetail)
             implementation(projects.core.network)
             implementation(projects.domain)
 
@@ -29,6 +30,7 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
 
             implementation(libs.compose.material3)
+            implementation(libs.compose.components.resources)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.androidx.navigation3.runtime)

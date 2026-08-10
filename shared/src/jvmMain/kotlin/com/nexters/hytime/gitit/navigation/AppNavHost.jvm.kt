@@ -3,7 +3,9 @@ package com.nexters.hytime.gitit.navigation
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.nexters.hytime.gitit.feature.home.HomeRoute
+import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
+import com.nexters.hytime.gitit.presentation.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 
 // NavDisplay가 JVM(Desktop)을 미지원하므로 백스택 기반 직접 렌더를 사용한다.
@@ -12,12 +14,21 @@ actual fun AppNavHost() {
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
-            AppRoute.LiquidGlassExample,
+            AppRoute.Onboarding,
         )
 
-    when (backStack.lastOrNull()) {
+    when (val route = backStack.lastOrNull()) {
         AppRoute.SignIn -> SignInScreen()
+        AppRoute.Onboarding -> OnboardingRoute(onNavigateToHome = { backStack.add(AppRoute.Home) })
         AppRoute.Home -> HomeRoute()
+        is AppRoute.ProjectDetail -> {
+            ProjectDetailRoute(
+                projectId = route.projectId,
+                onBackClick = { backStack.removeLastOrNull() },
+                onNavigateToSavedQuestions = {},
+                onNavigateToLearningSet = {},
+            )
+        }
         AppRoute.LiquidGlassExample -> {
             LiquidGlassExampleScreen(onBackClick = { backStack.removeLastOrNull() })
         }

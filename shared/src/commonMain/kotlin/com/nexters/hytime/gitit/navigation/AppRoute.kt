@@ -9,10 +9,16 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface AppRoute : NavKey {
     /**
-     * 앱을 시작할 때 표시하는 로그인 화면이다.
+     * Google 로그인을 수행하는 로그인 화면이다.
      */
     @Serializable
     data object SignIn : AppRoute
+
+    /**
+     * 앱을 시작할 때 표시하는 온보딩 화면이다.
+     */
+    @Serializable
+    data object Onboarding : AppRoute
 
     /**
      * 앱을 시작할 때 표시하는 홈 화면이다.
@@ -25,4 +31,14 @@ sealed interface AppRoute : NavKey {
      */
     @Serializable
     data object LiquidGlassExample : AppRoute
+
+    /**
+     * 프로젝트 상세 화면이다. [projectId]로 특정 프로젝트를 식별한다.
+     *
+     * @property projectId 대상 프로젝트 식별자
+     */
+    @Serializable
+    data class ProjectDetail(
+        val projectId: String,
+    ) : AppRoute
 }

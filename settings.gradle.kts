@@ -42,6 +42,8 @@ include(":shared")
 
 include(":feature:home")
 
+include(":feature:projectdetail")
+
 include(":core:designsystem")
 include(":core:network")
 include(":core:logging")

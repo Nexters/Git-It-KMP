@@ -161,7 +161,18 @@ MVI + Clean Architecture를 지향합니다. 도입 예정 스택은 Koin(DI), C
 | network | `core:network` | Ktor 클라이언트와 공통 HTTP 설정. Ktor를 아는 유일한 곳 |
 | presentation | `shared` | Compose UI, ViewModel, UiState |
 
-의존 방향은 `presentation → domain ← data → network` 입니다. 안쪽(`domain`)은 바깥을 모릅니다.
+의존 방향은 `presentation → domain ← data → network` 입니다. 안쪽(`domain`)은 바깥을 모립니다.
+
+### 프레젠테이션 레이어
+
+**UI 상태 관리 규칙**
+
+- 화면의 비즈니스 상태(선택 날짜, 로딩 결과, 리스트 데이터, 에러, 업로드 진행 등)는 ViewModel이 단일 `UiState`(`data class`)로 소유하고, `setState { copy(...) }`로만 변경한다.
+- ViewModel은 상태를 읽기 전용으로만 노출한다. 상태 변경은 `fun onXxx()` 인텐트 메서드로만 일어나고, Composable에서 상태를 직접 mutate하지 않는다.
+- 네비게이션 이벤트, 스낵바/토스트 표시, 클립보드 복사, 공유 intent 발행 등 일회성 부작용은 `SharedFlow<Event>`로 ViewModel에서 흘려보내고, Screen에서 `LaunchedEffect { viewModel.events.collectLatest { ... } }`로 처리한다.
+- Route는 `savedStateHandle`을 읽어 Screen에 파라미터를 전달하는 역할을 맡는다. ViewModel 생성, 상태 수집, 이벤트 구독, `LaunchedEffect` 부작용은 Screen composable이 담당한다.
+- 다음 값들은 Composable이 `remember`/`rememberSaveable`로 로컬에서 들고 있는 것을 허용한다: 다이얼로그·드롭다운 메뉴 노출 여부, 스크롤 위치·헤더 가시성·페이저 상태, 애니메이션 트리거·진행도, 텍스트 입력 포커스 및 임시 입력값, 프로세스 재생성 후 복원이 필요한 값(`rememberSaveable`).
+- 단, ViewModel에 이미 해당 상태가 존재하는 필드와 동일한 의미의 값을 Composable이 `remember`로 중복 들고 있어서는 안 된다. 소유권은 하나다.
 
 ### 데이터 레이어
 
