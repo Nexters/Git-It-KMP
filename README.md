@@ -33,6 +33,7 @@
 | 빌드 구성 | Gradle Kotlin DSL, Version Catalog | 현재 구성 |
 | Android | Android Gradle Plugin, Activity Compose | 현재 구성 |
 | Desktop | Compose Desktop | 현재 구성 |
+| 권한 | Android 알림 런타임 권한, macOS UserNotifications(JNA 브리지) | 현재 구성 |
 | 테스트 | Kotlin Test | 현재 구성 |
 | 비동기 | Coroutine, Flow, Kotlinx Coroutines Swing | 일부 구성 / 도입 예정 |
 | 의존성 주입 | Koin | 도입 예정 |
