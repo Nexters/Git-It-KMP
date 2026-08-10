@@ -41,6 +41,9 @@ ktlintGradle = "13.1.0"
 # Logging
 kermit = "2.1.0"
 
+# Native Bridge
+jna = "5.18.1"
+
 # DI
 koin = "4.2.2"
 # Auth (Google Sign-In)
@@ -92,6 +95,9 @@ ktor-serialization-kotlinxJson = { module = "io.ktor:ktor-serialization-kotlinx-
 
 # Logging (Kermit)
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+
+# Native Bridge
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 
 # DI (Koin)
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
