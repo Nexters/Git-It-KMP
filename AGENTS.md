@@ -43,6 +43,7 @@ shared/              공유 UI + 앱 로직 (KMP: commonMain/androidMain/jvmMain
 feature/home/         홈 화면 기능 (KMP + Compose)
 core/designsystem/   디자인 시스템 (KMP + Compose)
 core/auth/           Google 로그인 인증 추상화 (KMP: commonMain/androidMain/jvmMain)
+core/permission/     알림 권한 추상화 (KMP: commonMain/androidMain/jvmMain)
 core/network/        Ktor 기반 HTTP 클라이언트 (순수 JVM)
 data/                Repository 구현체, API DTO, DTO↔도메인 매핑 (순수 JVM)
 domain/              도메인 레이어 (순수 JVM)

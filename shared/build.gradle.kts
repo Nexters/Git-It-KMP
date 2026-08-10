@@ -19,6 +19,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.designsystem)
             implementation(projects.core.logging)
+            implementation(projects.core.permission)
             implementation(projects.feature.home)
             implementation(projects.core.network)
             implementation(projects.domain)
