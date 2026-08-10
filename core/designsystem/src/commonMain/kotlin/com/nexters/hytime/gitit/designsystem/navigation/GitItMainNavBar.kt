@@ -1,6 +1,7 @@
 package com.nexters.hytime.gitit.designsystem.navigation
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
@@ -55,7 +56,7 @@ fun GitItMainNavBar(
             },
         selectedIndex = items.indexOfFirst { it.destination == selectedDestination }.coerceAtLeast(0),
         onSelectedIndexChange = { index -> onDestinationClick(items[index].destination) },
-        modifier = modifier,
+        modifier = modifier.navigationBarsPadding(),
     )
 }
 
