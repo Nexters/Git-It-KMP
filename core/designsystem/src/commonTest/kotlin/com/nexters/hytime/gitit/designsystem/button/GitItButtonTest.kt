@@ -1,20 +1,16 @@
 @file:Suppress("ktlint:standard:function-naming")
 
-package com.nexters.hytime.gitit.designsystem
+package com.nexters.hytime.gitit.designsystem.button
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.nexters.hytime.gitit.designsystem.button.GitItButtonSize
-import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
-import com.nexters.hytime.gitit.designsystem.button.GitItButtonStyle
-import com.nexters.hytime.gitit.designsystem.button.resolveButtonColors
-import com.nexters.hytime.gitit.designsystem.button.resolveButtonVisualState
+import com.nexters.hytime.gitit.designsystem.defaultGitItColors
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** Figma Button 속성과 Compose 규격 사이의 매핑을 검증한다. */
-class ButtonTest {
+class GitItButtonTest {
     /** 버튼 크기별 높이와 수평 여백이 Figma 규격과 일치하는지 검증한다. */
     @Test
     fun size_모든규격_피그마치수와일치한다() {
