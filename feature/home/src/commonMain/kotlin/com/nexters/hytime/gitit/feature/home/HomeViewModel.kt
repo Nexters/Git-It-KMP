@@ -37,6 +37,11 @@ class HomeViewModel : ViewModel() {
         when (intent) {
             HomeIntent.Refresh -> Unit
             HomeIntent.HomeTabClick -> Unit
+            HomeIntent.LoadProjectClick,
+            HomeIntent.ViewAllProjectsClick,
+            -> emit(HomeSideEffect.NavigateToProjectList)
+            is HomeIntent.LearningCardClick -> Unit
+            is HomeIntent.LearningPlayClick -> Unit
             HomeIntent.ProjectTabClick -> emit(HomeSideEffect.NavigateToProjectList)
             HomeIntent.SavedTabClick -> emit(HomeSideEffect.NavigateToBookmark)
             HomeIntent.MyTabClick -> emit(HomeSideEffect.NavigateToMy)
