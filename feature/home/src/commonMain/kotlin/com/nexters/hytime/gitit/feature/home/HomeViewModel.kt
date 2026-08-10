@@ -41,9 +41,7 @@ class HomeViewModel : ViewModel() {
             HomeIntent.SavedTabClick -> {
                 // TODO: 저장 화면 route 추가 후 연결한다.
             }
-            HomeIntent.MyTabClick -> {
-                // TODO: 마이 화면 route 추가 후 연결한다.
-            }
+            HomeIntent.MyTabClick -> emit(HomeSideEffect.NavigateToMy)
         }
     }
 

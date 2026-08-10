@@ -13,9 +13,13 @@ import kotlinx.coroutines.flow.collectLatest
  * 현재는 하단 탭바만 표시한다.
  *
  * @param onNavigateToProjectList 프로젝트 리스트 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
+ * @param onNavigateToMy 마이 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
  */
 @Composable
-fun HomeRoute(onNavigateToProjectList: () -> Unit = {}) {
+fun HomeRoute(
+    onNavigateToProjectList: () -> Unit = {},
+    onNavigateToMy: () -> Unit = {},
+) {
     val viewModel = viewModel { HomeViewModel() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -23,6 +27,7 @@ fun HomeRoute(onNavigateToProjectList: () -> Unit = {}) {
         viewModel.sideEffects.collectLatest { sideEffect ->
             when (sideEffect) {
                 HomeSideEffect.NavigateToProjectList -> onNavigateToProjectList()
+                HomeSideEffect.NavigateToMy -> onNavigateToMy()
             }
         }
     }

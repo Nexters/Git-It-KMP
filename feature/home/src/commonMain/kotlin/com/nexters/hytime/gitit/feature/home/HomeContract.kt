@@ -47,4 +47,9 @@ sealed interface HomeSideEffect {
      * 프로젝트 리스트 화면으로 이동한다.
      */
     data object NavigateToProjectList : HomeSideEffect
+
+    /**
+     * 마이 화면으로 이동한다.
+     */
+    data object NavigateToMy : HomeSideEffect
 }

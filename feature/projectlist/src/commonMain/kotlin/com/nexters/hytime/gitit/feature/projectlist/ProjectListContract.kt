@@ -70,4 +70,7 @@ sealed interface ProjectListSideEffect {
 
     /** 홈 화면으로 이동. */
     data object NavigateToHome : ProjectListSideEffect
+
+    /** 마이 화면으로 이동. */
+    data object NavigateToMy : ProjectListSideEffect
 }
