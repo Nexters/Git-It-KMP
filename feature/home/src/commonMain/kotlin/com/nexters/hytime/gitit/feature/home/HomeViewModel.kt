@@ -2,6 +2,7 @@ package com.nexters.hytime.gitit.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nexters.hytime.gitit.designsystem.GitItTheme
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
  * 홈 화면의 상태와 사용자 의도를 관리한다.
  */
 class HomeViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(HomeUiState())
+    private val _uiState = MutableStateFlow(HomeUiState(learningRepositories = dummyLearningRepositories))
 
     /**
      * 홈 화면이 구독할 현재 UI 상태이다.
@@ -52,3 +53,35 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch { _sideEffects.emit(sideEffect) }
     }
 }
+
+/** 실제 데이터 연동 전 홈 카드 동작을 확인하기 위한 임시 목록이다. */
+private val dummyLearningRepositories =
+    listOf(
+        HomeLearningRepository(
+            id = "nexters",
+            title = "Nexters",
+            technologies = "Kotlin · Compose · Coroutines",
+            setLabel = "Set 1",
+            description = "Compose 핵심 개념",
+            progress = 0.21f,
+            backgroundColor = GitItTheme.colors.purple300,
+        ),
+        HomeLearningRepository(
+            id = "now-in-android",
+            title = "Now in\nAndroid",
+            technologies = "Kotlin · Compose · Coroutines",
+            setLabel = "Set 1",
+            description = "Compose 핵심 개념",
+            progress = 0.21f,
+            backgroundColor = GitItTheme.colors.blue100,
+        ),
+        HomeLearningRepository(
+            id = "compose-samples",
+            title = "Compose\nSamples",
+            technologies = "Kotlin · Compose",
+            setLabel = "Set 2",
+            description = "상태 관리 익히기",
+            progress = 0.42f,
+            backgroundColor = GitItTheme.colors.blue500,
+        ),
+    )
