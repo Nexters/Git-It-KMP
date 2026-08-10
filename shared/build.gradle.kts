@@ -21,7 +21,9 @@ kotlin {
             implementation(projects.core.logging)
             implementation(projects.core.permission)
             implementation(projects.feature.home)
+            implementation(projects.feature.onboarding)
             implementation(projects.feature.projectdetail)
+            implementation(projects.feature.projectlist)
             implementation(projects.core.network)
             implementation(projects.domain)
 

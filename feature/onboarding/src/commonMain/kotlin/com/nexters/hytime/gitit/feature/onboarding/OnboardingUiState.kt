@@ -1,7 +1,7 @@
-package com.nexters.hytime.gitit.presentation.onboarding
+package com.nexters.hytime.gitit.feature.onboarding
 
 import com.nexters.hytime.gitit.domain.model.Account
-import com.nexters.hytime.gitit.presentation.terms.TermsAgreementState
+import com.nexters.hytime.gitit.feature.onboarding.terms.TermsAgreementState
 
 /**
  * 온보딩 화면의 단일 UI 상태(MVI State)다.

@@ -7,6 +7,7 @@ import com.nexters.hytime.gitit.auth.GoogleAuthTokenProvider
 import com.nexters.hytime.gitit.auth.GoogleAuthenticator
 import com.nexters.hytime.gitit.data.di.dataModule
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
+import com.nexters.hytime.gitit.feature.onboarding.onboardingModule
 import com.nexters.hytime.gitit.logging.gitItLogger
 import com.nexters.hytime.gitit.logging.initLogger
 import com.nexters.hytime.gitit.network.di.networkModule
@@ -19,6 +20,7 @@ fun main() {
     startKoin {
         modules(
             appModules +
+                onboardingModule +
                 dataModule +
                 platformModule +
                 networkModule(

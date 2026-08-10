@@ -27,6 +27,12 @@ sealed interface AppRoute : NavKey {
     data object Home : AppRoute
 
     /**
+     * 사용자가 불러온 프로젝트 목록 화면이다.
+     */
+    @Serializable
+    data object ProjectList : AppRoute
+
+    /**
      * 리퀴드 글래스 디자인 컴포넌트 확인용 예제 화면이다.
      */
     @Serializable

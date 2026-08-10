@@ -1,4 +1,4 @@
-package com.nexters.hytime.gitit.presentation.onboarding
+package com.nexters.hytime.gitit.feature.onboarding
 
 import androidx.compose.runtime.Composable
 
