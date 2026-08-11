@@ -19,9 +19,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -247,13 +247,22 @@ private fun LearningSection(
     if (uiState.learningRepositories.isEmpty()) {
         EmptyLearningRepositories()
     } else {
-        LearningRepositoryPager(repositories = uiState.learningRepositories, onIntent = onIntent)
+        Box {
+            if (uiState.learningRepositories.size < 3) {
+                EmptyLearningRepositories(showMessage = false)
+            }
+            LearningRepositoryPager(repositories = uiState.learningRepositories, onIntent = onIntent)
+        }
     }
 }
 
-/** 등록된 프로젝트가 없을 때 카드 윤곽과 안내 문구를 표시한다. */
+/**
+ * 비어 있는 프로젝트 카드 윤곽을 표시한다.
+ *
+ * @param showMessage 등록된 프로젝트가 없다는 안내 문구를 함께 표시할지 여부
+ */
 @Composable
-private fun EmptyLearningRepositories() {
+private fun EmptyLearningRepositories(showMessage: Boolean = true) {
     Box(
         modifier =
             Modifier
@@ -317,12 +326,14 @@ private fun EmptyLearningRepositories() {
                 )
             }
         }
-        Text(
-            text = "아직 등록된 프로젝트가 없어요.",
-            color = GitItTheme.colors.purple200,
-            textAlign = TextAlign.Center,
-            style = GitItTheme.typography.body2,
-        )
+        if (showMessage) {
+            Text(
+                text = "아직 등록된 프로젝트가 없어요.",
+                color = GitItTheme.colors.purple200,
+                textAlign = TextAlign.Center,
+                style = GitItTheme.typography.body2,
+            )
+        }
     }
 }
 
@@ -348,6 +359,7 @@ private fun LearningRepositoryPager(
         contentPadding = PaddingValues(start = 20.dp, end = 186.dp),
         pageSize = PageSize.Fixed(154.dp),
         beyondViewportPageCount = 2,
+        userScrollEnabled = repositories.size > 2,
         key = { repositories[it].id },
     ) { page ->
         val repository = repositories[page]
