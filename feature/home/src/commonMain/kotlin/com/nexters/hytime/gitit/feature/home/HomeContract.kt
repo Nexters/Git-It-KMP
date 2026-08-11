@@ -1,7 +1,6 @@
 package com.nexters.hytime.gitit.feature.home
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.Color
 
 /**
  * 홈에서 이어서 학습할 프로젝트 카드 정보다.
@@ -12,7 +11,6 @@ import androidx.compose.ui.graphics.Color
  * @property setLabel 현재 학습 세트 문구
  * @property description 현재 학습 내용 요약
  * @property progress 0f..1f 범위의 학습 진행률
- * @property backgroundColor 카드 배경색
  */
 @Immutable
 data class HomeLearningProject(
@@ -22,7 +20,6 @@ data class HomeLearningProject(
     val setLabel: String,
     val description: String,
     val progress: Float,
-    val backgroundColor: Color,
 )
 
 /**

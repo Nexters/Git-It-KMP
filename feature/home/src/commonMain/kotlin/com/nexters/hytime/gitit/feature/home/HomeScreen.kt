@@ -349,6 +349,13 @@ private fun LearningProjectPager(
     onIntent: (HomeIntent) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = projects::size)
+    // 실제 데이터의 개수와 무관하게 카드 순서대로 세 색상을 반복한다.
+    val backgroundColors =
+        listOf(
+            GitItTheme.colors.purple300,
+            GitItTheme.colors.blue100,
+            GitItTheme.colors.blue500,
+        )
 
     HorizontalPager(
         state = pagerState,
@@ -378,7 +385,7 @@ private fun LearningProjectPager(
                 setLabel = project.setLabel,
                 description = project.description,
                 progress = project.progress,
-                backgroundColor = project.backgroundColor,
+                backgroundColor = backgroundColors[page % backgroundColors.size],
                 onCardClick = { onIntent(HomeIntent.LearningCardClick(project.id)) },
                 onPlayClick = { onIntent(HomeIntent.LearningPlayClick(project.id)) },
                 modifier = Modifier.graphicsLayer { rotationZ = learningCardAngle(page, pageOffset) },
@@ -428,7 +435,6 @@ private fun LearningHomeScreenPreview() {
                                 setLabel = "Set 1",
                                 description = "Compose 핵심 개념",
                                 progress = 0.21f,
-                                backgroundColor = GitItTheme.colors.purple300,
                             ),
                             HomeLearningProject(
                                 id = "now-in-android",
@@ -437,7 +443,6 @@ private fun LearningHomeScreenPreview() {
                                 setLabel = "Set 1",
                                 description = "Compose 핵심 개념",
                                 progress = 0.21f,
-                                backgroundColor = GitItTheme.colors.blue100,
                             ),
                             HomeLearningProject(
                                 id = "compose-samples",
@@ -446,7 +451,6 @@ private fun LearningHomeScreenPreview() {
                                 setLabel = "Set 2",
                                 description = "상태 관리 익히기",
                                 progress = 0.42f,
-                                backgroundColor = GitItTheme.colors.blue500,
                             ),
                         ),
                 ),

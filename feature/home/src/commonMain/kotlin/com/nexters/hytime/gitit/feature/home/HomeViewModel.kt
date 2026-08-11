@@ -2,7 +2,6 @@ package com.nexters.hytime.gitit.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nexters.hytime.gitit.designsystem.GitItTheme
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -64,6 +63,21 @@ private val dummyLearningProjects =
             setLabel = "Set 1",
             description = "Compose 핵심 개념",
             progress = 0.21f,
-            backgroundColor = GitItTheme.colors.purple300,
+        ),
+        HomeLearningProject(
+            id = "now-in-android",
+            title = "Now in\nAndroid",
+            technologies = "Kotlin · Compose · Coroutines",
+            setLabel = "Set 1",
+            description = "Compose 핵심 개념",
+            progress = 0.21f,
+        ),
+        HomeLearningProject(
+            id = "compose-samples",
+            title = "Compose\nSamples",
+            technologies = "Kotlin · Compose",
+            setLabel = "Set 2",
+            description = "상태 관리 익히기",
+            progress = 0.42f,
         ),
     )
