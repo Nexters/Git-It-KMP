@@ -79,6 +79,9 @@ sealed interface HomeIntent {
 
 /** 홈 화면이 한 번만 전달해야 하는 이벤트를 정의한다. */
 sealed interface HomeSideEffect {
+    /** 질문 생성을 위한 저장소 확인 화면으로 이동한다. */
+    data object NavigateToQuestionCreate : HomeSideEffect
+
     /** 프로젝트 리스트 화면으로 이동한다. */
     data object NavigateToProjectList : HomeSideEffect
 
