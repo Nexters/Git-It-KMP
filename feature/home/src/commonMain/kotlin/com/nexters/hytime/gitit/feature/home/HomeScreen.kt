@@ -244,14 +244,14 @@ private fun LearningSection(
         }
     }
 
-    if (uiState.learningRepositories.isEmpty()) {
+    if (uiState.learningProjects.isEmpty()) {
         EmptyLearningRepositories()
     } else {
         Box {
-            if (uiState.learningRepositories.size < 3) {
+            if (uiState.learningProjects.size < 3) {
                 EmptyLearningRepositories(showMessage = false)
             }
-            LearningRepositoryPager(repositories = uiState.learningRepositories, onIntent = onIntent)
+            LearningProjectPager(projects = uiState.learningProjects, onIntent = onIntent)
         }
     }
 }
@@ -340,15 +340,15 @@ private fun EmptyLearningRepositories(showMessage: Boolean = true) {
 /**
  * 카드를 수평으로 넘기며 현재 카드가 정면을 향하도록 회전시킨다.
  *
- * @param repositories 표시할 학습 레포지토리 목록
+ * @param projects 표시할 학습 프로젝트 목록
  * @param onIntent 카드 입력을 전달할 콜백
  */
 @Composable
-private fun LearningRepositoryPager(
-    repositories: List<HomeLearningRepository>,
+private fun LearningProjectPager(
+    projects: List<HomeLearningProject>,
     onIntent: (HomeIntent) -> Unit,
 ) {
-    val pagerState = rememberPagerState(pageCount = repositories::size)
+    val pagerState = rememberPagerState(pageCount = projects::size)
 
     HorizontalPager(
         state = pagerState,
@@ -359,10 +359,10 @@ private fun LearningRepositoryPager(
         contentPadding = PaddingValues(start = 20.dp, end = 186.dp),
         pageSize = PageSize.Fixed(154.dp),
         beyondViewportPageCount = 2,
-        userScrollEnabled = repositories.size > 2,
-        key = { repositories[it].id },
+        userScrollEnabled = projects.size > 2,
+        key = { projects[it].id },
     ) { page ->
-        val repository = repositories[page]
+        val project = projects[page]
         val pageOffset = ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction).absoluteValue
 
         Box(
@@ -373,14 +373,14 @@ private fun LearningRepositoryPager(
                     .padding(top = 27.dp),
         ) {
             GitItLearningCard(
-                title = repository.title,
-                technologies = repository.technologies,
-                setLabel = repository.setLabel,
-                description = repository.description,
-                progress = repository.progress,
-                backgroundColor = repository.backgroundColor,
-                onCardClick = { onIntent(HomeIntent.LearningCardClick(repository.id)) },
-                onPlayClick = { onIntent(HomeIntent.LearningPlayClick(repository.id)) },
+                title = project.title,
+                technologies = project.technologies,
+                setLabel = project.setLabel,
+                description = project.description,
+                progress = project.progress,
+                backgroundColor = project.backgroundColor,
+                onCardClick = { onIntent(HomeIntent.LearningCardClick(project.id)) },
+                onPlayClick = { onIntent(HomeIntent.LearningPlayClick(project.id)) },
                 modifier = Modifier.graphicsLayer { rotationZ = learningCardAngle(page, pageOffset) },
             )
         }
@@ -419,9 +419,9 @@ private fun LearningHomeScreenPreview() {
         HomeScreen(
             uiState =
                 HomeUiState(
-                    learningRepositories =
+                    learningProjects =
                         listOf(
-                            HomeLearningRepository(
+                            HomeLearningProject(
                                 id = "nexters",
                                 title = "Nexters",
                                 technologies = "Kotlin · Compose · Coroutines",
@@ -430,7 +430,7 @@ private fun LearningHomeScreenPreview() {
                                 progress = 0.21f,
                                 backgroundColor = GitItTheme.colors.purple300,
                             ),
-                            HomeLearningRepository(
+                            HomeLearningProject(
                                 id = "now-in-android",
                                 title = "Now in\nAndroid",
                                 technologies = "Kotlin · Compose · Coroutines",
@@ -439,7 +439,7 @@ private fun LearningHomeScreenPreview() {
                                 progress = 0.21f,
                                 backgroundColor = GitItTheme.colors.blue100,
                             ),
-                            HomeLearningRepository(
+                            HomeLearningProject(
                                 id = "compose-samples",
                                 title = "Compose\nSamples",
                                 technologies = "Kotlin · Compose",
