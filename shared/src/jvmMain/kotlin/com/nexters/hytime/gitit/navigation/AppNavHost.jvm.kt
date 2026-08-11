@@ -66,6 +66,7 @@ actual fun AppNavHost() {
                 onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                onNavigateToQuiz = { backStack.add(AppRoute.Quiz) },
             )
         }
         is AppRoute.ProjectDetail -> {
