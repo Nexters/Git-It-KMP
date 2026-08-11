@@ -9,6 +9,12 @@ plugins {
 val libs = the<LibrariesForLibs>()
 
 kotlin {
+    android {
+        androidResources {
+            enable = true
+        }
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(libs.compose.runtime)

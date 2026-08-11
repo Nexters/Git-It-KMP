@@ -37,6 +37,11 @@ class HomeViewModel : ViewModel() {
         when (intent) {
             HomeIntent.Refresh -> Unit
             HomeIntent.HomeTabClick -> Unit
+            HomeIntent.LoadProjectClick,
+            HomeIntent.ViewAllProjectsClick,
+            -> emit(HomeSideEffect.NavigateToProjectList)
+            is HomeIntent.LearningCardClick -> Unit
+            is HomeIntent.LearningPlayClick -> Unit
             HomeIntent.ProjectTabClick -> emit(HomeSideEffect.NavigateToProjectList)
             HomeIntent.SavedTabClick -> emit(HomeSideEffect.NavigateToBookmark)
             HomeIntent.MyTabClick -> emit(HomeSideEffect.NavigateToMy)
@@ -47,3 +52,32 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch { _sideEffects.emit(sideEffect) }
     }
 }
+
+/** 실제 데이터 연동 전 홈 카드 동작을 확인하기 위한 임시 목록이다. */
+private val dummyLearningProjects =
+    listOf(
+        HomeLearningProject(
+            id = "nexters",
+            title = "Nexters",
+            technologies = "Kotlin · Compose · Coroutines",
+            setLabel = "Set 1",
+            description = "Compose 핵심 개념",
+            progress = 0.21f,
+        ),
+        HomeLearningProject(
+            id = "now-in-android",
+            title = "Now in\nAndroid",
+            technologies = "Kotlin · Compose · Coroutines",
+            setLabel = "Set 1",
+            description = "Compose 핵심 개념",
+            progress = 0.21f,
+        ),
+        HomeLearningProject(
+            id = "compose-samples",
+            title = "Compose\nSamples",
+            technologies = "Kotlin · Compose",
+            setLabel = "Set 2",
+            description = "상태 관리 익히기",
+            progress = 0.42f,
+        ),
+    )
