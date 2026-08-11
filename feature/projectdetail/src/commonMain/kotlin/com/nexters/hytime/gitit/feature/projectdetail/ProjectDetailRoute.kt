@@ -17,6 +17,7 @@ import org.koin.core.parameter.parametersOf
  * @param onBackClick 뒤로가기 이벤트 콜백
  * @param onNavigateToSavedQuestions 저장한 문제 화면으로 이동하는 콜백
  * @param onNavigateToLearningSet 학습 세트 화면으로 이동하는 콜백
+ * @param onNavigateToQuiz 문제 풀이 화면으로 이동하는 콜백
  */
 @Composable
 fun ProjectDetailRoute(
@@ -24,6 +25,7 @@ fun ProjectDetailRoute(
     onBackClick: () -> Unit,
     onNavigateToSavedQuestions: () -> Unit,
     onNavigateToLearningSet: (String) -> Unit,
+    onNavigateToQuiz: () -> Unit,
 ) {
     val viewModel =
         koinViewModel<ProjectDetailViewModel>(
@@ -36,6 +38,7 @@ fun ProjectDetailRoute(
             when (event) {
                 ProjectDetailEvent.NavigateBack -> onBackClick()
                 ProjectDetailEvent.NavigateToSavedQuestions -> onNavigateToSavedQuestions()
+                ProjectDetailEvent.NavigateToQuiz -> onNavigateToQuiz()
                 is ProjectDetailEvent.NavigateToLearningSet -> onNavigateToLearningSet(event.setId)
             }
         }

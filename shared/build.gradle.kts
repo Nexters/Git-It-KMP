@@ -27,6 +27,7 @@ kotlin {
             implementation(projects.feature.projectdetail)
             implementation(projects.feature.projectlist)
             implementation(projects.feature.questioncreate)
+            implementation(projects.feature.quiz)
             implementation(projects.core.network)
             implementation(projects.domain)
 

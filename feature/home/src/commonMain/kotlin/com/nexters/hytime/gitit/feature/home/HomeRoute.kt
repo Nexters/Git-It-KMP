@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.collectLatest
  * @param onNavigateToProjectList 프로젝트 리스트 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
  * @param onNavigateToMy 마이 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
  * @param onNavigateToBookmark 저장한 문제 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
+ * @param onNavigateToQuiz 문제 풀이 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
  */
 @Composable
 fun HomeRoute(
@@ -21,6 +22,7 @@ fun HomeRoute(
     onNavigateToProjectList: () -> Unit = {},
     onNavigateToMy: () -> Unit = {},
     onNavigateToBookmark: () -> Unit = {},
+    onNavigateToQuiz: () -> Unit = {},
 ) {
     val viewModel = viewModel { HomeViewModel() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -32,6 +34,7 @@ fun HomeRoute(
                 HomeSideEffect.NavigateToProjectList -> onNavigateToProjectList()
                 HomeSideEffect.NavigateToMy -> onNavigateToMy()
                 HomeSideEffect.NavigateToBookmark -> onNavigateToBookmark()
+                HomeSideEffect.NavigateToQuiz -> onNavigateToQuiz()
             }
         }
     }
