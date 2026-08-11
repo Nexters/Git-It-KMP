@@ -29,7 +29,7 @@
 | 구조 | Kotlin Multiplatform | 현재 구성 |
 | 플랫폼 | Android, Desktop(JVM) | 현재 구성 |
 | UI | Compose Multiplatform, Material 3 | 현재 구성 |
-| 기능 모듈 | feature:bookmark, feature:home, feature:my, feature:onboarding, feature:projectlist, feature:projectdetail | 현재 구성 |
+| 기능 모듈 | feature:bookmark, feature:home, feature:my, feature:onboarding, feature:projectlist, feature:projectdetail, feature:questioncreate | 현재 구성 |
 | 빌드 구성 | Gradle Kotlin DSL, Version Catalog | 현재 구성 |
 | Android | Android Gradle Plugin, Activity Compose | 현재 구성 |
 | Desktop | Compose Desktop | 현재 구성 |
@@ -37,7 +37,7 @@
 | 테스트 | Kotlin Test | 현재 구성 |
 | 비동기 | Coroutine, Flow, Kotlinx Coroutines Swing | 일부 구성 / 도입 예정 |
 | 의존성 주입 | Koin | 도입 예정 |
-| 이미지 로딩 | Coil | 도입 예정 |
+| 이미지 로딩 | Coil | 현재 구성 |
 | 화면 전환 | Navigation 3 | 현재 구성 |
 | 에러 트래킹 | Sentry | 도입 예정 |
 
