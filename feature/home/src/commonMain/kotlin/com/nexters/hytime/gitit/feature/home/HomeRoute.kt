@@ -10,8 +10,6 @@ import kotlinx.coroutines.flow.collectLatest
 /**
  * 홈 기능의 상태와 이벤트를 화면에 연결하는 진입점이다.
  *
- * 현재는 하단 탭바만 표시한다.
- *
  * @param onNavigateToProjectList 프로젝트 리스트 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
  * @param onNavigateToMy 마이 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
  * @param onNavigateToBookmark 저장한 문제 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
