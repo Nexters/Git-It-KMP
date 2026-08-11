@@ -10,6 +10,21 @@ import kotlinx.serialization.KSerializer
  */
 interface NetworkClient {
     /**
+     * 절대 URL로 GET 요청을 보내고 응답 본문을 역직렬화해 반환한다.
+     *
+     * @param url 요청할 전체 URL
+     * @param headers 요청에 추가할 HTTP 헤더. Ktor 타입을 노출하지 않도록 문자열로 받는다
+     * @param responseSerializer 응답 본문의 역직렬화기
+     * @return 역직렬화된 응답
+     * @throws NetworkException HTTP 통신 실패 또는 2xx 외 응답
+     */
+    suspend fun <Res : Any> get(
+        url: String,
+        headers: Map<String, String> = emptyMap(),
+        responseSerializer: KSerializer<Res>,
+    ): Res
+
+    /**
      * 타입 안전한 POST 요청을 보내고 응답 본문을 역직렬화해 반환한다.
      * [path]는 baseUrl 뒤에 붙는 경로다 (예: `"/auth/google"`).
      *
@@ -27,6 +42,18 @@ interface NetworkClient {
         responseSerializer: KSerializer<Res>,
     ): Res
 }
+
+/**
+ * [NetworkClient.get]의 reified 편의 확장이다.
+ *
+ * @param url 요청할 전체 URL
+ * @param headers 요청에 추가할 HTTP 헤더
+ * @return 역직렬화된 응답
+ */
+suspend inline fun <reified Res : Any> NetworkClient.get(
+    url: String,
+    headers: Map<String, String> = emptyMap(),
+): Res = get(url = url, headers = headers, responseSerializer = kotlinx.serialization.serializer())
 
 /**
  * [NetworkClient.post]의 reified 편의 확장이다. 직렬화기를 명시하지 않아도 된다.

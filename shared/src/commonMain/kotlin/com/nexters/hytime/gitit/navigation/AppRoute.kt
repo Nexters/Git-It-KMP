@@ -45,6 +45,12 @@ sealed interface AppRoute : NavKey {
     data object ProjectList : AppRoute
 
     /**
+     * 질문 생성을 시작할 GitHub 저장소를 입력하고 확인하는 화면이다.
+     */
+    @Serializable
+    data object QuestionCreate : AppRoute
+
+    /**
      * 리퀴드 글래스 디자인 컴포넌트 확인용 예제 화면이다.
      */
     @Serializable

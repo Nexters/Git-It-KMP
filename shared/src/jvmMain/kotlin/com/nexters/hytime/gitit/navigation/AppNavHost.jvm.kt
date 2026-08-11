@@ -8,6 +8,7 @@ import com.nexters.hytime.gitit.feature.my.MyRoute
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
+import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
 import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 
@@ -34,6 +35,7 @@ actual fun AppNavHost() {
         AppRoute.Onboarding -> OnboardingRoute(onNavigateToHome = { backStack.add(AppRoute.Home) })
         AppRoute.Home -> {
             HomeRoute(
+                onNavigateToQuestionCreate = { backStack.add(AppRoute.QuestionCreate) },
                 onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
@@ -72,6 +74,12 @@ actual fun AppNavHost() {
                 onBackClick = { backStack.removeLastOrNull() },
                 onNavigateToSavedQuestions = {},
                 onNavigateToLearningSet = {},
+            )
+        }
+        AppRoute.QuestionCreate -> {
+            QuestionCreateRoute(
+                onBackClick = { backStack.removeLastOrNull() },
+                onRepositoryConfirmed = {},
             )
         }
         AppRoute.LiquidGlassExample -> {
