@@ -245,11 +245,11 @@ private fun LearningSection(
     }
 
     if (uiState.learningProjects.isEmpty()) {
-        EmptyLearningRepositories()
+        EmptyLearningProjects()
     } else {
         Box {
             if (uiState.learningProjects.size < 3) {
-                EmptyLearningRepositories(showMessage = false)
+                EmptyLearningProjects(showMessage = false)
             }
             LearningProjectPager(projects = uiState.learningProjects, onIntent = onIntent)
         }
@@ -262,7 +262,7 @@ private fun LearningSection(
  * @param showMessage 등록된 프로젝트가 없다는 안내 문구를 함께 표시할지 여부
  */
 @Composable
-private fun EmptyLearningRepositories(showMessage: Boolean = true) {
+private fun EmptyLearningProjects(showMessage: Boolean = true) {
     Box(
         modifier =
             Modifier
