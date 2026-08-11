@@ -4,6 +4,7 @@ import com.nexters.hytime.gitit.network.api.NetworkClient
 import com.nexters.hytime.gitit.network.api.NetworkException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -25,13 +26,29 @@ internal class KtorNetworkClient(
     private val json: Json,
     private val baseUrl: String,
 ) : NetworkClient {
+    override suspend fun <Res : Any> get(
+        url: String,
+        headers: Map<String, String>,
+        responseSerializer: KSerializer<Res>,
+    ): Res =
+        request {
+            val response =
+                client.get(url) {
+                    headers.forEach { (name, value) -> this.headers.append(name, value) }
+                }
+            if (!response.status.isSuccess()) {
+                throw NetworkException("요청 실패: ${response.status.value}")
+            }
+            json.decodeFromString(responseSerializer, response.body())
+        }
+
     override suspend fun <Req : Any, Res : Any> post(
         path: String,
         body: Req,
         requestSerializer: KSerializer<Req>,
         responseSerializer: KSerializer<Res>,
     ): Res =
-        try {
+        request {
             val response =
                 client.post("$baseUrl$path") {
                     contentType(ContentType.Application.Json)
@@ -41,6 +58,17 @@ internal class KtorNetworkClient(
                 throw NetworkException("요청 실패: ${response.status.value}")
             }
             json.decodeFromString(responseSerializer, response.body())
+        }
+
+    /**
+     * 네트워크 예외를 공통 오류 타입으로 변환하되 코루틴 취소는 그대로 전파한다.
+     *
+     * @param block 실행할 HTTP 요청
+     * @return 요청 결과
+     */
+    private suspend fun <T> request(block: suspend () -> T): T =
+        try {
+            block()
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (e: NetworkException) {
