@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
  * 홈 화면의 상태와 사용자 의도를 관리한다.
  */
 class HomeViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(HomeUiState(learningProjects = dummyLearningProjects))
+    private val _uiState = MutableStateFlow(HomeUiState())
 
     /**
      * 홈 화면이 구독할 현재 UI 상태이다.
@@ -65,23 +65,5 @@ private val dummyLearningProjects =
             description = "Compose 핵심 개념",
             progress = 0.21f,
             backgroundColor = GitItTheme.colors.purple300,
-        ),
-        HomeLearningProject(
-            id = "now-in-android",
-            title = "Now in\nAndroid",
-            technologies = "Kotlin · Compose · Coroutines",
-            setLabel = "Set 1",
-            description = "Compose 핵심 개념",
-            progress = 0.21f,
-            backgroundColor = GitItTheme.colors.blue100,
-        ),
-        HomeLearningProject(
-            id = "compose-samples",
-            title = "Compose\nSamples",
-            technologies = "Kotlin · Compose",
-            setLabel = "Set 2",
-            description = "상태 관리 익히기",
-            progress = 0.42f,
-            backgroundColor = GitItTheme.colors.blue500,
         ),
     )
