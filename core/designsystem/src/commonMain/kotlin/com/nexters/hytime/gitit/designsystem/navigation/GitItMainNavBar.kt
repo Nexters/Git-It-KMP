@@ -116,7 +116,7 @@ private fun mainNavItems(): List<MainNavItem> =
     listOf(
         MainNavItem(GitItMainNavDestination.Home, "홈") { HomeIcon() },
         MainNavItem(GitItMainNavDestination.Project, "프로젝트") { FileTextIcon() },
-        MainNavItem(GitItMainNavDestination.Saved, "저장") { BookmarkIcon() },
+        MainNavItem(GitItMainNavDestination.Saved, "저장") { GitItBookmarkIcon() },
         MainNavItem(GitItMainNavDestination.My, "마이") { UserIcon() },
     )
 
@@ -191,12 +191,18 @@ private fun FileTextIcon() {
 }
 
 /**
- * 저장 탭 아이콘을 그린다.
+ * 북마크 아이콘을 그린다.
+ *
+ * @param modifier 아이콘의 크기와 배치를 지정할 수식자
+ * @param filled 내부를 채워 저장 상태를 강조할지 여부
  */
 @Composable
-private fun BookmarkIcon() {
+fun GitItBookmarkIcon(
+    modifier: Modifier = Modifier,
+    filled: Boolean = false,
+) {
     val color = LocalContentColor.current
-    Canvas(modifier = Modifier.size(20.dp)) {
+    Canvas(modifier = modifier.size(20.dp)) {
         val bookmark =
             Path().apply {
                 moveTo(size.width * 0.3f, size.height * 0.16f)
@@ -206,11 +212,15 @@ private fun BookmarkIcon() {
                 lineTo(size.width * 0.3f, size.height * 0.84f)
                 close()
             }
-        drawPath(
-            path = bookmark,
-            color = color,
-            style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
-        )
+        if (filled) {
+            drawPath(path = bookmark, color = color)
+        } else {
+            drawPath(
+                path = bookmark,
+                color = color,
+                style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+            )
+        }
     }
 }
 
