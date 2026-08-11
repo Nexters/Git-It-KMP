@@ -53,9 +53,9 @@ private val dummyMyUiState =
         profile = MyProfile(name = "김이박", role = "Junior Developer"),
         stats =
             listOf(
-                MyStudyStat(label = "푼 문제", value = "100문제"),
-                MyStudyStat(label = "푼 세트", value = "5세트"),
-                MyStudyStat(label = "복습한 문제", value = "15문제"),
+                MyStudyStat(label = "이번 주", value = "13문제"),
+                MyStudyStat(label = "이번 달", value = "47문제"),
+                MyStudyStat(label = "연속 학습", value = "7일"),
             ),
         weeklyStudy =
             listOf(
