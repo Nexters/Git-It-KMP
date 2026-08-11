@@ -39,11 +39,11 @@ data class MyStudyStat(
  * 주간 학습량 막대 한 개를 표현한다.
  *
  * @property day 표시할 요일
- * @property progress 막대 높이 비율(0..100)
+ * @property solvedCount 해당 요일에 학습한 문제 수
  */
 data class MyWeeklyStudy(
     val day: String,
-    val progress: Int,
+    val solvedCount: Int,
 )
 
 /**

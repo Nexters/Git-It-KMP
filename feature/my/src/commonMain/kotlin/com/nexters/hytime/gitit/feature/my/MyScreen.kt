@@ -225,6 +225,8 @@ private fun WeeklyStudyCard(
     items: List<MyWeeklyStudy>,
     modifier: Modifier = Modifier,
 ) {
+    val axisMax = weeklyStudyAxisMax(items.maxOfOrNull(MyWeeklyStudy::solvedCount) ?: 0)
+
     Column(
         modifier =
             modifier
@@ -241,14 +243,14 @@ private fun WeeklyStudyCard(
         )
         Spacer(Modifier.height(18.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
-            WeeklyStudyYAxis()
+            WeeklyStudyYAxis(axisMax = axisMax)
             Column(
                 modifier =
                     Modifier
                         .weight(1f)
                         .padding(start = 10.dp, top = 8.dp, end = 4.dp),
             ) {
-                WeeklyStudyPlot(items = items)
+                WeeklyStudyPlot(items = items, axisMax = axisMax)
                 Spacer(Modifier.height(7.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -272,21 +274,26 @@ private fun WeeklyStudyCard(
 /**
  * 주간 학습량 차트의 세로축 눈금을 표시한다.
  *
+ * @param axisMax 세로축에 표시할 최댓값
  * @param modifier 외부 배치와 추가 수식자
  */
 @Composable
-private fun WeeklyStudyYAxis(modifier: Modifier = Modifier) {
+private fun WeeklyStudyYAxis(
+    axisMax: Int,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier.height(120.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        listOf("20", "15", "10", "5", "0").forEach { label ->
+        (4 downTo 0).forEach { index ->
             Text(
-                text = label,
+                text = (axisMax * index / 4).toString(),
                 color = GitItTheme.colors.grey400,
                 style = GitItTheme.typography.body3,
                 textAlign = TextAlign.End,
-                modifier = Modifier.width(14.dp),
+                maxLines = 1,
+                modifier = Modifier.width(24.dp),
             )
         }
     }
@@ -296,11 +303,13 @@ private fun WeeklyStudyYAxis(modifier: Modifier = Modifier) {
  * 주간 학습량 막대와 가로 눈금선을 표시한다.
  *
  * @param items 요일별 학습량
+ * @param axisMax 막대 높이 계산에 사용할 세로축 최댓값
  * @param modifier 외부 배치와 추가 수식자
  */
 @Composable
 private fun WeeklyStudyPlot(
     items: List<MyWeeklyStudy>,
+    axisMax: Int,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -329,7 +338,7 @@ private fun WeeklyStudyPlot(
                     modifier =
                         Modifier
                             .width(24.dp)
-                            .height((88 * item.progress.coerceIn(0, 100) / 100).dp)
+                            .height((88f * item.solvedCount.coerceAtLeast(0) / axisMax).dp)
                             .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
                             .background(GitItTheme.colors.blue100),
                 )
@@ -337,6 +346,14 @@ private fun WeeklyStudyPlot(
         }
     }
 }
+
+/**
+ * 주간 최댓값을 모두 표시할 수 있도록 세로축 최댓값을 20 단위로 계산한다.
+ *
+ * @param maxSolvedCount 주간 일별 학습량 중 최댓값
+ * @return 최소 20이며 [maxSolvedCount] 이상인 가장 작은 20의 배수
+ */
+internal fun weeklyStudyAxisMax(maxSolvedCount: Int): Int = maxOf(20, (maxSolvedCount.coerceAtLeast(0) + 19) / 20 * 20)
 
 @Preview
 @Composable
@@ -354,13 +371,13 @@ private fun MyScreenPreview() {
                         ),
                     weeklyStudy =
                         listOf(
-                            MyWeeklyStudy(day = "수", progress = 100),
-                            MyWeeklyStudy(day = "목", progress = 58),
-                            MyWeeklyStudy(day = "금", progress = 76),
-                            MyWeeklyStudy(day = "토", progress = 58),
-                            MyWeeklyStudy(day = "일", progress = 100),
-                            MyWeeklyStudy(day = "월", progress = 76),
-                            MyWeeklyStudy(day = "화", progress = 41),
+                            MyWeeklyStudy(day = "수", solvedCount = 18),
+                            MyWeeklyStudy(day = "목", solvedCount = 11),
+                            MyWeeklyStudy(day = "금", solvedCount = 14),
+                            MyWeeklyStudy(day = "토", solvedCount = 11),
+                            MyWeeklyStudy(day = "일", solvedCount = 18),
+                            MyWeeklyStudy(day = "월", solvedCount = 14),
+                            MyWeeklyStudy(day = "화", solvedCount = 8),
                         ),
                 ),
             onIntent = {},
