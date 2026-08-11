@@ -53,18 +53,18 @@ private val dummyMyUiState =
         profile = MyProfile(name = "김이박", role = "Junior Developer"),
         stats =
             listOf(
-                MyStudyStat(label = "푼 문제", value = "100문제"),
-                MyStudyStat(label = "푼 세트", value = "5세트"),
-                MyStudyStat(label = "복습한 문제", value = "15문제"),
+                MyStudyStat(label = "이번 주", value = "13문제"),
+                MyStudyStat(label = "이번 달", value = "47문제"),
+                MyStudyStat(label = "연속 학습", value = "7일"),
             ),
         weeklyStudy =
             listOf(
-                MyWeeklyStudy(day = "수", progress = 100),
-                MyWeeklyStudy(day = "목", progress = 58),
-                MyWeeklyStudy(day = "금", progress = 76),
-                MyWeeklyStudy(day = "토", progress = 58),
-                MyWeeklyStudy(day = "일", progress = 100),
-                MyWeeklyStudy(day = "월", progress = 76),
-                MyWeeklyStudy(day = "화", progress = 41),
+                MyWeeklyStudy(day = "수", solvedCount = 18),
+                MyWeeklyStudy(day = "목", solvedCount = 11),
+                MyWeeklyStudy(day = "금", solvedCount = 14),
+                MyWeeklyStudy(day = "토", solvedCount = 11),
+                MyWeeklyStudy(day = "일", solvedCount = 18),
+                MyWeeklyStudy(day = "월", solvedCount = 14),
+                MyWeeklyStudy(day = "화", solvedCount = 8),
             ),
     )

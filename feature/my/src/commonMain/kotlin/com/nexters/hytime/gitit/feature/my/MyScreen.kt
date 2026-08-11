@@ -1,6 +1,7 @@
 package com.nexters.hytime.gitit.feature.my
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,9 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,6 +32,9 @@ import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
 import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
+import git_it_kmp.feature.my.generated.resources.Res
+import git_it_kmp.feature.my.generated.resources.my_default_avatar
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * 마이 학습 화면의 순수 UI 영역이다.
@@ -73,10 +75,10 @@ fun MyScreen(
                 color = GitItTheme.colors.grey100,
                 style = GitItTheme.typography.subtitle2,
             )
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(12.dp))
 
             MyStatsCard(stats = uiState.stats)
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(12.dp))
             WeeklyStudyCard(items = uiState.weeklyStudy)
         }
 
@@ -138,26 +140,11 @@ private fun MyProfileHeader(
  */
 @Composable
 private fun AvatarIcon(modifier: Modifier = Modifier) {
-    val background = GitItTheme.colors.grey300
-    val foreground = GitItTheme.colors.grey700
-
-    Canvas(modifier = modifier.size(40.dp)) {
-        drawCircle(color = background)
-        drawCircle(
-            color = foreground,
-            radius = size.minDimension * 0.15f,
-            center = Offset(size.width * 0.5f, size.height * 0.38f),
-        )
-        drawArc(
-            color = foreground,
-            startAngle = 200f,
-            sweepAngle = 140f,
-            useCenter = false,
-            topLeft = Offset(size.width * 0.26f, size.height * 0.55f),
-            size = Size(size.width * 0.48f, size.height * 0.32f),
-            style = Stroke(width = 4.dp.toPx()),
-        )
-    }
+    Image(
+        painter = painterResource(Res.drawable.my_default_avatar),
+        contentDescription = null,
+        modifier = modifier.size(40.dp),
+    )
 }
 
 /**
@@ -175,7 +162,7 @@ private fun MyStatsCard(
         modifier =
             modifier
                 .fillMaxWidth()
-                .height(69.dp)
+                .height(88.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .background(
                     Brush.horizontalGradient(
@@ -186,7 +173,7 @@ private fun MyStatsCard(
                             ),
                     ),
                 ).border(1.dp, GitItTheme.colors.blue400, RoundedCornerShape(10.dp))
-                .padding(horizontal = 26.dp),
+                .padding(horizontal = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -208,7 +195,7 @@ private fun MyStatItem(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.width(90.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -217,7 +204,7 @@ private fun MyStatItem(
             style = GitItTheme.typography.caption2,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(2.dp))
+        Spacer(Modifier.height(4.dp))
         Text(
             text = stat.value,
             color = GitItTheme.colors.blue100,
@@ -238,54 +225,135 @@ private fun WeeklyStudyCard(
     items: List<MyWeeklyStudy>,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    val axisMax = weeklyStudyAxisMax(items.maxOfOrNull(MyWeeklyStudy::solvedCount) ?: 0)
+
+    Column(
         modifier =
             modifier
                 .fillMaxWidth()
-                .height(140.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .height(216.dp)
+                .clip(RoundedCornerShape(16.dp))
                 .background(GitItTheme.colors.grey600)
-                .padding(start = 27.dp, top = 20.dp, end = 27.dp, bottom = 11.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Bottom,
+                .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 12.dp),
     ) {
-        items.forEach { item ->
-            WeeklyStudyBar(item = item)
+        Text(
+            text = "학습한 문제 수 (일별)",
+            color = GitItTheme.colors.grey400,
+            style = GitItTheme.typography.body2,
+        )
+        Spacer(Modifier.height(18.dp))
+        Row(modifier = Modifier.fillMaxWidth()) {
+            WeeklyStudyYAxis(axisMax = axisMax)
+            Column(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .padding(start = 10.dp, top = 8.dp, end = 4.dp),
+            ) {
+                WeeklyStudyPlot(items = items, axisMax = axisMax)
+                Spacer(Modifier.height(7.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    items.forEach { item ->
+                        Text(
+                            text = item.day,
+                            color = GitItTheme.colors.grey400,
+                            style = GitItTheme.typography.body3,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(24.dp),
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 /**
- * 주간 학습량 막대 한 개를 표시한다.
+ * 주간 학습량 차트의 세로축 눈금을 표시한다.
  *
- * @param item 표시할 요일별 학습량
+ * @param axisMax 세로축에 표시할 최댓값
  * @param modifier 외부 배치와 추가 수식자
  */
 @Composable
-private fun WeeklyStudyBar(
-    item: MyWeeklyStudy,
+private fun WeeklyStudyYAxis(
+    axisMax: Int,
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom,
+        modifier = modifier.height(120.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(width = 26.dp, height = (88 * item.progress.coerceIn(0, 100) / 100).dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(GitItTheme.colors.blue100),
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = item.day,
-            color = GitItTheme.colors.grey400,
-            style = GitItTheme.typography.caption2,
-        )
+        (4 downTo 0).forEach { index ->
+            Text(
+                text = (axisMax * index / 4).toString(),
+                color = GitItTheme.colors.grey400,
+                style = GitItTheme.typography.body3,
+                textAlign = TextAlign.End,
+                maxLines = 1,
+                modifier = Modifier.width(24.dp),
+            )
+        }
     }
 }
+
+/**
+ * 주간 학습량 막대와 가로 눈금선을 표시한다.
+ *
+ * @param items 요일별 학습량
+ * @param axisMax 막대 높이 계산에 사용할 세로축 최댓값
+ * @param modifier 외부 배치와 추가 수식자
+ */
+@Composable
+private fun WeeklyStudyPlot(
+    items: List<MyWeeklyStudy>,
+    axisMax: Int,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(104.dp),
+    ) {
+        val gridColor = GitItTheme.colors.grey500
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            repeat(5) { index ->
+                val y = size.height * index / 4
+                drawLine(gridColor, Offset(0f, y), Offset(size.width, y))
+            }
+        }
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 7.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom,
+        ) {
+            items.forEach { item ->
+                Box(
+                    modifier =
+                        Modifier
+                            .width(24.dp)
+                            .height((88f * item.solvedCount.coerceAtLeast(0) / axisMax).dp)
+                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                            .background(GitItTheme.colors.blue100),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 주간 최댓값을 모두 표시할 수 있도록 세로축 최댓값을 20 단위로 계산한다.
+ *
+ * @param maxSolvedCount 주간 일별 학습량 중 최댓값
+ * @return 최소 20이며 [maxSolvedCount] 이상인 가장 작은 20의 배수
+ */
+internal fun weeklyStudyAxisMax(maxSolvedCount: Int): Int = maxOf(20, (maxSolvedCount.coerceAtLeast(0) + 19) / 20 * 20)
 
 @Preview
 @Composable
@@ -297,19 +365,19 @@ private fun MyScreenPreview() {
                     profile = MyProfile(name = "김이박", role = "Junior Developer"),
                     stats =
                         listOf(
-                            MyStudyStat(label = "푼 문제", value = "100문제"),
-                            MyStudyStat(label = "푼 세트", value = "5세트"),
-                            MyStudyStat(label = "복습한 문제", value = "15문제"),
+                            MyStudyStat(label = "이번 주", value = "13문제"),
+                            MyStudyStat(label = "이번 달", value = "47문제"),
+                            MyStudyStat(label = "연속 학습", value = "7일"),
                         ),
                     weeklyStudy =
                         listOf(
-                            MyWeeklyStudy(day = "수", progress = 100),
-                            MyWeeklyStudy(day = "목", progress = 58),
-                            MyWeeklyStudy(day = "금", progress = 76),
-                            MyWeeklyStudy(day = "토", progress = 58),
-                            MyWeeklyStudy(day = "일", progress = 100),
-                            MyWeeklyStudy(day = "월", progress = 76),
-                            MyWeeklyStudy(day = "화", progress = 41),
+                            MyWeeklyStudy(day = "수", solvedCount = 18),
+                            MyWeeklyStudy(day = "목", solvedCount = 11),
+                            MyWeeklyStudy(day = "금", solvedCount = 14),
+                            MyWeeklyStudy(day = "토", solvedCount = 11),
+                            MyWeeklyStudy(day = "일", solvedCount = 18),
+                            MyWeeklyStudy(day = "월", solvedCount = 14),
+                            MyWeeklyStudy(day = "화", solvedCount = 8),
                         ),
                 ),
             onIntent = {},
