@@ -8,6 +8,7 @@ import com.nexters.hytime.gitit.feature.my.MyRoute
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
+import com.nexters.hytime.gitit.feature.quiz.QuizRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
 import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 
@@ -37,6 +38,7 @@ actual fun AppNavHost() {
                 onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                onNavigateToQuiz = { backStack.add(AppRoute.Quiz) },
             )
         }
         AppRoute.Bookmark -> {
@@ -71,8 +73,12 @@ actual fun AppNavHost() {
                 projectId = route.projectId,
                 onBackClick = { backStack.removeLastOrNull() },
                 onNavigateToSavedQuestions = {},
-                onNavigateToLearningSet = {},
+                onNavigateToLearningSet = { backStack.add(AppRoute.Quiz) },
+                onNavigateToQuiz = { backStack.add(AppRoute.Quiz) },
             )
+        }
+        AppRoute.Quiz -> {
+            QuizRoute(onBackClick = { backStack.removeLastOrNull() })
         }
         AppRoute.LiquidGlassExample -> {
             LiquidGlassExampleScreen(onBackClick = { backStack.removeLastOrNull() })

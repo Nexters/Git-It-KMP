@@ -45,6 +45,12 @@ sealed interface AppRoute : NavKey {
     data object ProjectList : AppRoute
 
     /**
+     * 사용자가 학습 문제를 푸는 화면이다.
+     */
+    @Serializable
+    data object Quiz : AppRoute
+
+    /**
      * 리퀴드 글래스 디자인 컴포넌트 확인용 예제 화면이다.
      */
     @Serializable

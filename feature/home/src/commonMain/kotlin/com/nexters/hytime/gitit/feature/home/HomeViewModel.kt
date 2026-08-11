@@ -1,14 +1,12 @@
 package com.nexters.hytime.gitit.feature.home
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * 홈 화면의 상태와 사용자 의도를 관리한다.
@@ -41,7 +39,7 @@ class HomeViewModel : ViewModel() {
             HomeIntent.ViewAllProjectsClick,
             -> emit(HomeSideEffect.NavigateToProjectList)
             is HomeIntent.LearningCardClick -> Unit
-            is HomeIntent.LearningPlayClick -> Unit
+            is HomeIntent.LearningPlayClick -> emit(HomeSideEffect.NavigateToQuiz)
             HomeIntent.ProjectTabClick -> emit(HomeSideEffect.NavigateToProjectList)
             HomeIntent.SavedTabClick -> emit(HomeSideEffect.NavigateToBookmark)
             HomeIntent.MyTabClick -> emit(HomeSideEffect.NavigateToMy)
@@ -49,7 +47,7 @@ class HomeViewModel : ViewModel() {
     }
 
     private fun emit(sideEffect: HomeSideEffect) {
-        viewModelScope.launch { _sideEffects.emit(sideEffect) }
+        _sideEffects.tryEmit(sideEffect)
     }
 }
 

@@ -1,6 +1,11 @@
 package com.nexters.hytime.gitit.feature.projectdetail
 
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -28,4 +33,16 @@ class ProjectDetailViewModelTest {
 
         assertFalse(viewModel.uiState.value.showMoreMenu)
     }
+
+    /** 프로젝트 상세의 플레이 버튼이 문제 풀이 이동 이벤트를 발행하는지 검증한다. */
+    @Test
+    fun onQuestionSolvingClick_emitsNavigateToQuiz() =
+        runBlocking {
+            val viewModel = ProjectDetailViewModel(projectId = "project-1")
+            val event = async(start = CoroutineStart.UNDISPATCHED) { viewModel.events.first() }
+
+            viewModel.onQuestionSolvingClick()
+
+            assertEquals(ProjectDetailEvent.NavigateToQuiz, event.await())
+        }
 }
