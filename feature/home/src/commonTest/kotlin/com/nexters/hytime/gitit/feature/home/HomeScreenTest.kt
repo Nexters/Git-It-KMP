@@ -32,6 +32,6 @@ class HomeScreenTest {
 
             viewModel.onIntent(HomeIntent.LearningPlayClick("project-1"))
 
-            assertEquals(HomeSideEffect.NavigateToQuiz, sideEffect.await())
+            assertEquals(HomeSideEffect.NavigateToQuiz("project-1"), sideEffect.await())
         }
 }

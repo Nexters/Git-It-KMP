@@ -18,6 +18,6 @@ class ProjectListViewModelTest {
 
             viewModel.onIntent(ProjectListIntent.PlayProjectClick("project-1"))
 
-            assertEquals(ProjectListSideEffect.NavigateToQuiz, sideEffect.await())
+            assertEquals(ProjectListSideEffect.NavigateToQuiz("project-1"), sideEffect.await())
         }
 }

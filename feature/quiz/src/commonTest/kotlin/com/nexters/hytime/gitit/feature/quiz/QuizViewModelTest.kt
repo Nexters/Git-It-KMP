@@ -11,7 +11,7 @@ class QuizViewModelTest {
     /** 시작·선택·정답 제출이 결과 화면에 필요한 상태를 만든다. */
     @Test
     fun onIntent_correctAnswer_expandsOnlyCorrectAnswer() {
-        val viewModel = QuizViewModel()
+        val viewModel = createViewModel()
 
         viewModel.onIntent(QuizIntent.Start)
         viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
@@ -26,7 +26,7 @@ class QuizViewModelTest {
     /** 오답 제출 시 선택한 오답과 실제 정답을 함께 펼친다. */
     @Test
     fun onIntent_incorrectAnswer_expandsIncorrectAndCorrectAnswers() {
-        val viewModel = QuizViewModel()
+        val viewModel = createViewModel()
 
         viewModel.onIntent(QuizIntent.AnswerClick("render"))
         viewModel.onIntent(QuizIntent.Submit)
@@ -37,7 +37,7 @@ class QuizViewModelTest {
     /** 채점 후 답안과 북마크를 다시 누르면 각각 표시 상태를 전환한다. */
     @Test
     fun onIntent_resultAnswerAndBookmark_togglesStates() {
-        val viewModel = QuizViewModel()
+        val viewModel = createViewModel()
         viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
         viewModel.onIntent(QuizIntent.Submit)
 
@@ -62,4 +62,6 @@ class QuizViewModelTest {
         assertEquals(GitItMultipleChoiceAnswerState.Correct, state.answerCardState("set-content"))
         assertEquals(GitItMultipleChoiceAnswerState.Folded, state.answerCardState("set-state"))
     }
+
+    private fun createViewModel() = QuizViewModel(projectId = "project-1")
 }

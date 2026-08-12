@@ -86,7 +86,7 @@ class ProjectDetailViewModel(
      * 문제풀이 바로가기 인텐트. [ProjectDetailEvent.NavigateToQuiz]를 흘려보낸다.
      */
     fun onQuestionSolvingClick() {
-        emit(ProjectDetailEvent.NavigateToQuiz)
+        emit(ProjectDetailEvent.NavigateToQuiz(projectId))
     }
 
     /**
@@ -94,7 +94,7 @@ class ProjectDetailViewModel(
      */
     fun onQuestionSolvingShortcutClick() {
         onDismissMoreMenu()
-        emit(ProjectDetailEvent.NavigateToQuiz)
+        emit(ProjectDetailEvent.NavigateToQuiz(projectId))
     }
 
     /**

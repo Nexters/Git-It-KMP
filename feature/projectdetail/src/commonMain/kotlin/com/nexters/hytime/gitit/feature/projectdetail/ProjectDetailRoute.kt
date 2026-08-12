@@ -16,16 +16,16 @@ import org.koin.core.parameter.parametersOf
  * @param projectId 네비게이션 인자로 전달된 프로젝트 식별자
  * @param onBackClick 뒤로가기 이벤트 콜백
  * @param onNavigateToSavedQuestions 저장한 문제 화면으로 이동하는 콜백
- * @param onNavigateToLearningSet 학습 세트 화면으로 이동하는 콜백
- * @param onNavigateToQuiz 문제 풀이 화면으로 이동하는 콜백
+ * @param onNavigateToLearningSet 선택한 학습 세트의 문제 풀이 화면으로 이동하는 콜백
+ * @param onNavigateToQuiz 현재 프로젝트의 문제 풀이 화면으로 이동하는 콜백
  */
 @Composable
 fun ProjectDetailRoute(
     projectId: String,
     onBackClick: () -> Unit,
     onNavigateToSavedQuestions: () -> Unit,
-    onNavigateToLearningSet: (String) -> Unit,
-    onNavigateToQuiz: () -> Unit,
+    onNavigateToLearningSet: (String, String) -> Unit,
+    onNavigateToQuiz: (String) -> Unit,
 ) {
     val viewModel =
         koinViewModel<ProjectDetailViewModel>(
@@ -38,8 +38,8 @@ fun ProjectDetailRoute(
             when (event) {
                 ProjectDetailEvent.NavigateBack -> onBackClick()
                 ProjectDetailEvent.NavigateToSavedQuestions -> onNavigateToSavedQuestions()
-                ProjectDetailEvent.NavigateToQuiz -> onNavigateToQuiz()
-                is ProjectDetailEvent.NavigateToLearningSet -> onNavigateToLearningSet(event.setId)
+                is ProjectDetailEvent.NavigateToQuiz -> onNavigateToQuiz(event.projectId)
+                is ProjectDetailEvent.NavigateToLearningSet -> onNavigateToLearningSet(projectId, event.setId)
             }
         }
     }

@@ -14,7 +14,7 @@ class AppNavHostTest {
         val serializer =
             appRouteSavedStateConfiguration.serializersModule.getPolymorphic(
                 NavKey::class,
-                AppRoute.Quiz,
+                AppRoute.Quiz(projectId = "project-1", setId = "set-1"),
             )
 
         assertNotNull(serializer)

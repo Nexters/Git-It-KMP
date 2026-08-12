@@ -51,10 +51,16 @@ sealed interface AppRoute : NavKey {
     data object QuestionCreate : AppRoute
 
     /**
-     * 사용자가 학습 문제를 푸는 화면이다.
+     * 사용자가 프로젝트 또는 학습 세트의 문제를 푸는 화면이다.
+     *
+     * @property projectId 문제를 불러올 프로젝트 식별자
+     * @property setId 문제를 특정 학습 세트로 제한할 때 사용하는 식별자
      */
     @Serializable
-    data object Quiz : AppRoute
+    data class Quiz(
+        val projectId: String,
+        val setId: String? = null,
+    ) : AppRoute
 
     /**
      * 리퀴드 글래스 디자인 컴포넌트 확인용 예제 화면이다.
