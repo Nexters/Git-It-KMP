@@ -25,6 +25,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -192,6 +193,10 @@ private fun QuizQuestionScreen(
     val sky = if (LocalInspectionMode.current) null else rememberSky()
     var headerHeightPx by remember { mutableIntStateOf(0) }
     val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
+
+    LaunchedEffect(sky, headerHeightPx) {
+        if (headerHeightPx > 0) sky?.invalidate()
+    }
 
     Box(
         modifier =
