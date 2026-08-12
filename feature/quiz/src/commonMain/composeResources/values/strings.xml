@@ -1,0 +1,21 @@
+<resources>
+  <string name="quiz_start">시작하기</string>
+  <string name="quiz_question_number">문제 %1$d</string>
+  <string name="quiz_submit">정답 확인</string>
+  <string name="quiz_next">다음</string>
+  <string name="quiz_source">출처</string>
+  <string name="quiz_bookmark">문제 저장</string>
+  <string name="quiz_bookmark_remove">문제 저장 해제</string>
+  <string name="quiz_explanation">AI 해설</string>
+  <string name="quiz_essay_placeholder">생각한 답을 자유롭게 적어보세요.</string>
+  <string name="quiz_essay_count">%1$d / %2$d</string>
+  <string name="quiz_my_answer">나의 답안</string>
+  <string name="quiz_ai_answer">AI의 답안</string>
+  <string name="quiz_empty_answer">작성한 답안 없음</string>
+  <string name="quiz_completion_title">학습 완료</string>
+  <string name="quiz_completion_count">%1$d / %2$d</string>
+  <string name="quiz_completion_description">세트의 모든 문제를 다 풀었어요!</string>
+  <string name="quiz_completion_close">학습 완료 닫기</string>
+  <string name="quiz_source_title">문제 %1$d 출처</string>
+  <string name="quiz_close">닫기</string>
+</resources>

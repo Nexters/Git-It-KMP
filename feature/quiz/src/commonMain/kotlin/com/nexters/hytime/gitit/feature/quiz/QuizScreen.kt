@@ -70,8 +70,28 @@ import com.skydoves.cloudy.cloudy
 import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
 import git_it_kmp.feature.quiz.generated.resources.Res
+import git_it_kmp.feature.quiz.generated.resources.quiz_ai_answer
+import git_it_kmp.feature.quiz.generated.resources.quiz_bookmark
+import git_it_kmp.feature.quiz.generated.resources.quiz_bookmark_remove
+import git_it_kmp.feature.quiz.generated.resources.quiz_close
 import git_it_kmp.feature.quiz.generated.resources.quiz_completion
+import git_it_kmp.feature.quiz.generated.resources.quiz_completion_close
+import git_it_kmp.feature.quiz.generated.resources.quiz_completion_count
+import git_it_kmp.feature.quiz.generated.resources.quiz_completion_description
+import git_it_kmp.feature.quiz.generated.resources.quiz_completion_title
+import git_it_kmp.feature.quiz.generated.resources.quiz_empty_answer
+import git_it_kmp.feature.quiz.generated.resources.quiz_essay_count
+import git_it_kmp.feature.quiz.generated.resources.quiz_essay_placeholder
+import git_it_kmp.feature.quiz.generated.resources.quiz_explanation
+import git_it_kmp.feature.quiz.generated.resources.quiz_my_answer
+import git_it_kmp.feature.quiz.generated.resources.quiz_next
+import git_it_kmp.feature.quiz.generated.resources.quiz_question_number
+import git_it_kmp.feature.quiz.generated.resources.quiz_source
+import git_it_kmp.feature.quiz.generated.resources.quiz_source_title
+import git_it_kmp.feature.quiz.generated.resources.quiz_start
+import git_it_kmp.feature.quiz.generated.resources.quiz_submit
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * 세트 소개와 객관식 문제 풀이 화면을 현재 상태에 맞춰 표시한다.
@@ -119,9 +139,13 @@ fun QuizScreen(
     }
 
     if (showSource) {
+        val questionNumber =
+            if (uiState.step == QuizStep.Essay) uiState.essayQuestion.number else uiState.multipleChoiceQuestion.number
+        val source =
+            if (uiState.step == QuizStep.Essay) uiState.essayQuestion.source else uiState.multipleChoiceQuestion.source
         QuizSourceSheet(
-            questionNumber = uiState.multipleChoiceQuestion.number,
-            source = uiState.multipleChoiceQuestion.source,
+            questionNumber = questionNumber,
+            source = source,
             onDismiss = { showSource = false },
             onOpenSource = {
                 onIntent(QuizIntent.OpenSource)
@@ -188,7 +212,7 @@ private fun QuizIntroScreen(
             }
             Spacer(Modifier.weight(1f))
             GitItButton(
-                text = "시작하기",
+                text = stringResource(Res.string.quiz_start),
                 onClick = onStartClick,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
             )
@@ -245,7 +269,10 @@ private fun QuizQuestionScreen(
         )
         QuizBottomBar(
             isBookmarked = uiState.multipleChoiceQuestion.number in uiState.bookmarkedQuestionNumbers,
-            buttonText = if (uiState.isMultipleChoiceSubmitted) "다음" else "정답 확인",
+            buttonText =
+                stringResource(
+                    if (uiState.isMultipleChoiceSubmitted) Res.string.quiz_next else Res.string.quiz_submit,
+                ),
             onBookmarkClick = { onIntent(QuizIntent.BookmarkClick) },
             onButtonClick = {
                 onIntent(if (uiState.isMultipleChoiceSubmitted) QuizIntent.Next else QuizIntent.Submit)
@@ -316,7 +343,7 @@ private fun QuizSourceButton(onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "출처",
+            text = stringResource(Res.string.quiz_source),
             color = GitItTheme.colors.blue100,
             style = GitItTheme.typography.body2,
         )
@@ -355,7 +382,7 @@ private fun QuizQuestionHeader(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = "문제 $questionNumber",
+                text = stringResource(Res.string.quiz_question_number, questionNumber),
                 modifier =
                     Modifier
                         .clip(RoundedCornerShape(8.dp))
@@ -389,6 +416,8 @@ private fun QuizBottomBar(
     onButtonClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val bookmarkDescription =
+        stringResource(if (isBookmarked) Res.string.quiz_bookmark_remove else Res.string.quiz_bookmark)
     Row(
         modifier =
             modifier
@@ -410,7 +439,7 @@ private fun QuizBottomBar(
                     .background(GitItTheme.colors.grey500)
                     .clickable(role = Role.Button, onClick = onBookmarkClick)
                     .semantics {
-                        contentDescription = if (isBookmarked) "문제 저장 해제" else "문제 저장"
+                        contentDescription = bookmarkDescription
                     },
             contentAlignment = Alignment.Center,
         ) {
@@ -480,7 +509,7 @@ private fun QuizEssayScreen(
         )
         QuizBottomBar(
             isBookmarked = uiState.essayQuestion.number in uiState.bookmarkedQuestionNumbers,
-            buttonText = if (uiState.isEssaySubmitted) "다음" else "정답 확인",
+            buttonText = stringResource(if (uiState.isEssaySubmitted) Res.string.quiz_next else Res.string.quiz_submit),
             onBookmarkClick = { onIntent(QuizIntent.BookmarkClick) },
             onButtonClick = { onIntent(if (uiState.isEssaySubmitted) QuizIntent.Next else QuizIntent.Submit) },
             modifier = Modifier.align(Alignment.BottomCenter),
@@ -515,14 +544,14 @@ private fun QuizEssayInput(
             Box(Modifier.fillMaxSize()) {
                 if (answer.isEmpty()) {
                     Text(
-                        text = "생각한 답을 자유롭게 적어보세요.",
+                        text = stringResource(Res.string.quiz_essay_placeholder),
                         color = GitItTheme.colors.grey400,
                         style = GitItTheme.typography.body2,
                     )
                 }
                 innerTextField()
                 Text(
-                    text = "${answer.length} / $ESSAY_ANSWER_MAX_LENGTH",
+                    text = stringResource(Res.string.quiz_essay_count, answer.length, ESSAY_ANSWER_MAX_LENGTH),
                     modifier = Modifier.align(Alignment.BottomEnd),
                     color = GitItTheme.colors.grey400,
                     style = GitItTheme.typography.body2,
@@ -545,13 +574,13 @@ private fun QuizEssayResult(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         QuizEssayResultCard(
-            title = "나의 답안",
-            text = answer.ifEmpty { "작성한 답안 없음" },
+            title = stringResource(Res.string.quiz_my_answer),
+            text = answer.ifEmpty { stringResource(Res.string.quiz_empty_answer) },
             containerColor = GitItTheme.colors.grey500,
             textColor = GitItTheme.colors.grey400,
         )
         QuizEssayResultCard(
-            title = "AI의 답안",
+            title = stringResource(Res.string.quiz_ai_answer),
             text = modelAnswer,
             containerColor = GitItTheme.colors.blue500,
             textColor = GitItTheme.colors.grey100,
@@ -610,7 +639,11 @@ private fun QuizCompletionScreen(
             modifier = Modifier.align(Alignment.Center).padding(bottom = 60.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(text = "학습 완료", color = GitItTheme.colors.grey100, style = GitItTheme.typography.subtitle1)
+            Text(
+                text = stringResource(Res.string.quiz_completion_title),
+                color = GitItTheme.colors.grey100,
+                style = GitItTheme.typography.subtitle1,
+            )
             Spacer(Modifier.height(20.dp))
             Image(
                 painter = painterResource(Res.drawable.quiz_completion),
@@ -619,20 +652,20 @@ private fun QuizCompletionScreen(
                 contentScale = ContentScale.Fit,
             )
             Spacer(Modifier.height(40.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "2", color = GitItTheme.colors.blue200, style = GitItTheme.typography.subtitle1)
-                Text(text = "/", color = GitItTheme.colors.grey400, style = GitItTheme.typography.subtitle1)
-                Text(text = "2", color = GitItTheme.colors.grey400, style = GitItTheme.typography.subtitle1)
-            }
+            Text(
+                text = stringResource(Res.string.quiz_completion_count, 2, 2),
+                color = GitItTheme.colors.blue200,
+                style = GitItTheme.typography.subtitle1,
+            )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "세트의 모든 문제를 다 풀었어요!",
+                text = stringResource(Res.string.quiz_completion_description),
                 color = GitItTheme.colors.grey400,
                 style = GitItTheme.typography.body1,
             )
         }
         GitItButton(
-            text = "다음",
+            text = stringResource(Res.string.quiz_next),
             onClick = onNextClick,
             modifier =
                 Modifier
@@ -656,6 +689,7 @@ private fun QuizCloseButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val closeDescription = stringResource(Res.string.quiz_completion_close)
     Canvas(
         modifier =
             modifier
@@ -663,7 +697,7 @@ private fun QuizCloseButton(
                 .clip(RoundedCornerShape(99.dp))
                 .background(GitItTheme.colors.white15)
                 .clickable(role = Role.Button, onClick = onClick)
-                .semantics { contentDescription = "학습 완료 닫기" }
+                .semantics { contentDescription = closeDescription }
                 .padding(11.dp),
     ) {
         val strokeWidth = 1.7.dp.toPx()
@@ -696,7 +730,7 @@ private fun QuizExplanation(text: String) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
-            text = "AI 해설",
+            text = stringResource(Res.string.quiz_explanation),
             color = GitItTheme.colors.blue100,
             style = GitItTheme.typography.body2,
         )
@@ -746,7 +780,7 @@ private fun QuizSourceSheet(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = "문제 $questionNumber 출처",
+                    text = stringResource(Res.string.quiz_source_title, questionNumber),
                     color = GitItTheme.colors.grey100,
                     style = GitItTheme.typography.subtitle1.copy(fontSize = 22.sp, lineHeight = 32.56.sp),
                 )
@@ -764,7 +798,7 @@ private fun QuizSourceSheet(
             )
             Spacer(Modifier.height(24.dp))
             GitItButton(
-                text = "닫기",
+                text = stringResource(Res.string.quiz_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
             )
