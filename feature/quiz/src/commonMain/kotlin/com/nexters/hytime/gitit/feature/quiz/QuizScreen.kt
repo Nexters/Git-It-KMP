@@ -320,7 +320,7 @@ private fun QuizQuestionHeader(
                 Modifier
                     .fillMaxWidth()
                     .questionBackdrop(sky)
-                    .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 32.dp),
+                    .padding(start = 20.dp, top = 20.dp, end = 20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
