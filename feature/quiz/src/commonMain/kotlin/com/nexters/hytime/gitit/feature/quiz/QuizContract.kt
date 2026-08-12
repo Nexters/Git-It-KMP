@@ -35,6 +35,7 @@ data class QuizAnswer(
  * @property correctAnswerId 정답으로 판정할 답안 식별자
  * @property explanation 채점 후 표시할 해설
  * @property sourceDescription 출처 바텀시트에 표시할 코드 설명
+ * @property sourceLabel 출처 링크 카드에 표시할 파일과 라인
  * @property sourceUrl 원본 코드의 GitHub 라인 링크
  */
 data class QuizQuestion(
@@ -44,6 +45,7 @@ data class QuizQuestion(
     val correctAnswerId: String,
     val explanation: String,
     val sourceDescription: String,
+    val sourceLabel: String,
     val sourceUrl: String,
 )
 
@@ -133,6 +135,7 @@ private val sampleQuizQuestion =
         correctAnswerId = "set-content",
         explanation = "ComponentActivity의 setContent 블록이 Compose UI 트리를 만들며, 이 프로젝트는 그 안에서 App 컴포저블을 호출합니다.",
         sourceDescription = "MainActivity.onCreate()에서 setContent { App() }을 호출해 공유 Compose UI를 화면에 설정합니다.",
+        sourceLabel = "Git-It-KMP · MainActivity.kt:L12–L18",
         sourceUrl =
             "https://github.com/Nexters/Git-It-KMP/blob/main/androidApp/src/main/kotlin/com/nexters/hytime/gitit/MainActivity.kt#L12-L18",
     )
