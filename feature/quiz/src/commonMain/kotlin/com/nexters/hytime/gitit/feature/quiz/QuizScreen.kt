@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
+import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
 import com.nexters.hytime.gitit.designsystem.navigation.GitItBookmarkIcon
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerCard
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerState
@@ -222,6 +223,7 @@ private fun QuizQuestionScreen(
         )
         QuizBottomBar(
             isBookmarked = uiState.isBookmarked,
+            isSubmitEnabled = uiState.selectedAnswerId != null,
             onBookmarkClick = { onIntent(QuizIntent.BookmarkClick) },
             onSubmitClick = { onIntent(QuizIntent.Submit) },
             modifier = Modifier.align(Alignment.BottomCenter),
@@ -350,6 +352,7 @@ private fun QuizQuestionHeader(
  * 정답 확인 버튼 위에 고정되는 북마크와 하단 그라디언트를 표시한다.
  *
  * @param isBookmarked 현재 문제의 저장 상태
+ * @param isSubmitEnabled 답안을 선택해 정답을 확인할 수 있는지 여부
  * @param onBookmarkClick 저장 상태를 전환하는 콜백
  * @param onSubmitClick 현재 선택 답안을 채점하는 콜백
  * @param modifier 하단 바의 크기와 배치를 지정할 수식자
@@ -357,6 +360,7 @@ private fun QuizQuestionHeader(
 @Composable
 private fun QuizBottomBar(
     isBookmarked: Boolean,
+    isSubmitEnabled: Boolean,
     onBookmarkClick: () -> Unit,
     onSubmitClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -396,6 +400,7 @@ private fun QuizBottomBar(
             text = "정답 확인",
             onClick = onSubmitClick,
             modifier = Modifier.weight(1f),
+            state = if (isSubmitEnabled) GitItButtonState.Default else GitItButtonState.Disabled,
         )
     }
 }
