@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
+import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
 import com.nexters.hytime.gitit.designsystem.navigation.GitItBookmarkIcon
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerCard
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerState
@@ -274,6 +275,7 @@ private fun QuizQuestionScreen(
                 stringResource(
                     if (uiState.isMultipleChoiceSubmitted) Res.string.quiz_next else Res.string.quiz_submit,
                 ),
+            isButtonEnabled = uiState.isMultipleChoiceSubmitted || uiState.selectedAnswerId != null,
             onBookmarkClick = { onIntent(QuizIntent.BookmarkClick) },
             onButtonClick = {
                 onIntent(if (uiState.isMultipleChoiceSubmitted) QuizIntent.Next else QuizIntent.Submit)
@@ -413,6 +415,7 @@ private fun QuizQuestionHeader(
 private fun QuizBottomBar(
     isBookmarked: Boolean,
     buttonText: String,
+    isButtonEnabled: Boolean = true,
     onBookmarkClick: () -> Unit,
     onButtonClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -454,6 +457,7 @@ private fun QuizBottomBar(
             text = buttonText,
             onClick = onButtonClick,
             modifier = Modifier.weight(1f),
+            state = if (isButtonEnabled) GitItButtonState.Default else GitItButtonState.Disabled,
         )
     }
 }

@@ -40,7 +40,7 @@ actual fun AppNavHost() {
                 onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
-                onNavigateToQuiz = { backStack.add(AppRoute.Quiz) },
+                onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
             )
         }
         AppRoute.Bookmark -> {
@@ -68,7 +68,7 @@ actual fun AppNavHost() {
                 onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
-                onNavigateToQuiz = { backStack.add(AppRoute.Quiz) },
+                onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
             )
         }
         is AppRoute.ProjectDetail -> {
@@ -76,8 +76,8 @@ actual fun AppNavHost() {
                 projectId = route.projectId,
                 onBackClick = { backStack.removeLastOrNull() },
                 onNavigateToSavedQuestions = {},
-                onNavigateToLearningSet = { backStack.add(AppRoute.Quiz) },
-                onNavigateToQuiz = { backStack.add(AppRoute.Quiz) },
+                onNavigateToLearningSet = { projectId, setId -> backStack.add(AppRoute.Quiz(projectId, setId)) },
+                onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
             )
         }
         AppRoute.QuestionCreate -> {
@@ -86,8 +86,12 @@ actual fun AppNavHost() {
                 onRepositoryConfirmed = {},
             )
         }
-        AppRoute.Quiz -> {
-            QuizRoute(onBackClick = { backStack.removeLastOrNull() })
+        is AppRoute.Quiz -> {
+            QuizRoute(
+                projectId = route.projectId,
+                setId = route.setId,
+                onBackClick = { backStack.removeLastOrNull() },
+            )
         }
         AppRoute.LiquidGlassExample -> {
             LiquidGlassExampleScreen(onBackClick = { backStack.removeLastOrNull() })

@@ -11,7 +11,7 @@ class QuizViewModelTest {
     /** 시작·선택·정답 제출이 결과 화면에 필요한 상태를 만든다. */
     @Test
     fun onIntent_correctAnswer_expandsOnlyCorrectAnswer() {
-        val viewModel = QuizViewModel()
+        val viewModel = createViewModel()
 
         viewModel.onIntent(QuizIntent.Start)
         viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
@@ -26,7 +26,7 @@ class QuizViewModelTest {
     /** 오답 제출 시 선택한 오답과 실제 정답을 함께 펼친다. */
     @Test
     fun onIntent_incorrectAnswer_expandsIncorrectAndCorrectAnswers() {
-        val viewModel = QuizViewModel()
+        val viewModel = createViewModel()
 
         viewModel.onIntent(QuizIntent.Start)
         viewModel.onIntent(QuizIntent.AnswerClick("render"))
@@ -38,7 +38,7 @@ class QuizViewModelTest {
     /** 채점 후 답안과 북마크를 다시 누르면 각각 표시 상태를 전환한다. */
     @Test
     fun onIntent_resultAnswerAndBookmark_togglesStates() {
-        val viewModel = QuizViewModel()
+        val viewModel = createViewModel()
         viewModel.onIntent(QuizIntent.Start)
         viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
         viewModel.onIntent(QuizIntent.Submit)
@@ -68,7 +68,7 @@ class QuizViewModelTest {
     /** 객관식 채점 후 다음을 누르면 서술형 문제로 이동한다. */
     @Test
     fun onIntent_multipleChoiceNext_movesToEssay() {
-        val viewModel = QuizViewModel()
+        val viewModel = createViewModel()
         viewModel.onIntent(QuizIntent.Start)
         viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
         viewModel.onIntent(QuizIntent.Submit)
@@ -103,7 +103,7 @@ class QuizViewModelTest {
     /** 객관식과 서술형 북마크는 문제 번호별로 독립적으로 유지된다. */
     @Test
     fun onIntent_bookmarkEachQuestion_keepsBothQuestionNumbers() {
-        val viewModel = QuizViewModel()
+        val viewModel = createViewModel()
         viewModel.onIntent(QuizIntent.Start)
         viewModel.onIntent(QuizIntent.BookmarkClick)
         viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
@@ -117,10 +117,13 @@ class QuizViewModelTest {
 
     /** 서술형 단계까지 이동한 ViewModel을 만든다. */
     private fun essayViewModel(): QuizViewModel =
-        QuizViewModel().apply {
+        createViewModel().apply {
             onIntent(QuizIntent.Start)
             onIntent(QuizIntent.AnswerClick("set-content"))
             onIntent(QuizIntent.Submit)
             onIntent(QuizIntent.Next)
         }
+
+    /** 테스트에서 사용할 프로젝트 식별자가 포함된 ViewModel을 만든다. */
+    private fun createViewModel(): QuizViewModel = QuizViewModel(projectId = "project-1")
 }

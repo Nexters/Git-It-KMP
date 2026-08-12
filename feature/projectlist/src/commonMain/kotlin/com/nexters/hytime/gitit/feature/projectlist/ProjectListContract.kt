@@ -77,6 +77,12 @@ sealed interface ProjectListSideEffect {
     /** 저장한 문제 화면으로 이동. */
     data object NavigateToBookmark : ProjectListSideEffect
 
-    /** 문제 풀이 화면으로 이동. */
-    data object NavigateToQuiz : ProjectListSideEffect
+    /**
+     * 문제 풀이 화면으로 이동.
+     *
+     * @property projectId 문제를 불러올 프로젝트 식별자
+     */
+    data class NavigateToQuiz(
+        val projectId: String,
+    ) : ProjectListSideEffect
 }

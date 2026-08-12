@@ -43,6 +43,6 @@ class ProjectDetailViewModelTest {
 
             viewModel.onQuestionSolvingClick()
 
-            assertEquals(ProjectDetailEvent.NavigateToQuiz, event.await())
+            assertEquals(ProjectDetailEvent.NavigateToQuiz("project-1"), event.await())
         }
 }

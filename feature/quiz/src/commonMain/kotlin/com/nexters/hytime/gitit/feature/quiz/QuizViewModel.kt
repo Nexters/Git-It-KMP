@@ -8,8 +8,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/** 로컬 샘플 문제의 상태와 사용자 의도를 관리한다. */
-class QuizViewModel : ViewModel() {
+/**
+ * 로컬 샘플 문제의 상태와 사용자 의도를 관리한다.
+ *
+ * @property projectId 추후 문제 조회에 사용할 프로젝트 식별자
+ * @property setId 추후 특정 학습 세트 조회에 사용할 선택적 식별자
+ */
+class QuizViewModel(
+    val projectId: String,
+    val setId: String? = null,
+) : ViewModel() {
     private val _uiState = MutableStateFlow(QuizUiState())
 
     /** 문제 풀이 화면이 구독할 현재 상태다. */

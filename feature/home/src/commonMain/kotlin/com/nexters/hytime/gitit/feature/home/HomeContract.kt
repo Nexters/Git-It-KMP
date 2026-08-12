@@ -91,6 +91,12 @@ sealed interface HomeSideEffect {
     /** 저장한 문제 화면으로 이동한다. */
     data object NavigateToBookmark : HomeSideEffect
 
-    /** 문제 풀이 화면으로 이동한다. */
-    data object NavigateToQuiz : HomeSideEffect
+    /**
+     * 문제 풀이 화면으로 이동한다.
+     *
+     * @property projectId 문제를 불러올 프로젝트 식별자
+     */
+    data class NavigateToQuiz(
+        val projectId: String,
+    ) : HomeSideEffect
 }

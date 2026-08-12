@@ -38,7 +38,7 @@ class ProjectListViewModel : ViewModel() {
             ProjectListIntent.ProjectTabClick -> Unit
             ProjectListIntent.SavedTabClick -> emit(ProjectListSideEffect.NavigateToBookmark)
             ProjectListIntent.MyTabClick -> emit(ProjectListSideEffect.NavigateToMy)
-            is ProjectListIntent.PlayProjectClick -> emit(ProjectListSideEffect.NavigateToQuiz)
+            is ProjectListIntent.PlayProjectClick -> emit(ProjectListSideEffect.NavigateToQuiz(intent.projectId))
         }
     }
 
