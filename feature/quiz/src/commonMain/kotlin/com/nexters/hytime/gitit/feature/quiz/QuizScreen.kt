@@ -203,7 +203,7 @@ private fun QuizQuestionScreen(
             uiState = uiState,
             onIntent = onIntent,
             onSourceClick = onSourceClick,
-            topPadding = headerHeight,
+            topPadding = headerHeight + 20.dp,
             modifier = Modifier.fillMaxSize().captureSky(sky),
         )
         QuizQuestionHeader(
