@@ -1,6 +1,7 @@
 package com.nexters.hytime.gitit.feature.quiz
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +46,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -67,6 +69,9 @@ import com.skydoves.cloudy.Sky
 import com.skydoves.cloudy.cloudy
 import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
+import git_it_kmp.feature.quiz.generated.resources.Res
+import git_it_kmp.feature.quiz.generated.resources.quiz_completion
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * 세트 소개와 객관식 문제 풀이 화면을 현재 상태에 맞춰 표시한다.
@@ -607,7 +612,12 @@ private fun QuizCompletionScreen(
         ) {
             Text(text = "학습 완료", color = GitItTheme.colors.grey100, style = GitItTheme.typography.subtitle1)
             Spacer(Modifier.height(20.dp))
-            Spacer(Modifier.size(145.dp))
+            Image(
+                painter = painterResource(Res.drawable.quiz_completion),
+                contentDescription = null,
+                modifier = Modifier.size(145.dp),
+                contentScale = ContentScale.Fit,
+            )
             Spacer(Modifier.height(40.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "2", color = GitItTheme.colors.blue200, style = GitItTheme.typography.subtitle1)
