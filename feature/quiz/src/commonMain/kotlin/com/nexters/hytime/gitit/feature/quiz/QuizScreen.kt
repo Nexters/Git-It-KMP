@@ -65,6 +65,17 @@ import com.skydoves.cloudy.Sky
 import com.skydoves.cloudy.cloudy
 import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
+import git_it_kmp.feature.quiz.generated.resources.Res
+import git_it_kmp.feature.quiz.generated.resources.quiz_bookmark
+import git_it_kmp.feature.quiz.generated.resources.quiz_bookmark_remove
+import git_it_kmp.feature.quiz.generated.resources.quiz_close
+import git_it_kmp.feature.quiz.generated.resources.quiz_explanation
+import git_it_kmp.feature.quiz.generated.resources.quiz_question_number
+import git_it_kmp.feature.quiz.generated.resources.quiz_source
+import git_it_kmp.feature.quiz.generated.resources.quiz_source_title
+import git_it_kmp.feature.quiz.generated.resources.quiz_start
+import git_it_kmp.feature.quiz.generated.resources.quiz_submit
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * 세트 소개와 객관식 문제 풀이 화면을 현재 상태에 맞춰 표시한다.
@@ -167,7 +178,7 @@ private fun QuizIntroScreen(
             }
             Spacer(Modifier.weight(1f))
             GitItButton(
-                text = "시작하기",
+                text = stringResource(Res.string.quiz_start),
                 onClick = onStartClick,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
             )
@@ -292,7 +303,7 @@ private fun QuizSourceButton(onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "출처",
+            text = stringResource(Res.string.quiz_source),
             color = GitItTheme.colors.blue100,
             style = GitItTheme.typography.body2,
         )
@@ -330,7 +341,7 @@ private fun QuizQuestionHeader(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = "문제 ${question.number}",
+                text = stringResource(Res.string.quiz_question_number, question.number),
                 modifier =
                     Modifier
                         .clip(RoundedCornerShape(8.dp))
@@ -365,6 +376,9 @@ private fun QuizBottomBar(
     onSubmitClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val bookmarkDescription =
+        stringResource(if (isBookmarked) Res.string.quiz_bookmark_remove else Res.string.quiz_bookmark)
+
     Row(
         modifier =
             modifier
@@ -386,7 +400,7 @@ private fun QuizBottomBar(
                     .background(GitItTheme.colors.grey500)
                     .clickable(role = Role.Button, onClick = onBookmarkClick)
                     .semantics {
-                        contentDescription = if (isBookmarked) "문제 저장 해제" else "문제 저장"
+                        contentDescription = bookmarkDescription
                     },
             contentAlignment = Alignment.Center,
         ) {
@@ -397,7 +411,7 @@ private fun QuizBottomBar(
             }
         }
         GitItButton(
-            text = "정답 확인",
+            text = stringResource(Res.string.quiz_submit),
             onClick = onSubmitClick,
             modifier = Modifier.weight(1f),
             state = if (isSubmitEnabled) GitItButtonState.Default else GitItButtonState.Disabled,
@@ -423,7 +437,7 @@ private fun QuizExplanation(text: String) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
-            text = "AI 해설",
+            text = stringResource(Res.string.quiz_explanation),
             color = GitItTheme.colors.blue100,
             style = GitItTheme.typography.body2,
         )
@@ -472,7 +486,7 @@ private fun QuizSourceSheet(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = "문제 ${question.number} 출처",
+                    text = stringResource(Res.string.quiz_source_title, question.number),
                     color = GitItTheme.colors.grey100,
                     style = GitItTheme.typography.subtitle1.copy(fontSize = 22.sp, lineHeight = 32.56.sp),
                 )
@@ -490,7 +504,7 @@ private fun QuizSourceSheet(
             )
             Spacer(Modifier.height(24.dp))
             GitItButton(
-                text = "닫기",
+                text = stringResource(Res.string.quiz_close),
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
             )

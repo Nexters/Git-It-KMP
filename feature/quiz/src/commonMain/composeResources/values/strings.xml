@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="quiz_start">시작하기</string>
+  <string name="quiz_source">출처</string>
+  <string name="quiz_question_number">문제 %1$d</string>
+  <string name="quiz_bookmark">문제 저장</string>
+  <string name="quiz_bookmark_remove">문제 저장 해제</string>
+  <string name="quiz_submit">정답 확인</string>
+  <string name="quiz_explanation">AI 해설</string>
+  <string name="quiz_source_title">문제 %1$d 출처</string>
+  <string name="quiz_close">닫기</string>
+</resources>
