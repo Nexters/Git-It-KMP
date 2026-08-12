@@ -26,7 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,12 +41,15 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
@@ -185,6 +190,8 @@ private fun QuizQuestionScreen(
     modifier: Modifier = Modifier,
 ) {
     val sky = if (LocalInspectionMode.current) null else rememberSky()
+    var headerHeightPx by remember { mutableIntStateOf(0) }
+    val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
 
     Box(
         modifier =
@@ -196,13 +203,17 @@ private fun QuizQuestionScreen(
             uiState = uiState,
             onIntent = onIntent,
             onSourceClick = onSourceClick,
+            topPadding = headerHeight,
             modifier = Modifier.fillMaxSize().captureSky(sky),
         )
         QuizQuestionHeader(
             question = uiState.question,
             onBackClick = { onIntent(QuizIntent.BackClick) },
             sky = sky,
-            modifier = Modifier.align(Alignment.TopCenter),
+            modifier =
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .onSizeChanged { headerHeightPx = it.height },
         )
         QuizBottomBar(
             isBookmarked = uiState.isBookmarked,
@@ -219,6 +230,7 @@ private fun QuizQuestionScreen(
  * @param uiState 답안 표시 상태를 계산할 화면 상태
  * @param onIntent 답안 클릭을 전달하는 콜백
  * @param onSourceClick 출처 바텀시트를 여는 콜백
+ * @param topPadding 실제 질문 헤더 높이에 맞춘 목록 상단 여백
  * @param modifier 목록의 크기와 배치를 지정할 수식자
  */
 @Composable
@@ -226,11 +238,12 @@ private fun QuizAnswerList(
     uiState: QuizUiState,
     onIntent: (QuizIntent) -> Unit,
     onSourceClick: () -> Unit,
+    topPadding: Dp,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(start = 20.dp, top = 245.dp, end = 20.dp, bottom = 164.dp),
+        contentPadding = PaddingValues(start = 20.dp, top = topPadding, end = 20.dp, bottom = 164.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         items(uiState.question.answers, key = { it.id }) { answer ->
@@ -306,7 +319,6 @@ private fun QuizQuestionHeader(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(142.dp)
                     .questionBackdrop(sky)
                     .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
