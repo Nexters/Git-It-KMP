@@ -230,7 +230,7 @@ private fun QuizAnswerList(
 ) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(start = 20.dp, top = 265.dp, end = 20.dp, bottom = 164.dp),
+        contentPadding = PaddingValues(start = 20.dp, top = 245.dp, end = 20.dp, bottom = 164.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         items(uiState.question.answers, key = { it.id }) { answer ->
@@ -306,7 +306,7 @@ private fun QuizQuestionHeader(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(162.dp)
+                    .height(142.dp)
                     .questionBackdrop(sky)
                     .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
