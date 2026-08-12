@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -512,7 +513,7 @@ private fun QuizEssayScreen(
             buttonText = stringResource(if (uiState.isEssaySubmitted) Res.string.quiz_next else Res.string.quiz_submit),
             onBookmarkClick = { onIntent(QuizIntent.BookmarkClick) },
             onButtonClick = { onIntent(if (uiState.isEssaySubmitted) QuizIntent.Next else QuizIntent.Submit) },
-            modifier = Modifier.align(Alignment.BottomCenter),
+            modifier = Modifier.align(Alignment.BottomCenter).imePadding(),
         )
     }
 }
@@ -541,18 +542,20 @@ private fun QuizEssayInput(
         textStyle = GitItTheme.typography.body2.copy(color = GitItTheme.colors.grey100),
         cursorBrush = SolidColor(GitItTheme.colors.blue200),
         decorationBox = { innerTextField ->
-            Box(Modifier.fillMaxSize()) {
-                if (answer.isEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.quiz_essay_placeholder),
-                        color = GitItTheme.colors.grey400,
-                        style = GitItTheme.typography.body2,
-                    )
+            Column(Modifier.fillMaxSize()) {
+                Box(Modifier.weight(1f)) {
+                    if (answer.isEmpty()) {
+                        Text(
+                            text = stringResource(Res.string.quiz_essay_placeholder),
+                            color = GitItTheme.colors.grey400,
+                            style = GitItTheme.typography.body2,
+                        )
+                    }
+                    innerTextField()
                 }
-                innerTextField()
                 Text(
                     text = stringResource(Res.string.quiz_essay_count, answer.length, ESSAY_ANSWER_MAX_LENGTH),
-                    modifier = Modifier.align(Alignment.BottomEnd),
+                    modifier = Modifier.align(Alignment.End),
                     color = GitItTheme.colors.grey400,
                     style = GitItTheme.typography.body2,
                 )
