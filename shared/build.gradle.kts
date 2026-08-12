@@ -41,6 +41,7 @@ kotlin {
             implementation(libs.androidx.navigation3.runtime)
         }
         androidMain.dependencies {
+            implementation(libs.androidx.core)
             implementation(libs.androidx.navigation3.runtime)
             implementation(libs.androidx.navigation3.ui)
         }

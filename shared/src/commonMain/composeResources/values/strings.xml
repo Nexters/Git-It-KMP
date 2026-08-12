@@ -1,0 +1,5 @@
+<resources>
+    <string name="intermediate_splash_greeting">Hello World</string>
+    <string name="intermediate_splash_title_prefix">Let’s </string>
+    <string name="intermediate_splash_title_emphasis">Git-it!</string>
+</resources>
