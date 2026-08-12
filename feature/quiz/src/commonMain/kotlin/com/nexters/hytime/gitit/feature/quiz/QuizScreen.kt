@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.ModalBottomSheet
@@ -35,10 +36,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -81,25 +84,39 @@ fun QuizScreen(
 ) {
     var showSource by rememberSaveable { mutableStateOf(false) }
 
-    if (uiState.isStarted) {
-        QuizQuestionScreen(
-            uiState = uiState,
-            onIntent = onIntent,
-            onSourceClick = { showSource = true },
-            modifier = modifier,
-        )
-    } else {
-        QuizIntroScreen(
-            setInfo = uiState.setInfo,
-            onBackClick = { onIntent(QuizIntent.BackClick) },
-            onStartClick = { onIntent(QuizIntent.Start) },
-            modifier = modifier,
-        )
+    when (uiState.step) {
+        QuizStep.Intro ->
+            QuizIntroScreen(
+                setInfo = uiState.setInfo,
+                onBackClick = { onIntent(QuizIntent.BackClick) },
+                onStartClick = { onIntent(QuizIntent.Start) },
+                modifier = modifier,
+            )
+        QuizStep.MultipleChoice ->
+            QuizQuestionScreen(
+                uiState = uiState,
+                onIntent = onIntent,
+                onSourceClick = { showSource = true },
+                modifier = modifier,
+            )
+        QuizStep.Essay ->
+            QuizEssayScreen(
+                uiState = uiState,
+                onIntent = onIntent,
+                modifier = modifier,
+            )
+        QuizStep.Completed ->
+            QuizCompletionScreen(
+                onCloseClick = { onIntent(QuizIntent.BackClick) },
+                onNextClick = { onIntent(QuizIntent.BackClick) },
+                modifier = modifier,
+            )
     }
 
     if (showSource) {
         QuizSourceSheet(
-            question = uiState.question,
+            questionNumber = uiState.multipleChoiceQuestion.number,
+            source = uiState.multipleChoiceQuestion.source,
             onDismiss = { showSource = false },
             onOpenSource = {
                 onIntent(QuizIntent.OpenSource)
@@ -212,7 +229,8 @@ private fun QuizQuestionScreen(
             modifier = Modifier.fillMaxSize().captureSky(sky),
         )
         QuizQuestionHeader(
-            question = uiState.question,
+            questionNumber = uiState.multipleChoiceQuestion.number,
+            questionText = uiState.multipleChoiceQuestion.text,
             onBackClick = { onIntent(QuizIntent.BackClick) },
             sky = sky,
             modifier =
@@ -221,9 +239,12 @@ private fun QuizQuestionScreen(
                     .onSizeChanged { headerHeightPx = it.height },
         )
         QuizBottomBar(
-            isBookmarked = uiState.isBookmarked,
+            isBookmarked = uiState.multipleChoiceQuestion.number in uiState.bookmarkedQuestionNumbers,
+            buttonText = if (uiState.isMultipleChoiceSubmitted) "다음" else "정답 확인",
             onBookmarkClick = { onIntent(QuizIntent.BookmarkClick) },
-            onSubmitClick = { onIntent(QuizIntent.Submit) },
+            onButtonClick = {
+                onIntent(if (uiState.isMultipleChoiceSubmitted) QuizIntent.Next else QuizIntent.Submit)
+            },
             modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
@@ -251,7 +272,7 @@ private fun QuizAnswerList(
         contentPadding = PaddingValues(start = 20.dp, top = topPadding, end = 20.dp, bottom = 164.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        items(uiState.question.answers, key = { it.id }) { answer ->
+        items(uiState.multipleChoiceQuestion.answers, key = { it.id }) { answer ->
             GitItMultipleChoiceAnswerCard(
                 label = answer.label,
                 answer = answer.text,
@@ -260,8 +281,8 @@ private fun QuizAnswerList(
                 onClick = { onIntent(QuizIntent.AnswerClick(answer.id)) },
             )
         }
-        if (uiState.isSubmitted) {
-            item { QuizExplanation(text = uiState.question.explanation) }
+        if (uiState.isMultipleChoiceSubmitted) {
+            item { QuizExplanation(text = uiState.multipleChoiceQuestion.explanation) }
         }
         item {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -308,7 +329,8 @@ private fun QuizSourceButton(onClick: () -> Unit) {
  */
 @Composable
 private fun QuizQuestionHeader(
-    question: QuizQuestion,
+    questionNumber: Int,
+    questionText: String,
     onBackClick: () -> Unit,
     sky: Sky?,
     modifier: Modifier = Modifier,
@@ -328,7 +350,7 @@ private fun QuizQuestionHeader(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = "문제 ${question.number}",
+                text = "문제 $questionNumber",
                 modifier =
                     Modifier
                         .clip(RoundedCornerShape(8.dp))
@@ -338,7 +360,7 @@ private fun QuizQuestionHeader(
                 style = GitItTheme.typography.body2,
             )
             Text(
-                text = question.text,
+                text = questionText,
                 color = GitItTheme.colors.grey100,
                 style = GitItTheme.typography.subtitle3,
             )
@@ -357,8 +379,9 @@ private fun QuizQuestionHeader(
 @Composable
 private fun QuizBottomBar(
     isBookmarked: Boolean,
+    buttonText: String,
     onBookmarkClick: () -> Unit,
-    onSubmitClick: () -> Unit,
+    onButtonClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -393,9 +416,254 @@ private fun QuizBottomBar(
             }
         }
         GitItButton(
-            text = "정답 확인",
-            onClick = onSubmitClick,
+            text = buttonText,
+            onClick = onButtonClick,
             modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+/**
+ * 서술형 답안 입력과 AI 답안 비교 결과를 표시한다.
+ *
+ * @param uiState 현재 서술형 문제와 입력·제출 상태
+ * @param onIntent 사용자 입력을 전달하는 콜백
+ * @param modifier 화면의 크기와 배치를 지정할 수식자
+ */
+@Composable
+private fun QuizEssayScreen(
+    uiState: QuizUiState,
+    onIntent: (QuizIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val sky = if (LocalInspectionMode.current) null else rememberSky()
+    var headerHeightPx by remember { mutableIntStateOf(0) }
+    val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
+
+    LaunchedEffect(sky, headerHeightPx) {
+        if (headerHeightPx > 0) sky?.invalidate()
+    }
+
+    Box(modifier = modifier.fillMaxSize().background(GitItTheme.colors.grey700)) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().captureSky(sky),
+            contentPadding = PaddingValues(start = 20.dp, top = headerHeight + 20.dp, end = 20.dp, bottom = 164.dp),
+        ) {
+            item {
+                if (uiState.isEssaySubmitted) {
+                    QuizEssayResult(
+                        answer = uiState.essayAnswer,
+                        modelAnswer = uiState.essayQuestion.modelAnswer,
+                    )
+                } else {
+                    QuizEssayInput(
+                        answer = uiState.essayAnswer,
+                        onAnswerChange = { onIntent(QuizIntent.EssayAnswerChange(it)) },
+                    )
+                }
+            }
+        }
+        QuizQuestionHeader(
+            questionNumber = uiState.essayQuestion.number,
+            questionText = uiState.essayQuestion.text,
+            onBackClick = { onIntent(QuizIntent.BackClick) },
+            sky = sky,
+            modifier =
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .onSizeChanged { headerHeightPx = it.height },
+        )
+        QuizBottomBar(
+            isBookmarked = uiState.essayQuestion.number in uiState.bookmarkedQuestionNumbers,
+            buttonText = if (uiState.isEssaySubmitted) "다음" else "정답 확인",
+            onBookmarkClick = { onIntent(QuizIntent.BookmarkClick) },
+            onButtonClick = { onIntent(if (uiState.isEssaySubmitted) QuizIntent.Next else QuizIntent.Submit) },
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
+}
+
+/**
+ * 최대 300자의 서술형 답안을 입력하는 카드를 표시한다.
+ *
+ * @param answer 현재 입력된 답안
+ * @param onAnswerChange 답안이 바뀔 때 호출할 콜백
+ */
+@Composable
+private fun QuizEssayInput(
+    answer: String,
+    onAnswerChange: (String) -> Unit,
+) {
+    BasicTextField(
+        value = answer,
+        onValueChange = onAnswerChange,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(262.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(GitItTheme.colors.grey500)
+                .padding(horizontal = 22.dp, vertical = 14.dp),
+        textStyle = GitItTheme.typography.body2.copy(color = GitItTheme.colors.grey100),
+        cursorBrush = SolidColor(GitItTheme.colors.blue200),
+        decorationBox = { innerTextField ->
+            Box(Modifier.fillMaxSize()) {
+                if (answer.isEmpty()) {
+                    Text(
+                        text = "생각한 답을 자유롭게 적어보세요.",
+                        color = GitItTheme.colors.grey400,
+                        style = GitItTheme.typography.body2,
+                    )
+                }
+                innerTextField()
+                Text(
+                    text = "${answer.length} / $ESSAY_ANSWER_MAX_LENGTH",
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    color = GitItTheme.colors.grey400,
+                    style = GitItTheme.typography.body2,
+                )
+            }
+        },
+    )
+}
+
+/**
+ * 서술형 제출 후 사용자의 답안과 AI 모범 답안을 비교해 표시한다.
+ *
+ * @param answer 사용자가 제출한 답안
+ * @param modelAnswer 비교할 AI 모범 답안
+ */
+@Composable
+private fun QuizEssayResult(
+    answer: String,
+    modelAnswer: String,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        QuizEssayResultCard(
+            title = "나의 답안",
+            text = answer.ifEmpty { "작성한 답안 없음" },
+            containerColor = GitItTheme.colors.grey500,
+            textColor = GitItTheme.colors.grey400,
+        )
+        QuizEssayResultCard(
+            title = "AI의 답안",
+            text = modelAnswer,
+            containerColor = GitItTheme.colors.blue500,
+            textColor = GitItTheme.colors.grey100,
+        )
+    }
+}
+
+/**
+ * 서술형 결과의 제목과 본문을 하나의 카드로 표시한다.
+ *
+ * @param title 답안 작성 주체를 나타내는 제목
+ * @param text 표시할 답안 본문
+ * @param containerColor 카드 배경색
+ * @param textColor 답안 본문 색상
+ */
+@Composable
+private fun QuizEssayResultCard(
+    title: String,
+    text: String,
+    containerColor: Color,
+    textColor: Color,
+) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(containerColor)
+                .padding(horizontal = 22.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(text = title, color = GitItTheme.colors.grey200, style = GitItTheme.typography.body2)
+        Text(text = text, color = textColor, style = GitItTheme.typography.body2)
+    }
+}
+
+/**
+ * 세트의 모든 문제를 푼 뒤 완료 수치와 축하 일러스트를 표시한다.
+ *
+ * @param onCloseClick 완료 화면을 닫는 콜백
+ * @param onNextClick 다음 버튼으로 문제 풀이를 종료하는 콜백
+ * @param modifier 화면의 크기와 배치를 지정할 수식자
+ */
+@Composable
+private fun QuizCompletionScreen(
+    onCloseClick: () -> Unit,
+    onNextClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxSize().background(GitItTheme.colors.grey700)) {
+        QuizCloseButton(
+            onClick = onCloseClick,
+            modifier = Modifier.statusBarsPadding().padding(start = 20.dp, top = 8.dp),
+        )
+        Column(
+            modifier = Modifier.align(Alignment.Center).padding(bottom = 60.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(text = "학습 완료", color = GitItTheme.colors.grey100, style = GitItTheme.typography.subtitle1)
+            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.size(145.dp))
+            Spacer(Modifier.height(40.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "2", color = GitItTheme.colors.blue200, style = GitItTheme.typography.subtitle1)
+                Text(text = "/", color = GitItTheme.colors.grey400, style = GitItTheme.typography.subtitle1)
+                Text(text = "2", color = GitItTheme.colors.grey400, style = GitItTheme.typography.subtitle1)
+            }
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = "세트의 모든 문제를 다 풀었어요!",
+                color = GitItTheme.colors.grey400,
+                style = GitItTheme.typography.body1,
+            )
+        }
+        GitItButton(
+            text = "다음",
+            onClick = onNextClick,
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
+            style = com.nexters.hytime.gitit.designsystem.button.GitItButtonStyle.Secondary,
+        )
+    }
+}
+
+/**
+ * 학습 완료 화면의 닫기 버튼을 벡터 리소스 없이 그린다.
+ *
+ * @param onClick 완료 화면을 닫는 콜백
+ * @param modifier 버튼의 크기와 배치를 지정할 수식자
+ */
+@Composable
+private fun QuizCloseButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(
+        modifier =
+            modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(99.dp))
+                .background(GitItTheme.colors.white15)
+                .clickable(role = Role.Button, onClick = onClick)
+                .semantics { contentDescription = "학습 완료 닫기" }
+                .padding(11.dp),
+    ) {
+        val strokeWidth = 1.7.dp.toPx()
+        drawLine(GitItTheme.colors.grey100, Offset.Zero, Offset(size.width, size.height), strokeWidth, StrokeCap.Round)
+        drawLine(
+            GitItTheme.colors.grey100,
+            Offset(size.width, 0f),
+            Offset(0f, size.height),
+            strokeWidth,
+            StrokeCap.Round,
         )
     }
 }
@@ -440,7 +708,8 @@ private fun QuizExplanation(text: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun QuizSourceSheet(
-    question: QuizQuestion,
+    questionNumber: Int,
+    source: QuizSource,
     onDismiss: () -> Unit,
     onOpenSource: () -> Unit,
 ) {
@@ -467,19 +736,19 @@ private fun QuizSourceSheet(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = "문제 ${question.number} 출처",
+                    text = "문제 $questionNumber 출처",
                     color = GitItTheme.colors.grey100,
                     style = GitItTheme.typography.subtitle1.copy(fontSize = 22.sp, lineHeight = 32.56.sp),
                 )
                 Text(
-                    text = question.sourceDescription,
+                    text = source.description,
                     color = GitItTheme.colors.grey100,
                     style = GitItTheme.typography.body2,
                 )
             }
             Spacer(Modifier.height(27.dp))
             QuizSourceLink(
-                label = question.sourceLabel,
+                label = source.label,
                 onClick = onOpenSource,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
             )
@@ -619,7 +888,7 @@ private fun QuizExternalLinkIcon() {
  * @return 선택 전·정답·오답·접힘 여부를 반영한 카드 상태
  */
 internal fun QuizUiState.answerCardState(answerId: String): GitItMultipleChoiceAnswerState {
-    if (!isSubmitted) {
+    if (!isMultipleChoiceSubmitted) {
         return if (selectedAnswerId == answerId) {
             GitItMultipleChoiceAnswerState.Selected
         } else {
@@ -629,8 +898,8 @@ internal fun QuizUiState.answerCardState(answerId: String): GitItMultipleChoiceA
 
     val expanded = answerId in expandedAnswerIds
     return when {
-        answerId == question.correctAnswerId && expanded -> GitItMultipleChoiceAnswerState.Correct
-        answerId == question.correctAnswerId -> GitItMultipleChoiceAnswerState.CorrectFolded
+        answerId == multipleChoiceQuestion.correctAnswerId && expanded -> GitItMultipleChoiceAnswerState.Correct
+        answerId == multipleChoiceQuestion.correctAnswerId -> GitItMultipleChoiceAnswerState.CorrectFolded
         answerId == selectedAnswerId && expanded -> GitItMultipleChoiceAnswerState.Incorrect
         answerId == selectedAnswerId -> GitItMultipleChoiceAnswerState.IncorrectFolded
         expanded -> GitItMultipleChoiceAnswerState.Expanded
@@ -681,9 +950,9 @@ private fun QuizResultScreenPreview() {
         QuizScreen(
             uiState =
                 QuizUiState(
-                    isStarted = true,
+                    step = QuizStep.MultipleChoice,
                     selectedAnswerId = "render",
-                    isSubmitted = true,
+                    isMultipleChoiceSubmitted = true,
                     expandedAnswerIds = setOf("render", "set-content"),
                 ),
             onIntent = {},

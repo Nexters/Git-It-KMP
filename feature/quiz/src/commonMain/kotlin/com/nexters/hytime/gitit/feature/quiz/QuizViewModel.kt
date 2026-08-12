@@ -27,23 +27,25 @@ class QuizViewModel : ViewModel() {
      */
     fun onIntent(intent: QuizIntent) {
         when (intent) {
-            QuizIntent.Start -> setState { copy(isStarted = true) }
+            QuizIntent.Start -> setState { copy(step = QuizStep.MultipleChoice) }
             QuizIntent.BackClick -> _sideEffects.tryEmit(QuizSideEffect.NavigateBack)
             QuizIntent.Submit -> submitAnswer()
-            QuizIntent.BookmarkClick -> setState { copy(isBookmarked = !isBookmarked) }
-            QuizIntent.OpenSource -> _sideEffects.tryEmit(QuizSideEffect.OpenUrl(uiState.value.question.sourceUrl))
+            QuizIntent.Next -> moveToNextStep()
+            QuizIntent.BookmarkClick -> toggleBookmark()
+            QuizIntent.OpenSource -> _sideEffects.tryEmit(QuizSideEffect.OpenUrl(uiState.value.currentSource().url))
             is QuizIntent.AnswerClick -> onAnswerClick(intent.answerId)
+            is QuizIntent.EssayAnswerChange -> updateEssayAnswer(intent.answer)
         }
     }
 
     private fun onAnswerClick(answerId: String) {
-        if (uiState.value.question.answers
+        if (uiState.value.multipleChoiceQuestion.answers
                 .none { it.id == answerId }
         ) {
             return
         }
 
-        if (uiState.value.isSubmitted) {
+        if (uiState.value.isMultipleChoiceSubmitted) {
             setState {
                 copy(
                     expandedAnswerIds =
@@ -61,13 +63,52 @@ class QuizViewModel : ViewModel() {
 
     private fun submitAnswer() {
         val state = uiState.value
+        when (state.step) {
+            QuizStep.MultipleChoice -> submitMultipleChoiceAnswer(state)
+            QuizStep.Essay -> setState { copy(isEssaySubmitted = true) }
+            QuizStep.Intro,
+            QuizStep.Completed,
+            -> Unit
+        }
+    }
+
+    private fun submitMultipleChoiceAnswer(state: QuizUiState) {
         val selectedAnswerId = state.selectedAnswerId ?: return
-        if (state.isSubmitted) return
+        if (state.isMultipleChoiceSubmitted) return
 
         setState {
             copy(
-                isSubmitted = true,
-                expandedAnswerIds = setOf(selectedAnswerId, question.correctAnswerId),
+                isMultipleChoiceSubmitted = true,
+                expandedAnswerIds = setOf(selectedAnswerId, multipleChoiceQuestion.correctAnswerId),
+            )
+        }
+    }
+
+    private fun moveToNextStep() {
+        setState {
+            when {
+                step == QuizStep.MultipleChoice && isMultipleChoiceSubmitted -> copy(step = QuizStep.Essay)
+                step == QuizStep.Essay && isEssaySubmitted -> copy(step = QuizStep.Completed)
+                else -> this
+            }
+        }
+    }
+
+    private fun updateEssayAnswer(answer: String) {
+        if (uiState.value.step != QuizStep.Essay || uiState.value.isEssaySubmitted) return
+        setState { copy(essayAnswer = answer.take(ESSAY_ANSWER_MAX_LENGTH)) }
+    }
+
+    private fun toggleBookmark() {
+        val questionNumber = uiState.value.currentQuestionNumber()
+        setState {
+            copy(
+                bookmarkedQuestionNumbers =
+                    if (questionNumber in bookmarkedQuestionNumbers) {
+                        bookmarkedQuestionNumbers - questionNumber
+                    } else {
+                        bookmarkedQuestionNumbers + questionNumber
+                    },
             )
         }
     }
@@ -76,3 +117,9 @@ class QuizViewModel : ViewModel() {
         _uiState.value = _uiState.value.reducer()
     }
 }
+
+/** 현재 단계의 문제 번호를 반환한다. */
+private fun QuizUiState.currentQuestionNumber(): Int = if (step == QuizStep.Essay) essayQuestion.number else multipleChoiceQuestion.number
+
+/** 현재 단계의 문제 출처를 반환한다. */
+private fun QuizUiState.currentSource(): QuizSource = if (step == QuizStep.Essay) essayQuestion.source else multipleChoiceQuestion.source
