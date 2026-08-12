@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.feature.quiz
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,12 +39,12 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
-import com.nexters.hytime.gitit.designsystem.button.GitItButtonSize
-import com.nexters.hytime.gitit.designsystem.button.GitItButtonStyle
 import com.nexters.hytime.gitit.designsystem.navigation.GitItBookmarkIcon
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerCard
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerState
@@ -53,6 +54,10 @@ import com.skydoves.cloudy.Sky
 import com.skydoves.cloudy.cloudy
 import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
+import git_it_kmp.feature.quiz.generated.resources.Res
+import git_it_kmp.feature.quiz.generated.resources.quiz_external_link
+import git_it_kmp.feature.quiz.generated.resources.quiz_source_chevron
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * 세트 소개와 객관식 문제 풀이 화면을 현재 상태에 맞춰 표시한다.
@@ -91,7 +96,6 @@ fun QuizScreen(
             question = uiState.question,
             onDismiss = { showSource = false },
             onOpenSource = {
-                showSource = false
                 onIntent(QuizIntent.OpenSource)
             },
         )
@@ -243,14 +247,40 @@ private fun QuizAnswerList(
         }
         item {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                GitItButton(
-                    text = "출처 ›",
-                    onClick = onSourceClick,
-                    size = GitItButtonSize.Small,
-                    style = GitItButtonStyle.Secondary,
-                )
+                QuizSourceButton(onClick = onSourceClick)
             }
         }
+    }
+}
+
+/**
+ * Figma의 grey600 배경과 blue100 콘텐츠를 사용하는 출처 버튼이다.
+ *
+ * @param onClick 출처 바텀시트를 여는 콜백
+ */
+@Composable
+private fun QuizSourceButton(onClick: () -> Unit) {
+    Row(
+        modifier =
+            Modifier
+                .height(36.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(GitItTheme.colors.grey600)
+                .clickable(role = Role.Button, onClick = onClick)
+                .padding(start = 16.dp, end = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "출처",
+            color = GitItTheme.colors.blue100,
+            style = GitItTheme.typography.body2,
+        )
+        Image(
+            painter = painterResource(Res.drawable.quiz_source_chevron),
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+        )
     }
 }
 
@@ -404,34 +434,107 @@ private fun QuizSourceSheet(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = GitItTheme.colors.grey700,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        containerColor = GitItTheme.colors.grey600,
         contentColor = GitItTheme.colors.grey100,
+        scrimColor = GitItTheme.colors.black70,
+        tonalElevation = 0.dp,
+        dragHandle = { QuizSourceSheetDragHandle() },
     ) {
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(horizontal = 20.dp)
                     .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            Text(
-                text = "출처",
-                color = GitItTheme.colors.grey100,
-                style = GitItTheme.typography.subtitle2,
-            )
-            Text(
-                text = question.sourceDescription,
-                color = GitItTheme.colors.grey200,
-                style = GitItTheme.typography.body2,
-            )
-            GitItButton(
-                text = "GitHub에서 보기",
+            Spacer(Modifier.height(12.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = "문제 ${question.number} 출처",
+                    color = GitItTheme.colors.grey100,
+                    style = GitItTheme.typography.subtitle1.copy(fontSize = 22.sp, lineHeight = 32.56.sp),
+                )
+                Text(
+                    text = question.sourceDescription,
+                    color = GitItTheme.colors.grey100,
+                    style = GitItTheme.typography.body2,
+                )
+            }
+            Spacer(Modifier.height(27.dp))
+            QuizSourceLink(
+                label = question.sourceLabel,
                 onClick = onOpenSource,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+            )
+            Spacer(Modifier.height(24.dp))
+            GitItButton(
+                text = "닫기",
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
             )
         }
+    }
+}
+
+/** Figma 출처 바텀시트 상단의 58×4dp grabber를 표시한다. */
+@Composable
+private fun QuizSourceSheetDragHandle() {
+    Box(
+        modifier = Modifier.fillMaxWidth().height(16.dp).padding(top = 5.dp),
+        contentAlignment = Alignment.TopCenter,
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(width = 58.dp, height = 4.dp)
+                    .clip(RoundedCornerShape(99.dp))
+                    .background(GitItTheme.colors.grey400),
+        )
+    }
+}
+
+/**
+ * GitHub 파일 위치와 외부 링크 아이콘을 표시하는 출처 링크 카드다.
+ *
+ * @param label 파일과 라인 위치를 나타내는 문구
+ * @param onClick GitHub 원본을 여는 콜백
+ * @param modifier 카드의 크기와 배치를 지정할 수식자
+ */
+@Composable
+private fun QuizSourceLink(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier =
+            modifier
+                .height(54.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(GitItTheme.colors.grey500)
+                .clickable(role = Role.Button, onClick = onClick)
+                .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.weight(1f),
+            color = GitItTheme.colors.white70,
+            style = GitItTheme.typography.body1,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Image(
+            painter = painterResource(Res.drawable.quiz_external_link),
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }
 
