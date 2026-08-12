@@ -308,7 +308,7 @@ private fun QuizQuestionHeader(
     sky: Sky?,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxWidth().statusBarsPadding()) {
+    Column(modifier = modifier.fillMaxWidth().questionBackdrop(sky).statusBarsPadding()) {
         GitItTopBar(
             type = GitItTopBarType.Default,
             modifier = Modifier.padding(top = 8.dp),
@@ -319,7 +319,6 @@ private fun QuizQuestionHeader(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .questionBackdrop(sky)
                     .padding(start = 20.dp, top = 20.dp, end = 20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
