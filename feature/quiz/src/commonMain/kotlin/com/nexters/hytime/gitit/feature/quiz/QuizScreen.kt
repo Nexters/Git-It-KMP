@@ -1,6 +1,6 @@
 package com.nexters.hytime.gitit.feature.quiz
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,7 +34,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -54,10 +58,6 @@ import com.skydoves.cloudy.Sky
 import com.skydoves.cloudy.cloudy
 import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
-import git_it_kmp.feature.quiz.generated.resources.Res
-import git_it_kmp.feature.quiz.generated.resources.quiz_external_link
-import git_it_kmp.feature.quiz.generated.resources.quiz_source_chevron
-import org.jetbrains.compose.resources.painterResource
 
 /**
  * 세트 소개와 객관식 문제 풀이 화면을 현재 상태에 맞춰 표시한다.
@@ -276,11 +276,7 @@ private fun QuizSourceButton(onClick: () -> Unit) {
             color = GitItTheme.colors.blue100,
             style = GitItTheme.typography.body2,
         )
-        Image(
-            painter = painterResource(Res.drawable.quiz_source_chevron),
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-        )
+        QuizSourceChevron()
     }
 }
 
@@ -530,10 +526,72 @@ private fun QuizSourceLink(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        Image(
-            painter = painterResource(Res.drawable.quiz_external_link),
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
+        QuizExternalLinkIcon()
+    }
+}
+
+/** 출처 버튼의 오른쪽 방향 chevron을 그린다. */
+@Composable
+private fun QuizSourceChevron() {
+    Canvas(modifier = Modifier.size(16.dp)) {
+        val path =
+            Path().apply {
+                moveTo(size.width * 0.35f, size.height * 0.25f)
+                lineTo(size.width * 0.6f, size.height * 0.5f)
+                lineTo(size.width * 0.35f, size.height * 0.75f)
+            }
+        drawPath(
+            path = path,
+            color = GitItTheme.colors.blue100,
+            style = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+        )
+    }
+}
+
+/** GitHub 링크 카드의 외부 링크 아이콘을 그린다. */
+@Composable
+private fun QuizExternalLinkIcon() {
+    Canvas(modifier = Modifier.size(20.dp)) {
+        val stroke = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+        val box =
+            Path().apply {
+                moveTo(size.width * 0.45f, size.height * 0.2f)
+                lineTo(size.width * 0.2f, size.height * 0.2f)
+                lineTo(size.width * 0.2f, size.height * 0.8f)
+                lineTo(size.width * 0.8f, size.height * 0.8f)
+                lineTo(size.width * 0.8f, size.height * 0.55f)
+            }
+        drawPath(box, color = Color.White, style = stroke)
+        drawLine(
+            color = Color.White,
+            start = center,
+            end =
+                androidx.compose.ui.geometry
+                    .Offset(size.width * 0.85f, size.height * 0.15f),
+            strokeWidth = 2.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+        drawLine(
+            color = Color.White,
+            start =
+                androidx.compose.ui.geometry
+                    .Offset(size.width * 0.55f, size.height * 0.15f),
+            end =
+                androidx.compose.ui.geometry
+                    .Offset(size.width * 0.85f, size.height * 0.15f),
+            strokeWidth = 2.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+        drawLine(
+            color = Color.White,
+            start =
+                androidx.compose.ui.geometry
+                    .Offset(size.width * 0.85f, size.height * 0.15f),
+            end =
+                androidx.compose.ui.geometry
+                    .Offset(size.width * 0.85f, size.height * 0.45f),
+            strokeWidth = 2.dp.toPx(),
+            cap = StrokeCap.Round,
         )
     }
 }
