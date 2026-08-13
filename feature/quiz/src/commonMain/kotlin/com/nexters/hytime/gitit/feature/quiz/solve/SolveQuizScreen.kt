@@ -86,9 +86,9 @@ import org.jetbrains.compose.resources.stringResource
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuizScreen(
-    uiState: QuizUiState,
-    onIntent: (QuizIntent) -> Unit,
+fun SolveQuizScreen(
+    uiState: SolveQuizUiState,
+    onIntent: (SolveQuizIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showSource by rememberSaveable { mutableStateOf(false) }
@@ -103,8 +103,8 @@ fun QuizScreen(
     } else {
         QuizIntroScreen(
             setInfo = uiState.setInfo,
-            onBackClick = { onIntent(QuizIntent.BackClick) },
-            onStartClick = { onIntent(QuizIntent.Start) },
+            onBackClick = { onIntent(SolveQuizIntent.BackClick) },
+            onStartClick = { onIntent(SolveQuizIntent.Start) },
             modifier = modifier,
         )
     }
@@ -114,7 +114,7 @@ fun QuizScreen(
             question = uiState.question,
             onDismiss = { showSource = false },
             onOpenSource = {
-                onIntent(QuizIntent.OpenSource)
+                onIntent(SolveQuizIntent.OpenSource)
             },
         )
     }
@@ -197,8 +197,8 @@ private fun QuizIntroScreen(
  */
 @Composable
 private fun QuizQuestionScreen(
-    uiState: QuizUiState,
-    onIntent: (QuizIntent) -> Unit,
+    uiState: SolveQuizUiState,
+    onIntent: (SolveQuizIntent) -> Unit,
     onSourceClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -225,7 +225,7 @@ private fun QuizQuestionScreen(
         )
         QuizQuestionHeader(
             question = uiState.question,
-            onBackClick = { onIntent(QuizIntent.BackClick) },
+            onBackClick = { onIntent(SolveQuizIntent.BackClick) },
             sky = sky,
             modifier =
                 Modifier
@@ -235,8 +235,8 @@ private fun QuizQuestionScreen(
         QuizBottomBar(
             isBookmarked = uiState.isBookmarked,
             isSubmitEnabled = uiState.selectedAnswerId != null,
-            onBookmarkClick = { onIntent(QuizIntent.BookmarkClick) },
-            onSubmitClick = { onIntent(QuizIntent.Submit) },
+            onBookmarkClick = { onIntent(SolveQuizIntent.BookmarkClick) },
+            onSubmitClick = { onIntent(SolveQuizIntent.Submit) },
             modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
@@ -253,8 +253,8 @@ private fun QuizQuestionScreen(
  */
 @Composable
 private fun QuizAnswerList(
-    uiState: QuizUiState,
-    onIntent: (QuizIntent) -> Unit,
+    uiState: SolveQuizUiState,
+    onIntent: (SolveQuizIntent) -> Unit,
     onSourceClick: () -> Unit,
     topPadding: Dp,
     modifier: Modifier = Modifier,
@@ -270,7 +270,7 @@ private fun QuizAnswerList(
                 answer = answer.text,
                 modifier = Modifier.fillMaxWidth(),
                 state = uiState.answerCardState(answer.id),
-                onClick = { onIntent(QuizIntent.AnswerClick(answer.id)) },
+                onClick = { onIntent(SolveQuizIntent.AnswerClick(answer.id)) },
             )
         }
         if (uiState.isSubmitted) {
@@ -637,7 +637,7 @@ private fun QuizExternalLinkIcon() {
  * @param answerId 상태를 계산할 답안 식별자
  * @return 선택 전·정답·오답·접힘 여부를 반영한 카드 상태
  */
-internal fun QuizUiState.answerCardState(answerId: String): GitItMultipleChoiceAnswerState {
+internal fun SolveQuizUiState.answerCardState(answerId: String): GitItMultipleChoiceAnswerState {
     if (!isSubmitted) {
         return if (selectedAnswerId == answerId) {
             GitItMultipleChoiceAnswerState.Selected
@@ -689,7 +689,7 @@ private fun Modifier.questionBackdrop(sky: Sky?): Modifier =
 @Composable
 private fun QuizIntroScreenPreview() {
     GitItTheme {
-        QuizScreen(uiState = QuizUiState(), onIntent = {})
+        SolveQuizScreen(uiState = SolveQuizUiState(), onIntent = {})
     }
 }
 
@@ -697,9 +697,9 @@ private fun QuizIntroScreenPreview() {
 @Composable
 private fun QuizResultScreenPreview() {
     GitItTheme {
-        QuizScreen(
+        SolveQuizScreen(
             uiState =
-                QuizUiState(
+                SolveQuizUiState(
                     isStarted = true,
                     selectedAnswerId = "render",
                     isSubmitted = true,

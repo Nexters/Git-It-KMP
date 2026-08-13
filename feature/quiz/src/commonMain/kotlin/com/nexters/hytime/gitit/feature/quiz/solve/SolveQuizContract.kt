@@ -60,7 +60,7 @@ data class QuizQuestion(
  * @property expandedAnswerIds 채점 후 내용을 펼쳐 표시할 답안 식별자 집합
  * @property isBookmarked 현재 문제의 임시 저장 상태
  */
-data class QuizUiState(
+data class SolveQuizUiState(
     val setInfo: QuizSetInfo = sampleQuizSetInfo,
     val question: QuizQuestion = sampleQuizQuestion,
     val isStarted: Boolean = false,
@@ -71,21 +71,21 @@ data class QuizUiState(
 )
 
 /** 문제 풀이 화면에서 발생하는 사용자 의도다. */
-sealed interface QuizIntent {
+sealed interface SolveQuizIntent {
     /** 세트 문제 풀이를 시작한다. */
-    data object Start : QuizIntent
+    data object Start : SolveQuizIntent
 
     /** 이전 화면으로 이동한다. */
-    data object BackClick : QuizIntent
+    data object BackClick : SolveQuizIntent
 
     /** 현재 선택한 답안을 채점한다. */
-    data object Submit : QuizIntent
+    data object Submit : SolveQuizIntent
 
     /** 현재 문제의 임시 저장 상태를 전환한다. */
-    data object BookmarkClick : QuizIntent
+    data object BookmarkClick : SolveQuizIntent
 
     /** 문제 출처 URL을 연다. */
-    data object OpenSource : QuizIntent
+    data object OpenSource : SolveQuizIntent
 
     /**
      * 답안을 선택하거나 채점 후 펼침 상태를 전환한다.
@@ -94,13 +94,13 @@ sealed interface QuizIntent {
      */
     data class AnswerClick(
         val answerId: String,
-    ) : QuizIntent
+    ) : SolveQuizIntent
 }
 
 /** 문제 풀이 화면에서 한 번만 처리할 이벤트다. */
-sealed interface QuizSideEffect {
+sealed interface SolveQuizSideEffect {
     /** 이전 화면으로 이동한다. */
-    data object NavigateBack : QuizSideEffect
+    data object NavigateBack : SolveQuizSideEffect
 
     /**
      * 외부 URL을 연다.
@@ -109,7 +109,7 @@ sealed interface QuizSideEffect {
      */
     data class OpenUrl(
         val url: String,
-    ) : QuizSideEffect
+    ) : SolveQuizSideEffect
 }
 
 /** API 연동 전 화면 동작을 확인하는 Android 입문 세트다. */

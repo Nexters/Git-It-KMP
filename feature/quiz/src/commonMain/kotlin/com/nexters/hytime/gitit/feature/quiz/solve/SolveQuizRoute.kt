@@ -16,25 +16,25 @@ import kotlinx.coroutines.flow.collectLatest
  * @param onBackClick 이전 화면으로 이동하는 콜백
  */
 @Composable
-fun QuizRoute(
+fun SolveQuizRoute(
     projectId: String,
     setId: String? = null,
     onBackClick: () -> Unit,
 ) {
-    val viewModel = viewModel(key = "$projectId:$setId") { QuizViewModel(projectId, setId) }
+    val viewModel = viewModel(key = "$projectId:$setId") { SolveQuizViewModel(projectId, setId) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
 
     LaunchedEffect(Unit) {
         viewModel.sideEffects.collectLatest { sideEffect ->
             when (sideEffect) {
-                QuizSideEffect.NavigateBack -> onBackClick()
-                is QuizSideEffect.OpenUrl -> uriHandler.openUri(sideEffect.url)
+                SolveQuizSideEffect.NavigateBack -> onBackClick()
+                is SolveQuizSideEffect.OpenUrl -> uriHandler.openUri(sideEffect.url)
             }
         }
     }
 
-    QuizScreen(
+    SolveQuizScreen(
         uiState = uiState,
         onIntent = viewModel::onIntent,
     )

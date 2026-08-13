@@ -9,7 +9,7 @@ import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
-import com.nexters.hytime.gitit.feature.quiz.solve.QuizRoute
+import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
 import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 
@@ -87,7 +87,7 @@ actual fun AppNavHost() {
             )
         }
         is AppRoute.Quiz -> {
-            QuizRoute(
+            SolveQuizRoute(
                 projectId = route.projectId,
                 setId = route.setId,
                 onBackClick = { backStack.removeLastOrNull() },

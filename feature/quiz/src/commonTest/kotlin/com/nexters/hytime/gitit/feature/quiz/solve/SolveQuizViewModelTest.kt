@@ -7,15 +7,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /** 문제 풀이 ViewModel의 핵심 상태 전환을 검증한다. */
-class QuizViewModelTest {
+class SolveQuizViewModelTest {
     /** 시작·선택·정답 제출이 결과 화면에 필요한 상태를 만든다. */
     @Test
     fun onIntent_correctAnswer_expandsOnlyCorrectAnswer() {
         val viewModel = createViewModel()
 
-        viewModel.onIntent(QuizIntent.Start)
-        viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
-        viewModel.onIntent(QuizIntent.Submit)
+        viewModel.onIntent(SolveQuizIntent.Start)
+        viewModel.onIntent(SolveQuizIntent.AnswerClick("set-content"))
+        viewModel.onIntent(SolveQuizIntent.Submit)
 
         val state = viewModel.uiState.value
         assertTrue(state.isStarted)
@@ -28,8 +28,8 @@ class QuizViewModelTest {
     fun onIntent_incorrectAnswer_expandsIncorrectAndCorrectAnswers() {
         val viewModel = createViewModel()
 
-        viewModel.onIntent(QuizIntent.AnswerClick("render"))
-        viewModel.onIntent(QuizIntent.Submit)
+        viewModel.onIntent(SolveQuizIntent.AnswerClick("render"))
+        viewModel.onIntent(SolveQuizIntent.Submit)
 
         assertEquals(setOf("render", "set-content"), viewModel.uiState.value.expandedAnswerIds)
     }
@@ -38,11 +38,11 @@ class QuizViewModelTest {
     @Test
     fun onIntent_resultAnswerAndBookmark_togglesStates() {
         val viewModel = createViewModel()
-        viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
-        viewModel.onIntent(QuizIntent.Submit)
+        viewModel.onIntent(SolveQuizIntent.AnswerClick("set-content"))
+        viewModel.onIntent(SolveQuizIntent.Submit)
 
-        viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
-        viewModel.onIntent(QuizIntent.BookmarkClick)
+        viewModel.onIntent(SolveQuizIntent.AnswerClick("set-content"))
+        viewModel.onIntent(SolveQuizIntent.BookmarkClick)
 
         assertFalse("set-content" in viewModel.uiState.value.expandedAnswerIds)
         assertTrue(viewModel.uiState.value.isBookmarked)
@@ -52,7 +52,7 @@ class QuizViewModelTest {
     @Test
     fun answerCardState_incorrectResult_mapsIncorrectAndCorrectStates() {
         val state =
-            QuizUiState(
+            SolveQuizUiState(
                 selectedAnswerId = "render",
                 isSubmitted = true,
                 expandedAnswerIds = setOf("render", "set-content"),
@@ -63,5 +63,5 @@ class QuizViewModelTest {
         assertEquals(GitItMultipleChoiceAnswerState.Folded, state.answerCardState("set-state"))
     }
 
-    private fun createViewModel() = QuizViewModel(projectId = "project-1")
+    private fun createViewModel() = SolveQuizViewModel(projectId = "project-1")
 }
