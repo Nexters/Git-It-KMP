@@ -29,14 +29,8 @@ sealed interface LoginStep {
     /** 로그인에 성공한 상태다. */
     data object Success : LoginStep
 
-    /**
-     * 로그인에 실패한 상태다.
-     *
-     * @property message 사용자에게 보여줄 오류 메시지
-     */
-    data class Error(
-        val message: String,
-    ) : LoginStep
+    /** 로그인에 실패한 상태다. */
+    data object Error : LoginStep
 }
 
 /**

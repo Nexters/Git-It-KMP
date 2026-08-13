@@ -46,6 +46,7 @@ import com.nexters.hytime.gitit.feature.onboarding.terms.TermsAgreementState
 import git_it_kmp.feature.onboarding.generated.resources.Res
 import git_it_kmp.feature.onboarding.generated.resources.ic_google_logo
 import git_it_kmp.feature.onboarding.generated.resources.onboarding_google_login
+import git_it_kmp.feature.onboarding.generated.resources.onboarding_login_error
 import git_it_kmp.feature.onboarding.generated.resources.onboarding_signup_tooltip
 import git_it_kmp.feature.onboarding.generated.resources.onboarding_title_1
 import git_it_kmp.feature.onboarding.generated.resources.onboarding_title_2
@@ -174,9 +175,9 @@ private fun OnboardingContent(
                 isLoginLoading = uiState.loginStep is LoginStep.Loading,
                 onGoogleLoginClick = onGoogleLoginClick,
             )
-            if (uiState.loginStep is LoginStep.Error) {
+            if (uiState.loginStep == LoginStep.Error) {
                 Text(
-                    text = uiState.loginStep.message,
+                    text = stringResource(Res.string.onboarding_login_error),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                     color = GitItTheme.colors.grey100,
                     textAlign = TextAlign.Center,

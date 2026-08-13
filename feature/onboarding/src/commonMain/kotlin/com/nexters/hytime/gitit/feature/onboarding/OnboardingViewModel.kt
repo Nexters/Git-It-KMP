@@ -102,7 +102,7 @@ class OnboardingViewModel(
                     _events.emit(OnboardingEvent.NavigateToHome)
                 }.onFailure { error ->
                     logger.e(throwable = error) { "온보딩 로그인 실패" }
-                    setState { copy(loginStep = LoginStep.Error(error.message ?: "알 수 없는 오류")) }
+                    setState { copy(loginStep = LoginStep.Error) }
                 }
         }
     }
