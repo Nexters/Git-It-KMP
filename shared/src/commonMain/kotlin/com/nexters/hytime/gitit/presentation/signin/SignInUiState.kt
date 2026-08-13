@@ -1,6 +1,6 @@
 package com.nexters.hytime.gitit.presentation.signin
 
-import com.nexters.hytime.gitit.domain.model.Account
+import com.nexters.hytime.gitit.domain.model.LoginSession
 
 /**
  * Google 로그인 화면의 UI 상태다.
@@ -16,10 +16,10 @@ sealed interface SignInUiState {
 
     /** 로그인에 성공해 계정 정보를 보유한 상태다.
      *
-     * @property account 인증된 계정
+     * @property session 백엔드에서 발급받은 로그인 세션
      */
     data class Success(
-        val account: Account,
+        val session: LoginSession,
     ) : SignInUiState
 
     /** 로그인에 실패한 상태다.

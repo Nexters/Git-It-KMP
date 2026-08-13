@@ -9,7 +9,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +42,7 @@ fun SignInScreen(viewModel: SignInViewModel = koinViewModel()) {
         when (val current = state) {
             is SignInUiState.Idle -> Unit
             is SignInUiState.Loading -> CircularProgressIndicator()
-            is SignInUiState.Success -> Text("환영합니다, ${current.account.displayName}")
+            is SignInUiState.Success -> Text("로그인 성공")
             is SignInUiState.Error -> Text("로그인 실패: ${current.message}")
         }
     }

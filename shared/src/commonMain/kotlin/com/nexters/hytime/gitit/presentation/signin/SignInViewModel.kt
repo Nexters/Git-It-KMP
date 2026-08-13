@@ -36,7 +36,7 @@ class SignInViewModel(
         _uiState.value = SignInUiState.Loading
         viewModelScope.launch {
             signInUseCase()
-                .onSuccess { account -> _uiState.value = SignInUiState.Success(account) }
+                .onSuccess { session -> _uiState.value = SignInUiState.Success(session) }
                 .onFailure { error ->
                     logger.e(throwable = error) { "로그인 실패" }
                     _uiState.value = SignInUiState.Error(error.message ?: "알 수 없는 오류")
