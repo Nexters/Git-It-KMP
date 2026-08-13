@@ -1,9 +1,11 @@
 package com.nexters.hytime.gitit.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.feature.bookmark.BookmarkRoute
 import com.nexters.hytime.gitit.feature.home.HomeRoute
 import com.nexters.hytime.gitit.feature.my.MyRoute
@@ -13,13 +15,16 @@ import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
 import com.nexters.hytime.gitit.presentation.signin.SignInScreen
+import org.koin.compose.koinInject
 
 @Composable
 actual fun AppNavHost() {
+    val sessionStorage = koinInject<LoginSessionStorage>()
+    val initialRoute = remember { if (sessionStorage.load() == null) AppRoute.Onboarding else AppRoute.Home }
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
-            AppRoute.Onboarding,
+            initialRoute,
         )
 
     fun navigateToMainRoute(route: AppRoute) {
@@ -40,7 +45,7 @@ actual fun AppNavHost() {
                     SignInScreen()
                 }
                 entry<AppRoute.Onboarding> {
-                    OnboardingRoute(onNavigateToHome = { navigateToMainRoute(AppRoute.Home) })
+                    OnboardingRoute(onNavigateToHome = { backStack[0] = AppRoute.Home })
                 }
                 entry<AppRoute.Home> {
                     HomeRoute(
