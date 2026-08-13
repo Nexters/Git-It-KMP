@@ -1,6 +1,7 @@
 package com.nexters.hytime.gitit.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -17,6 +18,7 @@ import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 
 @Composable
 actual fun AppNavHost() {
+    val uriHandler = LocalUriHandler.current
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
@@ -52,7 +54,10 @@ actual fun AppNavHost() {
                     )
                 }
                 entry<AppRoute.Settings> {
-                    SettingsScreen(onBackClick = { backStack.removeLastOrNull() })
+                    SettingsScreen(
+                        onBackClick = { backStack.removeLastOrNull() },
+                        onPolicyClick = { uriHandler.openUri(POLICY_URL) },
+                    )
                 }
                 entry<AppRoute.Bookmark> {
                     BookmarkRoute(

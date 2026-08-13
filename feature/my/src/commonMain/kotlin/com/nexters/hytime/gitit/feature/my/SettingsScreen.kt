@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
@@ -51,22 +52,19 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-private const val POLICY_URL =
-    "https://app.notion.com/p/Git-it-3bb7221e5fe78005bcd9fab953906df1?source=copy_link"
-
 /**
  * 학습 환경과 계정 관련 메뉴를 표시하는 설정 화면이다.
  *
  * @param onBackClick 이전 화면으로 돌아가는 콜백
+ * @param onPolicyClick 서비스 약관 및 정책 링크를 열도록 요청하는 콜백
  * @param modifier 화면의 크기와 배치를 지정할 수식자
  */
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit,
+    onPolicyClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val uriHandler = LocalUriHandler.current
-
     Column(
         modifier =
             modifier
@@ -80,48 +78,56 @@ fun SettingsScreen(
             onBackClick = onBackClick,
             modifier = Modifier.padding(top = 8.dp),
         )
-        Spacer(Modifier.height(10.dp))
+        Column(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 20.dp),
+        ) {
+            Spacer(Modifier.height(10.dp))
 
-        SettingsSection(title = stringResource(Res.string.settings_learning)) {
-            SettingsRow(
-                icon = SettingsIconType.Develop,
-                label = stringResource(Res.string.settings_development_field),
-                value = stringResource(Res.string.settings_development_field_value),
-            )
-            SettingsDivider()
-            SettingsRow(
-                icon = SettingsIconType.Level,
-                label = stringResource(Res.string.settings_development_level),
-                value = stringResource(Res.string.settings_development_level_value),
-            )
-        }
+            SettingsSection(title = stringResource(Res.string.settings_learning)) {
+                SettingsRow(
+                    icon = SettingsIconType.Develop,
+                    label = stringResource(Res.string.settings_development_field),
+                    value = stringResource(Res.string.settings_development_field_value),
+                )
+                SettingsDivider()
+                SettingsRow(
+                    icon = SettingsIconType.Level,
+                    label = stringResource(Res.string.settings_development_level),
+                    value = stringResource(Res.string.settings_development_level_value),
+                )
+            }
 
-        SettingsSection(title = stringResource(Res.string.settings_notification)) {
-            SettingsRow(
-                icon = SettingsIconType.Alert,
-                label = stringResource(Res.string.settings_set_created_notification),
-                value = stringResource(Res.string.settings_on),
-            )
-        }
+            SettingsSection(title = stringResource(Res.string.settings_notification)) {
+                SettingsRow(
+                    icon = SettingsIconType.Alert,
+                    label = stringResource(Res.string.settings_set_created_notification),
+                    value = stringResource(Res.string.settings_on),
+                )
+            }
 
-        SettingsSection(title = stringResource(Res.string.settings_general)) {
-            SettingsRow(
-                icon = SettingsIconType.Policy,
-                label = stringResource(Res.string.settings_policy),
-                onClick = { uriHandler.openUri(POLICY_URL) },
-            )
-            SettingsDivider()
-            SettingsRow(
-                icon = SettingsIconType.Logout,
-                label = stringResource(Res.string.settings_logout),
-                labelColor = GitItTheme.colors.error,
-            )
-            SettingsDivider()
-            SettingsRow(
-                icon = SettingsIconType.Delete,
-                label = stringResource(Res.string.settings_delete_account),
-                labelColor = GitItTheme.colors.grey400,
-            )
+            SettingsSection(title = stringResource(Res.string.settings_general)) {
+                SettingsRow(
+                    icon = SettingsIconType.Policy,
+                    label = stringResource(Res.string.settings_policy),
+                    onClick = onPolicyClick,
+                )
+                SettingsDivider()
+                SettingsRow(
+                    icon = SettingsIconType.Logout,
+                    label = stringResource(Res.string.settings_logout),
+                    labelColor = GitItTheme.colors.error,
+                )
+                SettingsDivider()
+                SettingsRow(
+                    icon = SettingsIconType.Delete,
+                    label = stringResource(Res.string.settings_delete_account),
+                    labelColor = GitItTheme.colors.grey400,
+                )
+            }
         }
     }
 }

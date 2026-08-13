@@ -1,6 +1,7 @@
 package com.nexters.hytime.gitit.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.nexters.hytime.gitit.feature.bookmark.BookmarkRoute
 import com.nexters.hytime.gitit.feature.home.HomeRoute
@@ -16,6 +17,7 @@ import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 // NavDisplay가 JVM(Desktop)을 미지원하므로 백스택 기반 직접 렌더를 사용한다.
 @Composable
 actual fun AppNavHost() {
+    val uriHandler = LocalUriHandler.current
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
@@ -42,7 +44,11 @@ actual fun AppNavHost() {
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
             )
         }
-        AppRoute.Settings -> SettingsScreen(onBackClick = { backStack.removeLastOrNull() })
+        AppRoute.Settings ->
+            SettingsScreen(
+                onBackClick = { backStack.removeLastOrNull() },
+                onPolicyClick = { uriHandler.openUri(POLICY_URL) },
+            )
         AppRoute.Bookmark -> {
             BookmarkRoute(
                 onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
