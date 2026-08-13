@@ -24,10 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,12 +38,10 @@ import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
 import git_it_kmp.feature.my.generated.resources.Res
 import git_it_kmp.feature.my.generated.resources.my_default_avatar
+import git_it_kmp.feature.my.generated.resources.my_settings
 import git_it_kmp.feature.my.generated.resources.my_settings_content_description
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 /**
  * 마이 학습 화면의 순수 UI 영역이다.
@@ -136,7 +130,7 @@ fun MyScreen(
 }
 
 /**
- * 설정 진입을 나타내는 톱니바퀴 아이콘을 그린다.
+ * 설정 진입을 나타내는 피그마 원본 톱니바퀴 아이콘을 표시한다.
  *
  * @param contentDescription 접근성 서비스에 전달할 설명
  * @param modifier 외부 배치와 추가 수식자
@@ -146,29 +140,11 @@ private fun SettingsIcon(
     contentDescription: String,
     modifier: Modifier = Modifier,
 ) {
-    val color = GitItTheme.colors.grey100
-
-    Canvas(
-        modifier =
-            modifier
-                .size(24.dp)
-                .semantics { this.contentDescription = contentDescription },
-    ) {
-        val center = Offset(size.width / 2f, size.height / 2f)
-        val strokeWidth = 1.6.dp.toPx()
-        drawCircle(color = color, radius = size.minDimension * 0.12f, center = center, style = Stroke(strokeWidth))
-        drawCircle(color = color, radius = size.minDimension * 0.34f, center = center, style = Stroke(strokeWidth))
-        repeat(8) { index ->
-            val angle = index * 45f * PI.toFloat() / 180f
-            drawLine(
-                color = color,
-                start = center + Offset(cos(angle), sin(angle)) * size.minDimension * 0.34f,
-                end = center + Offset(cos(angle), sin(angle)) * size.minDimension * 0.43f,
-                strokeWidth = strokeWidth,
-                cap = StrokeCap.Round,
-            )
-        }
-    }
+    Image(
+        painter = painterResource(Res.drawable.my_settings),
+        contentDescription = contentDescription,
+        modifier = modifier.size(18.1.dp),
+    )
 }
 
 /**

@@ -1,6 +1,6 @@
 package com.nexters.hytime.gitit.feature.my
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -19,31 +19,36 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
 import git_it_kmp.feature.my.generated.resources.Res
+import git_it_kmp.feature.my.generated.resources.settings_alert
+import git_it_kmp.feature.my.generated.resources.settings_chevron_right
 import git_it_kmp.feature.my.generated.resources.settings_delete_account
+import git_it_kmp.feature.my.generated.resources.settings_delete_icon
+import git_it_kmp.feature.my.generated.resources.settings_develop
 import git_it_kmp.feature.my.generated.resources.settings_development_field
 import git_it_kmp.feature.my.generated.resources.settings_development_field_value
 import git_it_kmp.feature.my.generated.resources.settings_development_level
 import git_it_kmp.feature.my.generated.resources.settings_development_level_value
 import git_it_kmp.feature.my.generated.resources.settings_general
 import git_it_kmp.feature.my.generated.resources.settings_learning
+import git_it_kmp.feature.my.generated.resources.settings_level
 import git_it_kmp.feature.my.generated.resources.settings_logout
+import git_it_kmp.feature.my.generated.resources.settings_logout_icon
 import git_it_kmp.feature.my.generated.resources.settings_notification
 import git_it_kmp.feature.my.generated.resources.settings_on
 import git_it_kmp.feature.my.generated.resources.settings_policy
+import git_it_kmp.feature.my.generated.resources.settings_policy_icon
 import git_it_kmp.feature.my.generated.resources.settings_set_created_notification
 import git_it_kmp.feature.my.generated.resources.settings_title
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val POLICY_URL =
@@ -234,7 +239,7 @@ private enum class SettingsIconType {
 }
 
 /**
- * 설정 메뉴의 선형 아이콘을 Compose Canvas로 그린다.
+ * 설정 메뉴의 피그마 원본 아이콘을 표시한다.
  *
  * @param type 그릴 아이콘 종류
  * @param modifier 외부 배치와 추가 수식자
@@ -244,6 +249,15 @@ private fun SettingsItemIcon(
     type: SettingsIconType,
     modifier: Modifier = Modifier,
 ) {
+    val resource =
+        when (type) {
+            SettingsIconType.Develop -> Res.drawable.settings_develop
+            SettingsIconType.Level -> Res.drawable.settings_level
+            SettingsIconType.Alert -> Res.drawable.settings_alert
+            SettingsIconType.Policy -> Res.drawable.settings_policy_icon
+            SettingsIconType.Logout -> Res.drawable.settings_logout_icon
+            SettingsIconType.Delete -> Res.drawable.settings_delete_icon
+        }
     val color =
         when (type) {
             SettingsIconType.Logout -> GitItTheme.colors.error
@@ -251,132 +265,36 @@ private fun SettingsItemIcon(
             else -> GitItTheme.colors.blue100
         }
 
-    Canvas(modifier = modifier.size(24.dp)) {
-        val stroke = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-        when (type) {
-            SettingsIconType.Develop -> {
-                drawRoundRect(
-                    color,
-                    Offset(2f, 3f) * density,
-                    size.copy(
-                        width = size.width - 4.dp.toPx(),
-                        height =
-                            size.height - 8.dp.toPx(),
-                    ),
-                    style = stroke,
-                )
-                drawLine(
-                    color,
-                    Offset(size.width / 2f, size.height - 5.dp.toPx()),
-                    Offset(size.width / 2f, size.height - 1.dp.toPx()),
-                    stroke.width,
-                )
-                drawLine(
-                    color,
-                    Offset(size.width * 0.3f, size.height - 1.dp.toPx()),
-                    Offset(size.width * 0.7f, size.height - 1.dp.toPx()),
-                    stroke.width,
-                )
-            }
-            SettingsIconType.Level ->
-                listOf(0.3f to 0.6f, 0.5f to 0.25f, 0.7f to 0.45f).forEach { (x, top) ->
-                    drawLine(
-                        color,
-                        Offset(size.width * x, size.height * top),
-                        Offset(size.width * x, size.height * 0.85f),
-                        stroke.width,
-                        StrokeCap.Round,
-                    )
-                }
-            SettingsIconType.Alert -> {
-                drawCircle(color, size.minDimension * 0.38f, style = stroke)
-                drawLine(color, center, Offset(center.x, size.height * 0.28f), stroke.width, StrokeCap.Round)
-                drawLine(color, center, Offset(size.width * 0.67f, size.height * 0.62f), stroke.width, StrokeCap.Round)
-            }
-            SettingsIconType.Policy -> {
-                val path =
-                    Path().apply {
-                        moveTo(size.width * 0.25f, size.height * 0.08f)
-                        lineTo(size.width * 0.62f, size.height * 0.08f)
-                        lineTo(size.width * 0.82f, size.height * 0.3f)
-                        lineTo(size.width * 0.82f, size.height * 0.9f)
-                        lineTo(size.width * 0.25f, size.height * 0.9f)
-                        close()
-                        moveTo(size.width * 0.62f, size.height * 0.08f)
-                        lineTo(size.width * 0.62f, size.height * 0.3f)
-                        lineTo(size.width * 0.82f, size.height * 0.3f)
-                    }
-                drawPath(path, color, style = stroke)
-            }
-            SettingsIconType.Logout -> {
-                drawLine(
-                    color,
-                    Offset(size.width * 0.22f, size.height * 0.2f),
-                    Offset(size.width * 0.22f, size.height * 0.8f),
-                    stroke.width,
-                    StrokeCap.Round,
-                )
-                drawLine(
-                    color,
-                    Offset(size.width * 0.22f, size.height * 0.2f),
-                    Offset(size.width * 0.45f, size.height * 0.2f),
-                    stroke.width,
-                    StrokeCap.Round,
-                )
-                drawLine(
-                    color,
-                    Offset(size.width * 0.22f, size.height * 0.8f),
-                    Offset(size.width * 0.45f, size.height * 0.8f),
-                    stroke.width,
-                    StrokeCap.Round,
-                )
-                drawLine(color, Offset(size.width * 0.4f, center.y), Offset(size.width * 0.85f, center.y), stroke.width, StrokeCap.Round)
-                drawLine(
-                    color,
-                    Offset(size.width * 0.68f, size.height * 0.34f),
-                    Offset(size.width * 0.85f, center.y),
-                    stroke.width,
-                    StrokeCap.Round,
-                )
-                drawLine(
-                    color,
-                    Offset(size.width * 0.68f, size.height * 0.66f),
-                    Offset(size.width * 0.85f, center.y),
-                    stroke.width,
-                    StrokeCap.Round,
-                )
-            }
-            SettingsIconType.Delete -> {
-                drawLine(
-                    color,
-                    Offset(size.width * 0.3f, size.height * 0.3f),
-                    Offset(size.width * 0.7f, size.height * 0.7f),
-                    stroke.width,
-                    StrokeCap.Round,
-                )
-                drawLine(
-                    color,
-                    Offset(size.width * 0.7f, size.height * 0.3f),
-                    Offset(size.width * 0.3f, size.height * 0.7f),
-                    stroke.width,
-                    StrokeCap.Round,
-                )
-            }
-        }
-    }
+    SettingsIcon(resource = resource, color = color, modifier = modifier.size(24.dp))
 }
 
-/** 설정 항목 우측의 이동 표시를 그린다. */
+/** 설정 항목 우측의 피그마 원본 이동 표시를 보여준다. */
 @Composable
 private fun SettingsChevron(modifier: Modifier = Modifier) {
-    val color = GitItTheme.colors.grey400
-    Canvas(modifier = modifier.size(16.dp)) {
-        val path =
-            Path().apply {
-                moveTo(size.width * 0.4f, size.height * 0.25f)
-                lineTo(size.width * 0.65f, size.height * 0.5f)
-                lineTo(size.width * 0.4f, size.height * 0.75f)
-            }
-        drawPath(path, color, style = Stroke(1.6.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
-    }
+    SettingsIcon(
+        resource = Res.drawable.settings_chevron_right,
+        color = GitItTheme.colors.grey400,
+        modifier = modifier.size(16.dp),
+    )
+}
+
+/**
+ * 공통 벡터 리소스를 지정한 색상으로 표시한다.
+ *
+ * @param resource 피그마 아이콘에서 변환한 벡터 리소스
+ * @param color 화면 상태에 맞게 입힐 디자인 토큰 색상
+ * @param modifier 외부 배치와 추가 수식자
+ */
+@Composable
+private fun SettingsIcon(
+    resource: DrawableResource,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    Image(
+        painter = painterResource(resource),
+        contentDescription = null,
+        colorFilter = ColorFilter.tint(color),
+        modifier = modifier,
+    )
 }
