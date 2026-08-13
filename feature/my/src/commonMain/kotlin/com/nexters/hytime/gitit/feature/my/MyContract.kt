@@ -50,6 +50,9 @@ data class MyWeeklyStudy(
  * 마이 화면에서 발생하는 사용자 의도다.
  */
 sealed interface MyIntent {
+    /** 설정 화면 진입. */
+    data object SettingsClick : MyIntent
+
     /** 홈 탭 선택. */
     data object HomeTabClick : MyIntent
 
@@ -67,6 +70,9 @@ sealed interface MyIntent {
  * 마이 화면이 한 번만 전달해야 하는 이벤트다.
  */
 sealed interface MySideEffect {
+    /** 설정 화면으로 이동. */
+    data object NavigateToSettings : MySideEffect
+
     /** 홈 화면으로 이동. */
     data object NavigateToHome : MySideEffect
 

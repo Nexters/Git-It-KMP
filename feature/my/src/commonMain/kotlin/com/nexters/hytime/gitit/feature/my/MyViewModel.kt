@@ -35,6 +35,7 @@ class MyViewModel : ViewModel() {
      */
     fun onIntent(intent: MyIntent) {
         when (intent) {
+            MyIntent.SettingsClick -> emit(MySideEffect.NavigateToSettings)
             MyIntent.HomeTabClick -> emit(MySideEffect.NavigateToHome)
             MyIntent.ProjectTabClick -> emit(MySideEffect.NavigateToProjectList)
             MyIntent.SavedTabClick -> emit(MySideEffect.NavigateToBookmark)

@@ -24,17 +24,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassContainer
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonSize
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonVariant
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
 import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
 import git_it_kmp.feature.my.generated.resources.Res
 import git_it_kmp.feature.my.generated.resources.my_default_avatar
+import git_it_kmp.feature.my.generated.resources.my_settings_content_description
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * 마이 학습 화면의 순수 UI 영역이다.
@@ -67,7 +80,28 @@ fun MyScreen(
                     .padding(horizontal = 20.dp),
         ) {
             Spacer(Modifier.height(24.dp))
-            MyProfileHeader(profile = uiState.profile)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MyProfileHeader(
+                    profile = uiState.profile,
+                    modifier = Modifier.weight(1f),
+                )
+                val settingsButton: @Composable () -> Unit = {
+                    GitItLiquidGlassIconButton(
+                        onClick = { onIntent(MyIntent.SettingsClick) },
+                        size = GitItLiquidGlassIconButtonSize.Md,
+                        variant = GitItLiquidGlassIconButtonVariant.Secondary,
+                    ) {
+                        SettingsIcon(
+                            contentDescription = stringResource(Res.string.my_settings_content_description),
+                        )
+                    }
+                }
+                if (sky != null) {
+                    GitItLiquidGlassContainer(sky = sky) { settingsButton() }
+                } else {
+                    settingsButton()
+                }
+            }
             Spacer(Modifier.height(29.dp))
 
             Text(
@@ -98,6 +132,42 @@ fun MyScreen(
                     .padding(start = 27.dp, end = 27.dp, bottom = 29.dp),
             sky = sky,
         )
+    }
+}
+
+/**
+ * 설정 진입을 나타내는 톱니바퀴 아이콘을 그린다.
+ *
+ * @param contentDescription 접근성 서비스에 전달할 설명
+ * @param modifier 외부 배치와 추가 수식자
+ */
+@Composable
+private fun SettingsIcon(
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+) {
+    val color = GitItTheme.colors.grey100
+
+    Canvas(
+        modifier =
+            modifier
+                .size(24.dp)
+                .semantics { this.contentDescription = contentDescription },
+    ) {
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val strokeWidth = 1.6.dp.toPx()
+        drawCircle(color = color, radius = size.minDimension * 0.12f, center = center, style = Stroke(strokeWidth))
+        drawCircle(color = color, radius = size.minDimension * 0.34f, center = center, style = Stroke(strokeWidth))
+        repeat(8) { index ->
+            val angle = index * 45f * PI.toFloat() / 180f
+            drawLine(
+                color = color,
+                start = center + Offset(cos(angle), sin(angle)) * size.minDimension * 0.34f,
+                end = center + Offset(cos(angle), sin(angle)) * size.minDimension * 0.43f,
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round,
+            )
+        }
     }
 }
 

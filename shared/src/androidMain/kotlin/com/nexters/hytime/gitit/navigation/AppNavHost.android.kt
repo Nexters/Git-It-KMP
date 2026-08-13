@@ -7,6 +7,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.nexters.hytime.gitit.feature.bookmark.BookmarkRoute
 import com.nexters.hytime.gitit.feature.home.HomeRoute
 import com.nexters.hytime.gitit.feature.my.MyRoute
+import com.nexters.hytime.gitit.feature.my.SettingsScreen
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
@@ -50,6 +51,9 @@ actual fun AppNavHost() {
                         onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
                     )
                 }
+                entry<AppRoute.Settings> {
+                    SettingsScreen(onBackClick = { backStack.removeLastOrNull() })
+                }
                 entry<AppRoute.Bookmark> {
                     BookmarkRoute(
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
@@ -62,6 +66,7 @@ actual fun AppNavHost() {
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                         onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                        onNavigateToSettings = { backStack.add(AppRoute.Settings) },
                     )
                 }
                 entry<AppRoute.ProjectList> {
