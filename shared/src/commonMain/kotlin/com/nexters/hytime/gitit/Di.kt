@@ -4,11 +4,13 @@ import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.domain.repository.AccountRepository
 import com.nexters.hytime.gitit.domain.repository.GitHubRepositoryRepository
+import com.nexters.hytime.gitit.domain.usecase.HasLoginSessionUseCase
 import com.nexters.hytime.gitit.domain.usecase.LoadGitHubRepositoryUseCase
 import com.nexters.hytime.gitit.domain.usecase.SignInUseCase
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailViewModel
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateViewModel
 import com.nexters.hytime.gitit.logging.loggingModule
+import com.nexters.hytime.gitit.presentation.app.AppViewModel
 import com.nexters.hytime.gitit.presentation.signin.SignInViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
@@ -30,7 +32,9 @@ val appModule: Module =
                 sessionStorage = get<LoginSessionStorage>(),
             )
         }
+        single { HasLoginSessionUseCase(sessionStorage = get<LoginSessionStorage>()) }
         single { LoadGitHubRepositoryUseCase(repository = get<GitHubRepositoryRepository>()) }
+        viewModel { AppViewModel(get()) }
         viewModel { SignInViewModel(get()) }
         viewModel { params -> ProjectDetailViewModel(projectId = params.get<String>()) }
         viewModel { QuestionCreateViewModel(loadGitHubRepository = get()) }
