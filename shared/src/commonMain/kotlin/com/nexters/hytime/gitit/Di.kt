@@ -9,7 +9,6 @@ import com.nexters.hytime.gitit.domain.usecase.SignInUseCase
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailViewModel
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateViewModel
 import com.nexters.hytime.gitit.logging.loggingModule
-import com.nexters.hytime.gitit.presentation.signin.SignInViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -31,7 +30,6 @@ val appModule: Module =
             )
         }
         single { LoadGitHubRepositoryUseCase(repository = get<GitHubRepositoryRepository>()) }
-        viewModel { SignInViewModel(get()) }
         viewModel { params -> ProjectDetailViewModel(projectId = params.get<String>()) }
         viewModel { QuestionCreateViewModel(loadGitHubRepository = get()) }
     }

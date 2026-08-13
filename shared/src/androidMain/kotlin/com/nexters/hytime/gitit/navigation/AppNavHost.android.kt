@@ -12,7 +12,6 @@ import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
-import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 
 @Composable
 actual fun AppNavHost() {
@@ -36,9 +35,6 @@ actual fun AppNavHost() {
         onBack = { backStack.removeLastOrNull() },
         entryProvider =
             entryProvider {
-                entry<AppRoute.SignIn> {
-                    SignInScreen()
-                }
                 entry<AppRoute.Onboarding> {
                     OnboardingRoute(onNavigateToHome = { backStack[0] = AppRoute.Home })
                 }

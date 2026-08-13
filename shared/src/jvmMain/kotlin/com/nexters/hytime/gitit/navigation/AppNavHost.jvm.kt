@@ -10,7 +10,6 @@ import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
-import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 
 // NavDisplay가 JVM(Desktop)을 미지원하므로 백스택 기반 직접 렌더를 사용한다.
 @Composable
@@ -31,7 +30,6 @@ actual fun AppNavHost() {
     }
 
     when (val route = backStack.lastOrNull()) {
-        AppRoute.SignIn -> SignInScreen()
         AppRoute.Onboarding -> OnboardingRoute(onNavigateToHome = { backStack[0] = AppRoute.Home })
         AppRoute.Home -> {
             HomeRoute(
@@ -85,6 +83,6 @@ actual fun AppNavHost() {
         AppRoute.LiquidGlassExample -> {
             LiquidGlassExampleScreen(onBackClick = { backStack.removeLastOrNull() })
         }
-        else -> SignInScreen()
+        else -> Unit
     }
 }
