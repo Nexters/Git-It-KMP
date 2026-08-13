@@ -97,8 +97,8 @@ class OnboardingViewModel(
         setState { copy(loginStep = LoginStep.Loading) }
         viewModelScope.launch {
             signInUseCase()
-                .onSuccess { session ->
-                    setState { copy(loginStep = LoginStep.Success(session)) }
+                .onSuccess {
+                    setState { copy(loginStep = LoginStep.Success) }
                     _events.emit(OnboardingEvent.NavigateToHome)
                 }.onFailure { error ->
                     logger.e(throwable = error) { "온보딩 로그인 실패" }

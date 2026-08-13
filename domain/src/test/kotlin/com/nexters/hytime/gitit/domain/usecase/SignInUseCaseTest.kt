@@ -30,7 +30,7 @@ class SignInUseCaseTest {
 
         val result = runBlocking { useCase() }
 
-        assertEquals(session, result.getOrThrow())
+        assertEquals(Unit, result.getOrThrow())
         assertEquals(session, storage.load())
     }
 }

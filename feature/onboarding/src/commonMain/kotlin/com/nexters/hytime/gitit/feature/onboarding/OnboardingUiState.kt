@@ -1,6 +1,5 @@
 package com.nexters.hytime.gitit.feature.onboarding
 
-import com.nexters.hytime.gitit.domain.model.LoginSession
 import com.nexters.hytime.gitit.feature.onboarding.terms.TermsAgreementState
 
 /**
@@ -27,14 +26,8 @@ sealed interface LoginStep {
     /** 로그인 진행 중이다. 중복 요청을 막기 위해 버튼을 비활성화한다. */
     data object Loading : LoginStep
 
-    /**
-     * 로그인에 성공해 계정 정보를 보유한 상태다.
-     *
-     * @property session 백엔드에서 발급받은 로그인 세션
-     */
-    data class Success(
-        val session: LoginSession,
-    ) : LoginStep
+    /** 로그인에 성공한 상태다. */
+    data object Success : LoginStep
 
     /**
      * 로그인에 실패한 상태다.
