@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @Serializable
@@ -113,5 +114,33 @@ class KtorNetworkClientTest {
                 client(status = HttpStatusCode.NotFound).get<TestResponse>("https://example.com/missing")
             }
         }
+    }
+
+    /** 요청과 응답 본문의 인증 토큰을 네트워크 로그에서 마스킹하는지 검증한다. */
+    @Test
+    fun post_authTokensAreMaskedFromLogs() {
+        val logs = mutableListOf<String>()
+        val httpClient =
+            HttpClient(
+                MockEngine {
+                    respond(
+                        content =
+                            """{"result":"ok","accessToken":"access-secret","refreshToken":"refresh-secret","access_token":"legacy-secret"}""",
+                        headers = headers { append("Content-Type", "application/json") },
+                    )
+                },
+            ) {
+                configureGitItHttpClient(NetworkLogger(logs::add))
+            }
+
+        runBlocking {
+            KtorNetworkClient(httpClient, json, baseUrl = "https://example.com")
+                .post<TestRequest, TestResponse>("/test", TestRequest("id-secret"))
+        }
+
+        val message = logs.joinToString()
+        assertFalse("access-secret" in message)
+        assertFalse("refresh-secret" in message)
+        assertFalse("legacy-secret" in message)
     }
 }
