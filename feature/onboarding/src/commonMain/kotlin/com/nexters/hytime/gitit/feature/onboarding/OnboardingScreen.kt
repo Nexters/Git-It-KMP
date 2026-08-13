@@ -174,6 +174,15 @@ private fun OnboardingContent(
                 isLoginLoading = uiState.loginStep is LoginStep.Loading,
                 onGoogleLoginClick = onGoogleLoginClick,
             )
+            if (uiState.loginStep is LoginStep.Error) {
+                Text(
+                    text = uiState.loginStep.message,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                    color = GitItTheme.colors.grey100,
+                    textAlign = TextAlign.Center,
+                    style = GitItTheme.typography.body3,
+                )
+            }
             Spacer(Modifier.height(29.dp))
         }
 

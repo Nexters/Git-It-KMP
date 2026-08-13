@@ -19,7 +19,7 @@ actual fun AppNavHost() {
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
-            AppRoute.Home,
+            AppRoute.Onboarding,
         )
 
     fun navigateToMainRoute(route: AppRoute) {
@@ -40,7 +40,7 @@ actual fun AppNavHost() {
                     SignInScreen()
                 }
                 entry<AppRoute.Onboarding> {
-                    OnboardingRoute(onNavigateToHome = { backStack.add(AppRoute.Home) })
+                    OnboardingRoute(onNavigateToHome = { navigateToMainRoute(AppRoute.Home) })
                 }
                 entry<AppRoute.Home> {
                     HomeRoute(

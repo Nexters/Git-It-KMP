@@ -1,6 +1,6 @@
 package com.nexters.hytime.gitit.feature.onboarding
 
-import com.nexters.hytime.gitit.domain.model.Account
+import com.nexters.hytime.gitit.domain.model.LoginSession
 import com.nexters.hytime.gitit.feature.onboarding.terms.TermsAgreementState
 
 /**
@@ -30,10 +30,10 @@ sealed interface LoginStep {
     /**
      * 로그인에 성공해 계정 정보를 보유한 상태다.
      *
-     * @property account 인증된 계정
+     * @property session 백엔드에서 발급받은 로그인 세션
      */
     data class Success(
-        val account: Account,
+        val session: LoginSession,
     ) : LoginStep
 
     /**
