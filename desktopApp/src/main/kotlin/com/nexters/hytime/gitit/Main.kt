@@ -3,10 +3,12 @@ package com.nexters.hytime.gitit
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.nexters.hytime.gitit.auth.DesktopGoogleAuthenticator
+import com.nexters.hytime.gitit.auth.DesktopLoginSessionStorage
 import com.nexters.hytime.gitit.auth.GoogleAuthTokenProvider
 import com.nexters.hytime.gitit.auth.GoogleAuthenticator
 import com.nexters.hytime.gitit.data.di.dataModule
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
+import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.feature.onboarding.onboardingModule
 import com.nexters.hytime.gitit.logging.gitItLogger
 import com.nexters.hytime.gitit.logging.initLogger
@@ -49,4 +51,5 @@ private val platformModule =
             )
         }
         single<AuthTokenProvider> { GoogleAuthTokenProvider(get()) }
+        single<LoginSessionStorage> { DesktopLoginSessionStorage() }
     }

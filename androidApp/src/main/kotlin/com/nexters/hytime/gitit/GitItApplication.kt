@@ -3,10 +3,12 @@ package com.nexters.hytime.gitit
 import android.content.Context
 import android.app.Application
 import com.nexters.hytime.gitit.auth.AndroidGoogleAuthenticator
+import com.nexters.hytime.gitit.auth.AndroidLoginSessionStorage
 import com.nexters.hytime.gitit.auth.GoogleAuthenticator
 import com.nexters.hytime.gitit.auth.GoogleAuthTokenProvider
 import com.nexters.hytime.gitit.data.di.dataModule
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
+import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.feature.onboarding.onboardingModule
 import com.nexters.hytime.gitit.logging.gitItLogger
 import com.nexters.hytime.gitit.logging.initLogger
@@ -45,4 +47,5 @@ private val platformModule =
             )
         }
         single<AuthTokenProvider> { GoogleAuthTokenProvider(get()) }
+        single<LoginSessionStorage> { AndroidLoginSessionStorage(get<Context>()) }
     }

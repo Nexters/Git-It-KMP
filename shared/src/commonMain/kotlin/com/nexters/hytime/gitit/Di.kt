@@ -1,6 +1,7 @@
 package com.nexters.hytime.gitit
 
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
+import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.domain.repository.AccountRepository
 import com.nexters.hytime.gitit.domain.repository.GitHubRepositoryRepository
 import com.nexters.hytime.gitit.domain.usecase.LoadGitHubRepositoryUseCase
@@ -26,6 +27,7 @@ val appModule: Module =
             SignInUseCase(
                 tokenProvider = get<AuthTokenProvider>(),
                 accountRepository = get<AccountRepository>(),
+                sessionStorage = get<LoginSessionStorage>(),
             )
         }
         single { LoadGitHubRepositoryUseCase(repository = get<GitHubRepositoryRepository>()) }
