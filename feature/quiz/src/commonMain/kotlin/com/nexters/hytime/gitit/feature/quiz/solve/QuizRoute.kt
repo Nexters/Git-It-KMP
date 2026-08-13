@@ -1,4 +1,4 @@
-package com.nexters.hytime.gitit.feature.quiz
+package com.nexters.hytime.gitit.feature.quiz.solve
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

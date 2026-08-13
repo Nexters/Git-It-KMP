@@ -11,7 +11,7 @@ import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
-import com.nexters.hytime.gitit.feature.quiz.QuizRoute
+import com.nexters.hytime.gitit.feature.quiz.solve.QuizRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
 import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 

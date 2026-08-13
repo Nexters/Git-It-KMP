@@ -1,4 +1,4 @@
-package com.nexters.hytime.gitit.feature.quiz
+package com.nexters.hytime.gitit.feature.quiz.solve
 
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerState
 import kotlin.test.Test
