@@ -6,13 +6,14 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /** [AccountRepositoryImpl]의 Google 로그인 API 계약과 응답 매핑을 검증한다. */
 class AccountRepositoryImplTest {
     /** 실제 명세의 경로와 필드명으로 요청하고 로그인 세션을 반환하는지 검증한다. */
     @Test
     fun signInWithGoogle_successUsesOpenApiContractAndMapsSession() {
-        val networkClient = LoginFakeNetworkClient()
+        val networkClient = LoginFakeNetworkClient(SUCCESS_RESPONSE)
 
         val session = runBlocking { AccountRepositoryImpl(networkClient).signInWithGoogle("google-token") }.getOrThrow()
 
@@ -22,10 +23,34 @@ class AccountRepositoryImplTest {
         assertEquals("refresh-token", session.refreshToken)
         assertEquals(true, session.needsCuration)
     }
+
+    /** 실패 응답, 누락 데이터, 빈 토큰을 로그인 실패로 처리하는지 검증한다. */
+    @Test
+    fun signInWithGoogle_invalidResponseReturnsFailure() {
+        val invalidResponses =
+            listOf(
+                """{"success":false,"data":{"accessToken":"access-token","refreshToken":"refresh-token","needsCuration":false}}""",
+                """{"success":true,"data":null}""",
+                """{"success":true,"data":{"accessToken":"","refreshToken":"refresh-token","needsCuration":false}}""",
+                """{"success":true,"data":{"accessToken":"access-token","refreshToken":" ","needsCuration":false}}""",
+            )
+
+        invalidResponses.forEach { response ->
+            val result = runBlocking { AccountRepositoryImpl(LoginFakeNetworkClient(response)).signInWithGoogle("token") }
+            assertTrue(result.isFailure, response)
+        }
+    }
+
+    private companion object {
+        private const val SUCCESS_RESPONSE =
+            """{"success":true,"data":{"accessToken":"access-token","refreshToken":"refresh-token","needsCuration":true}}"""
+    }
 }
 
 /** 테스트 로그인 응답을 역직렬화하며 마지막 POST 요청을 기록한다. */
-private class LoginFakeNetworkClient : NetworkClient {
+private class LoginFakeNetworkClient(
+    private val responseBody: String,
+) : NetworkClient {
     /** 마지막으로 요청한 API 경로다. */
     var requestedPath: String = ""
 
@@ -48,7 +73,7 @@ private class LoginFakeNetworkClient : NetworkClient {
         requestBody = Json.encodeToString(requestSerializer, body)
         return Json.decodeFromString(
             responseSerializer,
-            """{"success":true,"data":{"accessToken":"access-token","refreshToken":"refresh-token","needsCuration":true}}""",
+            responseBody,
         )
     }
 }

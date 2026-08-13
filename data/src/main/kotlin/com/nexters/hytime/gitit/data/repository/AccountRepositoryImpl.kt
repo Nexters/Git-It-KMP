@@ -25,8 +25,11 @@ class AccountRepositoryImpl(
                     PATH_SIGN_IN_GOOGLE,
                     SignInWithGoogleRequest(idToken),
                 )
-            response.data?.toDomain()
-                ?: throw NetworkException(response.message ?: "로그인 응답에 세션이 없습니다.")
+            val data =
+                response.data?.takeIf {
+                    response.success && it.accessToken.isNotBlank() && it.refreshToken.isNotBlank()
+                } ?: throw NetworkException(response.message ?: "로그인 응답이 올바르지 않습니다.")
+            data.toDomain()
         }
 
     private companion object {
