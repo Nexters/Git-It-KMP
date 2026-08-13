@@ -29,6 +29,12 @@ private data class TestResponse(
     val result: String,
 )
 
+@Serializable
+private data class AuthTestRequest(
+    val idToken: String,
+    val id_token: String,
+)
+
 /** [KtorNetworkClient]의 요청 구성과 오류 변환을 검증한다. */
 class KtorNetworkClientTest {
     private val json = Json { ignoreUnknownKeys = true }
@@ -125,7 +131,7 @@ class KtorNetworkClientTest {
                 MockEngine {
                     respond(
                         content =
-                            """{"result":"ok","accessToken":"access-secret","refreshToken":"refresh-secret","access_token":"legacy-secret"}""",
+                            """{"result":"ok","accessToken":"access-secret","refreshToken":"refresh-secret","access_token":"legacy-access","refresh_token":"legacy-refresh"}""",
                         headers = headers { append("Content-Type", "application/json") },
                     )
                 },
@@ -135,12 +141,15 @@ class KtorNetworkClientTest {
 
         runBlocking {
             KtorNetworkClient(httpClient, json, baseUrl = "https://example.com")
-                .post<TestRequest, TestResponse>("/test", TestRequest("id-secret"))
+                .post<AuthTestRequest, TestResponse>("/test", AuthTestRequest("id-secret", "legacy-id"))
         }
 
         val message = logs.joinToString()
+        assertFalse("id-secret" in message)
+        assertFalse("legacy-id" in message)
         assertFalse("access-secret" in message)
         assertFalse("refresh-secret" in message)
-        assertFalse("legacy-secret" in message)
+        assertFalse("legacy-access" in message)
+        assertFalse("legacy-refresh" in message)
     }
 }
