@@ -1,4 +1,4 @@
-package com.nexters.hytime.gitit.feature.quiz
+package com.nexters.hytime.gitit.feature.quiz.solve
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -14,35 +14,35 @@ import kotlinx.coroutines.flow.asStateFlow
  * @property projectId 추후 문제 조회에 사용할 프로젝트 식별자
  * @property setId 추후 특정 학습 세트 조회에 사용할 선택적 식별자
  */
-class QuizViewModel(
+class SolveQuizViewModel(
     val projectId: String,
     val setId: String? = null,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(QuizUiState())
+    private val _uiState = MutableStateFlow(SolveQuizUiState())
 
     /** 문제 풀이 화면이 구독할 현재 상태다. */
-    val uiState: StateFlow<QuizUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<SolveQuizUiState> = _uiState.asStateFlow()
 
-    private val _sideEffects = MutableSharedFlow<QuizSideEffect>(extraBufferCapacity = 1)
+    private val _sideEffects = MutableSharedFlow<SolveQuizSideEffect>(extraBufferCapacity = 1)
 
     /** 화면 이동과 외부 URL 열기를 전달하는 이벤트 스트림이다. */
-    val sideEffects: SharedFlow<QuizSideEffect> = _sideEffects.asSharedFlow()
+    val sideEffects: SharedFlow<SolveQuizSideEffect> = _sideEffects.asSharedFlow()
 
     /**
      * 문제 풀이 화면에서 발생한 사용자 의도를 처리한다.
      *
      * @param intent 사용자가 발생시킨 문제 풀이 의도
      */
-    fun onIntent(intent: QuizIntent) {
+    fun onIntent(intent: SolveQuizIntent) {
         when (intent) {
-            QuizIntent.Start -> setState { copy(step = QuizStep.MultipleChoice) }
-            QuizIntent.BackClick -> _sideEffects.tryEmit(QuizSideEffect.NavigateBack)
-            QuizIntent.Submit -> submitAnswer()
-            QuizIntent.Next -> moveToNextStep()
-            QuizIntent.BookmarkClick -> toggleBookmark()
-            QuizIntent.OpenSource -> _sideEffects.tryEmit(QuizSideEffect.OpenUrl(uiState.value.currentSource().url))
-            is QuizIntent.AnswerClick -> onAnswerClick(intent.answerId)
-            is QuizIntent.EssayAnswerChange -> updateEssayAnswer(intent.answer)
+            SolveQuizIntent.Start -> setState { copy(step = QuizStep.MultipleChoice) }
+            SolveQuizIntent.BackClick -> _sideEffects.tryEmit(SolveQuizSideEffect.NavigateBack)
+            SolveQuizIntent.Submit -> submitAnswer()
+            SolveQuizIntent.Next -> moveToNextStep()
+            SolveQuizIntent.BookmarkClick -> toggleBookmark()
+            SolveQuizIntent.OpenSource -> _sideEffects.tryEmit(SolveQuizSideEffect.OpenUrl(uiState.value.currentSource().url))
+            is SolveQuizIntent.AnswerClick -> onAnswerClick(intent.answerId)
+            is SolveQuizIntent.EssayAnswerChange -> updateEssayAnswer(intent.answer)
         }
     }
 
@@ -80,7 +80,7 @@ class QuizViewModel(
         }
     }
 
-    private fun submitMultipleChoiceAnswer(state: QuizUiState) {
+    private fun submitMultipleChoiceAnswer(state: SolveQuizUiState) {
         val selectedAnswerId = state.selectedAnswerId ?: return
         if (state.isMultipleChoiceSubmitted) return
 
@@ -121,13 +121,27 @@ class QuizViewModel(
         }
     }
 
-    private fun setState(reducer: QuizUiState.() -> QuizUiState) {
+    private fun setState(reducer: SolveQuizUiState.() -> SolveQuizUiState) {
         _uiState.value = _uiState.value.reducer()
     }
 }
 
 /** 현재 단계의 문제 번호를 반환한다. */
-private fun QuizUiState.currentQuestionNumber(): Int = if (step == QuizStep.Essay) essayQuestion.number else multipleChoiceQuestion.number
+private fun SolveQuizUiState.currentQuestionNumber(): Int =
+    if (step ==
+        QuizStep.Essay
+    ) {
+        essayQuestion.number
+    } else {
+        multipleChoiceQuestion.number
+    }
 
 /** 현재 단계의 문제 출처를 반환한다. */
-private fun QuizUiState.currentSource(): QuizSource = if (step == QuizStep.Essay) essayQuestion.source else multipleChoiceQuestion.source
+private fun SolveQuizUiState.currentSource(): QuizSource =
+    if (step ==
+        QuizStep.Essay
+    ) {
+        essayQuestion.source
+    } else {
+        multipleChoiceQuestion.source
+    }

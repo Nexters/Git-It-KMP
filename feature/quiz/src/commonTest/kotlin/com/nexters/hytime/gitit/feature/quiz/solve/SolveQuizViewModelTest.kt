@@ -1,4 +1,4 @@
-package com.nexters.hytime.gitit.feature.quiz
+package com.nexters.hytime.gitit.feature.quiz.solve
 
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerState
 import kotlin.test.Test
@@ -7,15 +7,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /** 문제 풀이 ViewModel의 핵심 상태 전환을 검증한다. */
-class QuizViewModelTest {
+class SolveQuizViewModelTest {
     /** 시작·선택·정답 제출이 결과 화면에 필요한 상태를 만든다. */
     @Test
     fun onIntent_correctAnswer_expandsOnlyCorrectAnswer() {
         val viewModel = createViewModel()
 
-        viewModel.onIntent(QuizIntent.Start)
-        viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
-        viewModel.onIntent(QuizIntent.Submit)
+        viewModel.onIntent(SolveQuizIntent.Start)
+        viewModel.onIntent(SolveQuizIntent.AnswerClick("set-content"))
+        viewModel.onIntent(SolveQuizIntent.Submit)
 
         val state = viewModel.uiState.value
         assertEquals(QuizStep.MultipleChoice, state.step)
@@ -28,9 +28,9 @@ class QuizViewModelTest {
     fun onIntent_incorrectAnswer_expandsIncorrectAndCorrectAnswers() {
         val viewModel = createViewModel()
 
-        viewModel.onIntent(QuizIntent.Start)
-        viewModel.onIntent(QuizIntent.AnswerClick("render"))
-        viewModel.onIntent(QuizIntent.Submit)
+        viewModel.onIntent(SolveQuizIntent.Start)
+        viewModel.onIntent(SolveQuizIntent.AnswerClick("render"))
+        viewModel.onIntent(SolveQuizIntent.Submit)
 
         assertEquals(setOf("render", "set-content"), viewModel.uiState.value.expandedAnswerIds)
     }
@@ -39,12 +39,12 @@ class QuizViewModelTest {
     @Test
     fun onIntent_resultAnswerAndBookmark_togglesStates() {
         val viewModel = createViewModel()
-        viewModel.onIntent(QuizIntent.Start)
-        viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
-        viewModel.onIntent(QuizIntent.Submit)
+        viewModel.onIntent(SolveQuizIntent.Start)
+        viewModel.onIntent(SolveQuizIntent.AnswerClick("set-content"))
+        viewModel.onIntent(SolveQuizIntent.Submit)
 
-        viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
-        viewModel.onIntent(QuizIntent.BookmarkClick)
+        viewModel.onIntent(SolveQuizIntent.AnswerClick("set-content"))
+        viewModel.onIntent(SolveQuizIntent.BookmarkClick)
 
         assertFalse("set-content" in viewModel.uiState.value.expandedAnswerIds)
         assertEquals(setOf(1), viewModel.uiState.value.bookmarkedQuestionNumbers)
@@ -54,7 +54,7 @@ class QuizViewModelTest {
     @Test
     fun answerCardState_incorrectResult_mapsIncorrectAndCorrectStates() {
         val state =
-            QuizUiState(
+            SolveQuizUiState(
                 selectedAnswerId = "render",
                 isMultipleChoiceSubmitted = true,
                 expandedAnswerIds = setOf("render", "set-content"),
@@ -69,11 +69,11 @@ class QuizViewModelTest {
     @Test
     fun onIntent_multipleChoiceNext_movesToEssay() {
         val viewModel = createViewModel()
-        viewModel.onIntent(QuizIntent.Start)
-        viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
-        viewModel.onIntent(QuizIntent.Submit)
+        viewModel.onIntent(SolveQuizIntent.Start)
+        viewModel.onIntent(SolveQuizIntent.AnswerClick("set-content"))
+        viewModel.onIntent(SolveQuizIntent.Submit)
 
-        viewModel.onIntent(QuizIntent.Next)
+        viewModel.onIntent(SolveQuizIntent.Next)
 
         assertEquals(QuizStep.Essay, viewModel.uiState.value.step)
     }
@@ -83,7 +83,7 @@ class QuizViewModelTest {
     fun onIntent_essayAnswerOverLimit_truncatesToMaximumLength() {
         val viewModel = essayViewModel()
 
-        viewModel.onIntent(QuizIntent.EssayAnswerChange("가".repeat(ESSAY_ANSWER_MAX_LENGTH + 1)))
+        viewModel.onIntent(SolveQuizIntent.EssayAnswerChange("가".repeat(ESSAY_ANSWER_MAX_LENGTH + 1)))
 
         assertEquals(ESSAY_ANSWER_MAX_LENGTH, viewModel.uiState.value.essayAnswer.length)
     }
@@ -93,10 +93,10 @@ class QuizViewModelTest {
     fun onIntent_emptyEssay_submitAndNext_movesToCompleted() {
         val viewModel = essayViewModel()
 
-        viewModel.onIntent(QuizIntent.Submit)
+        viewModel.onIntent(SolveQuizIntent.Submit)
         assertTrue(viewModel.uiState.value.isEssaySubmitted)
 
-        viewModel.onIntent(QuizIntent.Next)
+        viewModel.onIntent(SolveQuizIntent.Next)
         assertEquals(QuizStep.Completed, viewModel.uiState.value.step)
     }
 
@@ -104,26 +104,26 @@ class QuizViewModelTest {
     @Test
     fun onIntent_bookmarkEachQuestion_keepsBothQuestionNumbers() {
         val viewModel = createViewModel()
-        viewModel.onIntent(QuizIntent.Start)
-        viewModel.onIntent(QuizIntent.BookmarkClick)
-        viewModel.onIntent(QuizIntent.AnswerClick("set-content"))
-        viewModel.onIntent(QuizIntent.Submit)
-        viewModel.onIntent(QuizIntent.Next)
+        viewModel.onIntent(SolveQuizIntent.Start)
+        viewModel.onIntent(SolveQuizIntent.BookmarkClick)
+        viewModel.onIntent(SolveQuizIntent.AnswerClick("set-content"))
+        viewModel.onIntent(SolveQuizIntent.Submit)
+        viewModel.onIntent(SolveQuizIntent.Next)
 
-        viewModel.onIntent(QuizIntent.BookmarkClick)
+        viewModel.onIntent(SolveQuizIntent.BookmarkClick)
 
         assertEquals(setOf(1, 2), viewModel.uiState.value.bookmarkedQuestionNumbers)
     }
 
     /** 서술형 단계까지 이동한 ViewModel을 만든다. */
-    private fun essayViewModel(): QuizViewModel =
+    private fun essayViewModel(): SolveQuizViewModel =
         createViewModel().apply {
-            onIntent(QuizIntent.Start)
-            onIntent(QuizIntent.AnswerClick("set-content"))
-            onIntent(QuizIntent.Submit)
-            onIntent(QuizIntent.Next)
+            onIntent(SolveQuizIntent.Start)
+            onIntent(SolveQuizIntent.AnswerClick("set-content"))
+            onIntent(SolveQuizIntent.Submit)
+            onIntent(SolveQuizIntent.Next)
         }
 
     /** 테스트에서 사용할 프로젝트 식별자가 포함된 ViewModel을 만든다. */
-    private fun createViewModel(): QuizViewModel = QuizViewModel(projectId = "project-1")
+    private fun createViewModel(): SolveQuizViewModel = SolveQuizViewModel(projectId = "project-1")
 }

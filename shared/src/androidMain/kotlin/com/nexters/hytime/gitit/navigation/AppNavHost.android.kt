@@ -11,9 +11,10 @@ import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
-import com.nexters.hytime.gitit.feature.quiz.QuizRoute
+import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
 import com.nexters.hytime.gitit.presentation.signin.SignInScreen
+import com.nexters.hytime.gitit.presentation.splash.IntermediateSplashScreen
 
 @Composable
 actual fun AppNavHost() {
@@ -42,6 +43,9 @@ actual fun AppNavHost() {
                 }
                 entry<AppRoute.Onboarding> {
                     OnboardingRoute(onNavigateToHome = { backStack.add(AppRoute.Home) })
+                }
+                entry<AppRoute.IntermediateSplash> {
+                    IntermediateSplashScreen(onFinished = { navigateToMainRoute(AppRoute.Home) })
                 }
                 entry<AppRoute.Home> {
                     HomeRoute(
@@ -96,7 +100,7 @@ actual fun AppNavHost() {
                     )
                 }
                 entry<AppRoute.Quiz> { route ->
-                    QuizRoute(
+                    SolveQuizRoute(
                         projectId = route.projectId,
                         setId = route.setId,
                         onBackClick = { backStack.removeLastOrNull() },

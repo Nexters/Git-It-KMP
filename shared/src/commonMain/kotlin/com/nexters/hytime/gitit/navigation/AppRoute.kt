@@ -27,6 +27,12 @@ sealed interface AppRoute : NavKey {
     data object Onboarding : AppRoute
 
     /**
+     * 튜토리얼 완료 후 홈으로 진입하기 전에 잠시 표시하는 중간 화면이다.
+     */
+    @Serializable
+    data object IntermediateSplash : AppRoute
+
+    /**
      * 앱을 시작할 때 표시하는 홈 화면이다.
      */
     @Serializable

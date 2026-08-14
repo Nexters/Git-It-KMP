@@ -1,4 +1,4 @@
-package com.nexters.hytime.gitit.feature.quiz
+package com.nexters.hytime.gitit.feature.quiz.solve
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -104,9 +104,9 @@ import org.jetbrains.compose.resources.stringResource
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuizScreen(
-    uiState: QuizUiState,
-    onIntent: (QuizIntent) -> Unit,
+fun SolveQuizScreen(
+    uiState: SolveQuizUiState,
+    onIntent: (SolveQuizIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showSource by rememberSaveable { mutableStateOf(false) }
@@ -115,8 +115,8 @@ fun QuizScreen(
         QuizStep.Intro ->
             QuizIntroScreen(
                 setInfo = uiState.setInfo,
-                onBackClick = { onIntent(QuizIntent.BackClick) },
-                onStartClick = { onIntent(QuizIntent.Start) },
+                onBackClick = { onIntent(SolveQuizIntent.BackClick) },
+                onStartClick = { onIntent(SolveQuizIntent.Start) },
                 modifier = modifier,
             )
         QuizStep.MultipleChoice ->
@@ -134,8 +134,8 @@ fun QuizScreen(
             )
         QuizStep.Completed ->
             QuizCompletionScreen(
-                onCloseClick = { onIntent(QuizIntent.BackClick) },
-                onNextClick = { onIntent(QuizIntent.BackClick) },
+                onCloseClick = { onIntent(SolveQuizIntent.BackClick) },
+                onNextClick = { onIntent(SolveQuizIntent.BackClick) },
                 modifier = modifier,
             )
     }
@@ -150,7 +150,7 @@ fun QuizScreen(
             source = source,
             onDismiss = { showSource = false },
             onOpenSource = {
-                onIntent(QuizIntent.OpenSource)
+                onIntent(SolveQuizIntent.OpenSource)
             },
         )
     }
@@ -233,8 +233,8 @@ private fun QuizIntroScreen(
  */
 @Composable
 private fun QuizQuestionScreen(
-    uiState: QuizUiState,
-    onIntent: (QuizIntent) -> Unit,
+    uiState: SolveQuizUiState,
+    onIntent: (SolveQuizIntent) -> Unit,
     onSourceClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -262,7 +262,7 @@ private fun QuizQuestionScreen(
         QuizQuestionHeader(
             questionNumber = uiState.multipleChoiceQuestion.number,
             questionText = uiState.multipleChoiceQuestion.text,
-            onBackClick = { onIntent(QuizIntent.BackClick) },
+            onBackClick = { onIntent(SolveQuizIntent.BackClick) },
             sky = sky,
             modifier =
                 Modifier
@@ -276,9 +276,9 @@ private fun QuizQuestionScreen(
                     if (uiState.isMultipleChoiceSubmitted) Res.string.quiz_next else Res.string.quiz_submit,
                 ),
             isButtonEnabled = uiState.isMultipleChoiceSubmitted || uiState.selectedAnswerId != null,
-            onBookmarkClick = { onIntent(QuizIntent.BookmarkClick) },
+            onBookmarkClick = { onIntent(SolveQuizIntent.BookmarkClick) },
             onButtonClick = {
-                onIntent(if (uiState.isMultipleChoiceSubmitted) QuizIntent.Next else QuizIntent.Submit)
+                onIntent(if (uiState.isMultipleChoiceSubmitted) SolveQuizIntent.Next else SolveQuizIntent.Submit)
             },
             modifier = Modifier.align(Alignment.BottomCenter),
         )
@@ -296,8 +296,8 @@ private fun QuizQuestionScreen(
  */
 @Composable
 private fun QuizAnswerList(
-    uiState: QuizUiState,
-    onIntent: (QuizIntent) -> Unit,
+    uiState: SolveQuizUiState,
+    onIntent: (SolveQuizIntent) -> Unit,
     onSourceClick: () -> Unit,
     topPadding: Dp,
     modifier: Modifier = Modifier,
@@ -313,7 +313,7 @@ private fun QuizAnswerList(
                 answer = answer.text,
                 modifier = Modifier.fillMaxWidth(),
                 state = uiState.answerCardState(answer.id),
-                onClick = { onIntent(QuizIntent.AnswerClick(answer.id)) },
+                onClick = { onIntent(SolveQuizIntent.AnswerClick(answer.id)) },
             )
         }
         if (uiState.isMultipleChoiceSubmitted) {
@@ -471,8 +471,8 @@ private fun QuizBottomBar(
  */
 @Composable
 private fun QuizEssayScreen(
-    uiState: QuizUiState,
-    onIntent: (QuizIntent) -> Unit,
+    uiState: SolveQuizUiState,
+    onIntent: (SolveQuizIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val sky = if (LocalInspectionMode.current) null else rememberSky()
@@ -497,7 +497,7 @@ private fun QuizEssayScreen(
                 } else {
                     QuizEssayInput(
                         answer = uiState.essayAnswer,
-                        onAnswerChange = { onIntent(QuizIntent.EssayAnswerChange(it)) },
+                        onAnswerChange = { onIntent(SolveQuizIntent.EssayAnswerChange(it)) },
                     )
                 }
             }
@@ -505,7 +505,7 @@ private fun QuizEssayScreen(
         QuizQuestionHeader(
             questionNumber = uiState.essayQuestion.number,
             questionText = uiState.essayQuestion.text,
-            onBackClick = { onIntent(QuizIntent.BackClick) },
+            onBackClick = { onIntent(SolveQuizIntent.BackClick) },
             sky = sky,
             modifier =
                 Modifier
@@ -515,8 +515,8 @@ private fun QuizEssayScreen(
         QuizBottomBar(
             isBookmarked = uiState.essayQuestion.number in uiState.bookmarkedQuestionNumbers,
             buttonText = stringResource(if (uiState.isEssaySubmitted) Res.string.quiz_next else Res.string.quiz_submit),
-            onBookmarkClick = { onIntent(QuizIntent.BookmarkClick) },
-            onButtonClick = { onIntent(if (uiState.isEssaySubmitted) QuizIntent.Next else QuizIntent.Submit) },
+            onBookmarkClick = { onIntent(SolveQuizIntent.BookmarkClick) },
+            onButtonClick = { onIntent(if (uiState.isEssaySubmitted) SolveQuizIntent.Next else SolveQuizIntent.Submit) },
             modifier = Modifier.align(Alignment.BottomCenter).imePadding(),
         )
     }
@@ -938,7 +938,7 @@ private fun QuizExternalLinkIcon() {
  * @param answerId 상태를 계산할 답안 식별자
  * @return 선택 전·정답·오답·접힘 여부를 반영한 카드 상태
  */
-internal fun QuizUiState.answerCardState(answerId: String): GitItMultipleChoiceAnswerState {
+internal fun SolveQuizUiState.answerCardState(answerId: String): GitItMultipleChoiceAnswerState {
     if (!isMultipleChoiceSubmitted) {
         return if (selectedAnswerId == answerId) {
             GitItMultipleChoiceAnswerState.Selected
@@ -990,7 +990,7 @@ private fun Modifier.questionBackdrop(sky: Sky?): Modifier =
 @Composable
 private fun QuizIntroScreenPreview() {
     GitItTheme {
-        QuizScreen(uiState = QuizUiState(), onIntent = {})
+        SolveQuizScreen(uiState = SolveQuizUiState(), onIntent = {})
     }
 }
 
@@ -998,9 +998,9 @@ private fun QuizIntroScreenPreview() {
 @Composable
 private fun QuizResultScreenPreview() {
     GitItTheme {
-        QuizScreen(
+        SolveQuizScreen(
             uiState =
-                QuizUiState(
+                SolveQuizUiState(
                     step = QuizStep.MultipleChoice,
                     selectedAnswerId = "render",
                     isMultipleChoiceSubmitted = true,
