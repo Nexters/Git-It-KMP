@@ -32,9 +32,6 @@ data class ProjectListItem(
  * 프로젝트 리스트 화면에서 발생하는 사용자 의도다.
  */
 sealed interface ProjectListIntent {
-    /** 뒤로가기 버튼 선택. */
-    data object BackClick : ProjectListIntent
-
     /** 홈 탭 선택. */
     data object HomeTabClick : ProjectListIntent
 
@@ -61,9 +58,6 @@ sealed interface ProjectListIntent {
  * 프로젝트 리스트 화면이 한 번만 전달해야 하는 이벤트다.
  */
 sealed interface ProjectListSideEffect {
-    /** 이전 화면으로 이동. */
-    data object NavigateBack : ProjectListSideEffect
-
     /** 홈 화면으로 이동. */
     data object NavigateToHome : ProjectListSideEffect
 

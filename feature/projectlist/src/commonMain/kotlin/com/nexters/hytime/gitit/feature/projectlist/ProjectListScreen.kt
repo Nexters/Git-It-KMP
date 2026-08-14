@@ -33,9 +33,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassContainer
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonSize
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonVariant
+import com.nexters.hytime.gitit.designsystem.liquidglass.gitItTopGradientBlur
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
 import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
@@ -57,14 +59,12 @@ import git_it_kmp.core.designsystem.generated.resources.Res as DesignSystemRes
  *
  * @param uiState 화면에 표시할 프로젝트 리스트 상태
  * @param onIntent 사용자 입력을 ViewModel로 올리는 콜백
- * @param showBackButton 상단 뒤로가기 버튼 표시 여부
  * @param modifier 화면의 크기와 배치를 지정할 수식자
  */
 @Composable
 fun ProjectListScreen(
     uiState: ProjectListUiState,
     onIntent: (ProjectListIntent) -> Unit,
-    showBackButton: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val sky = rememberGitItMainNavSky()
@@ -75,46 +75,54 @@ fun ProjectListScreen(
                 .fillMaxSize()
                 .background(GitItTheme.colors.grey700),
     ) {
-        Column(
+        LazyColumn(
             modifier =
                 Modifier
                     .fillMaxSize()
                     .background(GitItTheme.colors.grey700)
                     .gitItMainNavSky(sky)
+                    .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(top = TOP_BLUR_HEIGHT, bottom = 120.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(uiState.projects, key = { it.id }) { project ->
+                ProjectCard(
+                    item = project,
+                    onPlayClick = { onIntent(ProjectListIntent.PlayProjectClick(project.id)) },
+                )
+            }
+        }
+
+        Column(
+            modifier =
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .height(TOP_BLUR_HEIGHT)
+                    .gitItTopGradientBlur(sky)
                     .statusBarsPadding(),
         ) {
             GitItTopBar(
-                type = if (showBackButton) GitItTopBarType.LargeTitle else GitItTopBarType.InlineTitle,
+                type = GitItTopBarType.InlineTitle,
                 title = "프로젝트",
                 modifier = Modifier.padding(top = 8.dp),
-                onBackClick = if (showBackButton) ({ onIntent(ProjectListIntent.BackClick) }) else null,
                 actions = {
-                    GitItLiquidGlassIconButton(
-                        onClick = {},
-                        size = GitItLiquidGlassIconButtonSize.Md,
-                        variant = GitItLiquidGlassIconButtonVariant.Secondary,
-                    ) {
-                        ProjectListMenuIcon()
+                    val menuButton: @Composable () -> Unit = {
+                        GitItLiquidGlassIconButton(
+                            onClick = {},
+                            size = GitItLiquidGlassIconButtonSize.Md,
+                            variant = GitItLiquidGlassIconButtonVariant.Secondary,
+                        ) {
+                            ProjectListMenuIcon()
+                        }
+                    }
+                    if (sky == null) {
+                        menuButton()
+                    } else {
+                        GitItLiquidGlassContainer(sky = sky) { menuButton() }
                     }
                 },
             )
-            Spacer(Modifier.height(if (showBackButton) 21.dp else 9.dp))
-
-            LazyColumn(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 20.dp),
-                contentPadding = PaddingValues(bottom = 120.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(uiState.projects, key = { it.id }) { project ->
-                    ProjectCard(
-                        item = project,
-                        onPlayClick = { onIntent(ProjectListIntent.PlayProjectClick(project.id)) },
-                    )
-                }
-            }
         }
 
         GitItMainNavBar(
@@ -135,6 +143,9 @@ fun ProjectListScreen(
         )
     }
 }
+
+/** Figma 상단 dim과 동일한 점진 블러 영역 높이. */
+private val TOP_BLUR_HEIGHT = 103.dp
 
 /**
  * 프로젝트 카드 한 개를 렌더링한다.
@@ -357,7 +368,6 @@ private fun ProjectListScreenPreview() {
                         ),
                 ),
             onIntent = {},
-            showBackButton = false,
         )
     }
 }

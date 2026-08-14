@@ -33,7 +33,6 @@ class ProjectListViewModel : ViewModel() {
      */
     fun onIntent(intent: ProjectListIntent) {
         when (intent) {
-            ProjectListIntent.BackClick -> emit(ProjectListSideEffect.NavigateBack)
             ProjectListIntent.HomeTabClick -> emit(ProjectListSideEffect.NavigateToHome)
             ProjectListIntent.ProjectTabClick -> Unit
             ProjectListIntent.SavedTabClick -> emit(ProjectListSideEffect.NavigateToBookmark)
