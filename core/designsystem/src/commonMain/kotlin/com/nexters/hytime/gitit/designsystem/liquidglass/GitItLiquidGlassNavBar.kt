@@ -195,11 +195,11 @@ private data class NavItemLayoutInfo(
 )
 
 private val NAV_BAR_SHAPE = RoundedCornerShape(99.dp)
-private val NAV_BAR_HEIGHT = 64.dp
-private val NAV_BAR_HORIZONTAL_PADDING = 7.dp
+private val NAV_BAR_HEIGHT = 62.dp
+private val NAV_BAR_HORIZONTAL_PADDING = 8.dp
 private val NAV_BAR_ITEM_HORIZONTAL_PADDING = 14.5.dp
 private val NAV_BAR_ITEM_VERTICAL_PADDING = 3.dp
-private val NAV_BAR_ITEM_VERTICAL_INSET = 7.dp
+private val NAV_BAR_ITEM_VERTICAL_INSET = 6.dp
 private const val NAV_BAR_BACKGROUND_ALPHA = 0.1f
 private const val NAV_BAR_BORDER_END_ALPHA = 0.6f
 private const val NAV_BAR_ITEM_HIGHLIGHT_ALPHA = 0.2f

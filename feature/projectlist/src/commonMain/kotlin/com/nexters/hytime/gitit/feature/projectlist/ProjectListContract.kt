@@ -18,8 +18,6 @@ data class ProjectListUiState(
  * @property setLabel 최근 학습 세트 라벨
  * @property recentSetTitle 최근 학습 세트 이름
  * @property progress 최근 세트 진행률(0..100)
- * @property footerText 카드 하단 보조 텍스트. null이면 표시하지 않는다
- * @property showPlayButton 카드 우측 상단에 문제풀이 버튼을 표시할지 여부
  */
 data class ProjectListItem(
     val id: String,
@@ -28,8 +26,6 @@ data class ProjectListItem(
     val setLabel: String,
     val recentSetTitle: String,
     val progress: Int,
-    val footerText: String? = null,
-    val showPlayButton: Boolean = false,
 )
 
 /**

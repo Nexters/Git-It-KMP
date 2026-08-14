@@ -57,8 +57,6 @@ private val dummyProjects =
             setLabel = "Set 1",
             recentSetTitle = "Compose 핵심 개념",
             progress = 65,
-            footerText = "설정",
-            showPlayButton = true,
         ),
         ProjectListItem(
             id = "now-in-android-2",
