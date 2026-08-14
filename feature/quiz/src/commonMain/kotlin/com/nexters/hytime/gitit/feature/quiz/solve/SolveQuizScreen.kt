@@ -907,7 +907,7 @@ private fun QuizExternalLinkIcon() {
         )
         drawLine(
             color = Color.White,
-            start =Offset(size.width * 0.55f, size.height * 0.15f),
+            start = Offset(size.width * 0.55f, size.height * 0.15f),
             end = Offset(size.width * 0.85f, size.height * 0.15f),
             strokeWidth = 2.dp.toPx(),
             cap = StrokeCap.Round,
