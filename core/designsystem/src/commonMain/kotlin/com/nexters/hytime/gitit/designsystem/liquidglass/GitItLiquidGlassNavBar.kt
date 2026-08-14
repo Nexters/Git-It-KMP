@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
@@ -47,7 +48,7 @@ class GitItLiquidGlassNavBarItem(
  * Figma의 리퀴드 글래스 네비게이션 바(네비바)를 Compose로 렌더링한다.
  *
  * 4개 탭을 pill 형태 글래스 컨테이너에 가로로 배치하며, 선택된 탭 뒤에는
- * [GitItTheme.colors.grey400] 20% 하이라이트가 슬라이드 애니메이션으로 이동한다.
+ * [GitItTheme.colors.grey400] 30% 하이라이트가 슬라이드 애니메이션으로 이동한다.
  * 아이콘과 라벨은 모두 [GitItTheme.colors.blue100] 색상으로 표시된다.
  *
  * [sky]를 전달하면 [GitItLiquidGlassContainer]로 흐림(liquid glass) 효과가 추가된다.
@@ -75,13 +76,14 @@ fun GitItLiquidGlassNavBar(
                     .fillMaxWidth()
                     .height(NAV_BAR_HEIGHT)
                     .clip(NAV_BAR_SHAPE)
-                    .background(GitItTheme.colors.blue300.copy(alpha = NAV_BAR_BACKGROUND_ALPHA))
+                    .background(GitItTheme.colors.white05)
                     .drawWithContent {
                         drawContent()
                         drawGitItLiquidGlassBorder(
                             borderKind = GitItLiquidGlassBorderKind.NavBar,
                             color = GitItTheme.colors.blue300,
-                            endAlpha = NAV_BAR_BORDER_END_ALPHA,
+                            startAlpha = NAV_BAR_BORDER_ALPHA,
+                            endAlpha = NAV_BAR_BORDER_ALPHA,
                         )
                     }.padding(horizontal = NAV_BAR_HORIZONTAL_PADDING),
         ) {
@@ -131,7 +133,13 @@ fun GitItLiquidGlassNavBar(
     }
 
     if (sky != null) {
-        GitItLiquidGlassContainer(sky = sky, modifier = modifier.fillMaxWidth(), shape = NAV_BAR_SHAPE) {
+        GitItLiquidGlassContainer(
+            sky = sky,
+            modifier = modifier.fillMaxWidth(),
+            shape = NAV_BAR_SHAPE,
+            blurRadius = NAV_BAR_BLUR_RADIUS,
+            tint = Color.Transparent,
+        ) {
             navBarContent()
         }
     } else {
@@ -200,7 +208,7 @@ private val NAV_BAR_HORIZONTAL_PADDING = 8.dp
 private val NAV_BAR_ITEM_HORIZONTAL_PADDING = 14.5.dp
 private val NAV_BAR_ITEM_VERTICAL_PADDING = 3.dp
 private val NAV_BAR_ITEM_VERTICAL_INSET = 6.dp
-private const val NAV_BAR_BACKGROUND_ALPHA = 0.1f
-private const val NAV_BAR_BORDER_END_ALPHA = 0.6f
-private const val NAV_BAR_ITEM_HIGHLIGHT_ALPHA = 0.2f
+private const val NAV_BAR_BLUR_RADIUS = 4
+private const val NAV_BAR_BORDER_ALPHA = 0.75f
+private const val NAV_BAR_ITEM_HIGHLIGHT_ALPHA = 0.3f
 private const val NAV_BAR_ANIMATION_DURATION = 300
