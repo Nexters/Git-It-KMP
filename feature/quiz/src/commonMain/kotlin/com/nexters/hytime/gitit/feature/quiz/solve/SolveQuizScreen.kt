@@ -1010,3 +1010,18 @@ private fun QuizResultScreenPreview() {
         )
     }
 }
+
+@Preview
+@Composable
+private fun QuizEssayScreenPreview() {
+    GitItTheme {
+        SolveQuizScreen(
+            uiState =
+                SolveQuizUiState(
+                    step = QuizStep.Essay,
+                    essayAnswer = "공통 UI는 commonMain에서 공유하고 플랫폼별 구현만 소스셋으로 분리합니다.",
+                ),
+            onIntent = {},
+        )
+    }
+}
