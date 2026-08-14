@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
@@ -303,4 +304,15 @@ private fun SettingsIcon(
         colorFilter = ColorFilter.tint(color),
         modifier = modifier,
     )
+}
+
+@Preview
+@Composable
+private fun SettingsScreenPreview() {
+    GitItTheme {
+        SettingsScreen(
+            onBackClick = {},
+            onPolicyClick = {},
+        )
+    }
 }
