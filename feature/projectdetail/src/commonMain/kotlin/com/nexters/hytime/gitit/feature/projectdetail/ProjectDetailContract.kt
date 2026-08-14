@@ -66,6 +66,15 @@ sealed interface ProjectDetailEvent {
     /** 저장한 문제 화면으로 이동. */
     data object NavigateToSavedQuestions : ProjectDetailEvent
 
+    /**
+     * 문제 풀이 화면으로 이동.
+     *
+     * @property projectId 문제를 불러올 프로젝트 식별자
+     */
+    data class NavigateToQuiz(
+        val projectId: String,
+    ) : ProjectDetailEvent
+
     /** 학습 세트 진입.
      *
      * @property setId 진입할 세트 식별자

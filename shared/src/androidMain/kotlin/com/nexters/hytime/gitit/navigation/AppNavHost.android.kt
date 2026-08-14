@@ -11,6 +11,7 @@ import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
+import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
 import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 import com.nexters.hytime.gitit.presentation.splash.IntermediateSplashScreen
@@ -52,6 +53,7 @@ actual fun AppNavHost() {
                         onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                         onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                         onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                        onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )
                 }
                 entry<AppRoute.Bookmark> {
@@ -79,6 +81,7 @@ actual fun AppNavHost() {
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                         onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                        onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )
                 }
                 entry<AppRoute.ProjectDetail> { route ->
@@ -86,13 +89,21 @@ actual fun AppNavHost() {
                         projectId = route.projectId,
                         onBackClick = { backStack.removeLastOrNull() },
                         onNavigateToSavedQuestions = {},
-                        onNavigateToLearningSet = {},
+                        onNavigateToLearningSet = { projectId, setId -> backStack.add(AppRoute.Quiz(projectId, setId)) },
+                        onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )
                 }
                 entry<AppRoute.QuestionCreate> {
                     QuestionCreateRoute(
                         onBackClick = { backStack.removeLastOrNull() },
                         onRepositoryConfirmed = {},
+                    )
+                }
+                entry<AppRoute.Quiz> { route ->
+                    SolveQuizRoute(
+                        projectId = route.projectId,
+                        setId = route.setId,
+                        onBackClick = { backStack.removeLastOrNull() },
                     )
                 }
                 entry<AppRoute.LiquidGlassExample> {
