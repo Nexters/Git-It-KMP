@@ -1,17 +1,10 @@
 package com.nexters.hytime.gitit.designsystem.navigation
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassNavBar
@@ -19,6 +12,12 @@ import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassNavBarI
 import com.skydoves.cloudy.Sky
 import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
+import git_it_kmp.core.designsystem.generated.resources.Res
+import git_it_kmp.core.designsystem.generated.resources.ic_nav_bookmark
+import git_it_kmp.core.designsystem.generated.resources.ic_nav_file_text
+import git_it_kmp.core.designsystem.generated.resources.ic_nav_home
+import git_it_kmp.core.designsystem.generated.resources.ic_nav_user
+import org.jetbrains.compose.resources.painterResource
 
 /** 앱 하단 탭바의 목적지다. */
 enum class GitItMainNavDestination {
@@ -125,32 +124,7 @@ private fun mainNavItems(): List<MainNavItem> =
  */
 @Composable
 private fun HomeIcon() {
-    val color = LocalContentColor.current
-    Canvas(modifier = Modifier.size(20.dp)) {
-        val stroke = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-        val roof =
-            Path().apply {
-                moveTo(size.width * 0.18f, size.height * 0.46f)
-                lineTo(size.width * 0.5f, size.height * 0.2f)
-                lineTo(size.width * 0.82f, size.height * 0.46f)
-            }
-        val body =
-            Path().apply {
-                moveTo(size.width * 0.26f, size.height * 0.42f)
-                lineTo(size.width * 0.26f, size.height * 0.82f)
-                lineTo(size.width * 0.74f, size.height * 0.82f)
-                lineTo(size.width * 0.74f, size.height * 0.42f)
-            }
-        drawPath(roof, color = color, style = stroke)
-        drawPath(body, color = color, style = stroke)
-        drawLine(
-            color = color,
-            start = Offset(size.width * 0.5f, size.height * 0.82f),
-            end = Offset(size.width * 0.5f, size.height * 0.62f),
-            strokeWidth = 1.8.dp.toPx(),
-            cap = StrokeCap.Round,
-        )
-    }
+    Icon(painterResource(Res.drawable.ic_nav_home), contentDescription = null, modifier = Modifier.size(width = 18.214.dp, height = 20.dp))
 }
 
 /**
@@ -158,36 +132,11 @@ private fun HomeIcon() {
  */
 @Composable
 private fun FileTextIcon() {
-    val color = LocalContentColor.current
-    Canvas(modifier = Modifier.size(20.dp)) {
-        val stroke = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-        val file =
-            Path().apply {
-                moveTo(size.width * 0.26f, size.height * 0.14f)
-                lineTo(size.width * 0.58f, size.height * 0.14f)
-                lineTo(size.width * 0.78f, size.height * 0.34f)
-                lineTo(size.width * 0.78f, size.height * 0.86f)
-                lineTo(size.width * 0.26f, size.height * 0.86f)
-                close()
-            }
-        drawPath(file, color = color, style = stroke)
-        drawLine(
-            color = color,
-            start = Offset(size.width * 0.58f, size.height * 0.14f),
-            end = Offset(size.width * 0.58f, size.height * 0.34f),
-            strokeWidth = 1.8.dp.toPx(),
-            cap = StrokeCap.Round,
-        )
-        drawLine(
-            color = color,
-            start = Offset(size.width * 0.58f, size.height * 0.34f),
-            end = Offset(size.width * 0.78f, size.height * 0.34f),
-            strokeWidth = 1.8.dp.toPx(),
-            cap = StrokeCap.Round,
-        )
-        drawLine(color, Offset(size.width * 0.38f, size.height * 0.5f), Offset(size.width * 0.66f, size.height * 0.5f), 1.8.dp.toPx())
-        drawLine(color, Offset(size.width * 0.38f, size.height * 0.64f), Offset(size.width * 0.66f, size.height * 0.64f), 1.8.dp.toPx())
-    }
+    Icon(
+        painterResource(Res.drawable.ic_nav_file_text),
+        contentDescription = null,
+        modifier = Modifier.size(width = 16.428.dp, height = 20.dp),
+    )
 }
 
 /**
@@ -195,23 +144,11 @@ private fun FileTextIcon() {
  */
 @Composable
 private fun BookmarkIcon() {
-    val color = LocalContentColor.current
-    Canvas(modifier = Modifier.size(20.dp)) {
-        val bookmark =
-            Path().apply {
-                moveTo(size.width * 0.3f, size.height * 0.16f)
-                lineTo(size.width * 0.7f, size.height * 0.16f)
-                lineTo(size.width * 0.7f, size.height * 0.84f)
-                lineTo(size.width * 0.5f, size.height * 0.68f)
-                lineTo(size.width * 0.3f, size.height * 0.84f)
-                close()
-            }
-        drawPath(
-            path = bookmark,
-            color = color,
-            style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
-        )
-    }
+    Icon(
+        painterResource(Res.drawable.ic_nav_bookmark),
+        contentDescription = null,
+        modifier = Modifier.size(width = 16.078.dp, height = 20.dp),
+    )
 }
 
 /**
@@ -219,23 +156,5 @@ private fun BookmarkIcon() {
  */
 @Composable
 private fun UserIcon() {
-    val color = LocalContentColor.current
-    Canvas(modifier = Modifier.size(20.dp)) {
-        val strokeWidth = 1.8.dp.toPx()
-        drawCircle(
-            color = color,
-            radius = size.minDimension * 0.16f,
-            center = Offset(size.width * 0.5f, size.height * 0.28f),
-            style = Stroke(width = strokeWidth),
-        )
-        drawArc(
-            color = color,
-            startAngle = 200f,
-            sweepAngle = 140f,
-            useCenter = false,
-            topLeft = Offset(size.width * 0.25f, size.height * 0.48f),
-            size = Size(size.width * 0.5f, size.height * 0.42f),
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
-        )
-    }
+    Icon(painterResource(Res.drawable.ic_nav_user), contentDescription = null, modifier = Modifier.size(width = 18.039.dp, height = 20.dp))
 }
