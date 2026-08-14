@@ -204,9 +204,10 @@ private fun QuizQuestionScreen(
     val sky = if (LocalInspectionMode.current) null else rememberSky()
     var headerHeightPx by remember { mutableIntStateOf(0) }
     val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
+    val measuredSky = if (headerHeightPx > 0) sky else null
 
-    LaunchedEffect(sky, headerHeightPx) {
-        if (headerHeightPx > 0) sky?.invalidate()
+    LaunchedEffect(measuredSky, uiState) {
+        measuredSky?.invalidate()
     }
 
     Box(
@@ -220,12 +221,12 @@ private fun QuizQuestionScreen(
             onIntent = onIntent,
             onSourceClick = onSourceClick,
             topPadding = headerHeight + 20.dp,
-            modifier = Modifier.fillMaxSize().captureSky(sky),
+            modifier = Modifier.fillMaxSize().captureSky(measuredSky),
         )
         QuizQuestionHeader(
             question = uiState.question,
             onBackClick = { onIntent(SolveQuizIntent.BackClick) },
-            sky = sky,
+            sky = measuredSky,
             modifier =
                 Modifier
                     .align(Alignment.TopCenter)
