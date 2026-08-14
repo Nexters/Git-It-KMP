@@ -22,23 +22,31 @@ class GitItApplication : Application() {
         super.onCreate()
         initLogger(BuildConfig.DEBUG)
         val logger = gitItLogger(tag = "🌐 Network")
+        val sessionStorage = AndroidLoginSessionStorage(this)
         startKoin {
             androidContext(this@GitItApplication)
             modules(
                 appModules +
                     onboardingModule +
                     dataModule +
-                    platformModule +
+                    platformModule(sessionStorage) +
                     networkModule(
                         networkLogger = { message -> logger.d { message } },
                         baseUrl = BuildConfig.BACKEND_BASE_URL,
+                        accessTokenProvider = { sessionStorage.load()?.accessToken },
                     ),
             )
         }
     }
 }
 
-private val platformModule =
+/**
+ * Android 인증 의존성을 등록한다.
+ *
+ * @param sessionStorage 네트워크 인증과 로그인에서 공유할 세션 저장소
+ * @return Android 인증 의존성이 등록된 Koin 모듈
+ */
+private fun platformModule(sessionStorage: LoginSessionStorage) =
     module {
         single<GoogleAuthenticator> {
             AndroidGoogleAuthenticator(
@@ -47,5 +55,5 @@ private val platformModule =
             )
         }
         single<AuthTokenProvider> { GoogleAuthTokenProvider(get()) }
-        single<LoginSessionStorage> { AndroidLoginSessionStorage(get<Context>()) }
+        single<LoginSessionStorage> { sessionStorage }
     }

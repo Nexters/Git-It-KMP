@@ -57,20 +57,26 @@ private class LoginFakeNetworkClient(
     /** 마지막으로 직렬화한 요청 본문이다. */
     var requestBody: String = ""
 
+    /** 마지막 요청에 액세스 토큰 인증이 설정됐는지 여부다. */
+    var requestedAuthenticated: Boolean = true
+
     override suspend fun <Res : Any> get(
         url: String,
         headers: Map<String, String>,
+        authenticated: Boolean,
         responseSerializer: KSerializer<Res>,
     ): Res = error("호출되면 안 됩니다.")
 
     override suspend fun <Req : Any, Res : Any> post(
         path: String,
         body: Req,
+        authenticated: Boolean,
         requestSerializer: KSerializer<Req>,
         responseSerializer: KSerializer<Res>,
     ): Res {
         requestedPath = path
         requestBody = Json.encodeToString(requestSerializer, body)
+        requestedAuthenticated = authenticated
         return Json.decodeFromString(
             responseSerializer,
             responseBody,
