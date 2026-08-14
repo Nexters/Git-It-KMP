@@ -3,6 +3,7 @@ package com.nexters.hytime.gitit.feature.projectlist
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +39,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassContainer
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassDropdownMenu
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassDropdownMenuItem
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonSize
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonVariant
@@ -47,6 +54,8 @@ import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
 import git_it_kmp.core.designsystem.generated.resources.ic_menu
 import git_it_kmp.feature.projectlist.generated.resources.Res
 import git_it_kmp.feature.projectlist.generated.resources.ic_play_project_list
+import git_it_kmp.feature.projectlist.generated.resources.project_delete
+import git_it_kmp.feature.projectlist.generated.resources.project_menu_button_description
 import git_it_kmp.feature.projectlist.generated.resources.project_play_button_description
 import git_it_kmp.feature.projectlist.generated.resources.projectlist_thumbnail_base
 import git_it_kmp.feature.projectlist.generated.resources.projectlist_thumbnail_mark
@@ -68,6 +77,8 @@ fun ProjectListScreen(
     modifier: Modifier = Modifier,
 ) {
     val sky = rememberGitItMainNavSky()
+    var showMenu by remember { mutableStateOf(false) }
+    val dismissMenuInteractionSource = remember { MutableInteractionSource() }
 
     Box(
         modifier =
@@ -109,11 +120,13 @@ fun ProjectListScreen(
                 actions = {
                     val menuButton: @Composable () -> Unit = {
                         GitItLiquidGlassIconButton(
-                            onClick = {},
+                            onClick = { showMenu = !showMenu },
                             size = GitItLiquidGlassIconButtonSize.Md,
                             variant = GitItLiquidGlassIconButtonVariant.Secondary,
                         ) {
-                            ProjectListMenuIcon()
+                            ProjectListMenuIcon(
+                                contentDescription = stringResource(Res.string.project_menu_button_description),
+                            )
                         }
                     }
                     if (sky == null) {
@@ -141,6 +154,32 @@ fun ProjectListScreen(
                     .padding(start = 27.dp, end = 27.dp, bottom = 29.dp),
             sky = sky,
         )
+
+        if (showMenu) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = dismissMenuInteractionSource,
+                            indication = null,
+                            onClick = { showMenu = false },
+                        ),
+            )
+            GitItLiquidGlassDropdownMenu(
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 102.dp, end = 20.dp)
+                        .width(160.dp),
+                sky = sky,
+            ) {
+                GitItLiquidGlassDropdownMenuItem(
+                    text = stringResource(Res.string.project_delete),
+                    onClick = { showMenu = false },
+                )
+            }
+        }
     }
 }
 
@@ -329,12 +368,16 @@ private fun ProjectPlayButton(onClick: () -> Unit) {
     )
 }
 
-/** 프로젝트 목록의 메뉴 아이콘을 그린다. */
+/**
+ * 프로젝트 목록의 메뉴 아이콘을 그린다.
+ *
+ * @param contentDescription 스크린 리더에 전달할 메뉴 버튼 설명
+ */
 @Composable
-private fun ProjectListMenuIcon() {
+private fun ProjectListMenuIcon(contentDescription: String) {
     Icon(
         painter = painterResource(DesignSystemRes.drawable.ic_menu),
-        contentDescription = null,
+        contentDescription = contentDescription,
         modifier = Modifier.size(width = 17.dp, height = 12.dp),
         tint = Color.White,
     )
