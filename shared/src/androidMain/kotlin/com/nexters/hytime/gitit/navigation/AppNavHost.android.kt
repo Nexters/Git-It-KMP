@@ -15,7 +15,6 @@ import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
 import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
-import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 import com.nexters.hytime.gitit.presentation.splash.IntermediateSplashScreen
 
 @Composable
@@ -24,7 +23,7 @@ actual fun AppNavHost() {
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
-            AppRoute.Home,
+            AppRoute.Onboarding,
         )
 
     fun navigateToMainRoute(route: AppRoute) {
@@ -41,11 +40,8 @@ actual fun AppNavHost() {
         onBack = { backStack.removeLastOrNull() },
         entryProvider =
             entryProvider {
-                entry<AppRoute.SignIn> {
-                    SignInScreen()
-                }
                 entry<AppRoute.Onboarding> {
-                    OnboardingRoute(onNavigateToHome = { backStack.add(AppRoute.Home) })
+                    OnboardingRoute(onNavigateToHome = { backStack[0] = AppRoute.Home })
                 }
                 entry<AppRoute.IntermediateSplash> {
                     IntermediateSplashScreen(onFinished = { navigateToMainRoute(AppRoute.Home) })

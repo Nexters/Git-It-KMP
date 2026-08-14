@@ -13,10 +13,13 @@ import org.koin.dsl.module
  *
  * @param networkLogger HTTP 로거
  * @param baseUrl 모든 API 요청의 기준 URL
+ * @param accessTokenProvider 현재 로그인 세션의 액세스 토큰을 제공한다
+ * @return 네트워크 클라이언트를 등록한 Koin 모듈
  */
 fun networkModule(
     networkLogger: NetworkLogger,
     baseUrl: String,
+    accessTokenProvider: suspend () -> String?,
 ): Module =
     module {
         single<NetworkClient> {
@@ -28,6 +31,7 @@ fun networkModule(
                         isLenient = true
                     },
                 baseUrl = baseUrl,
+                accessTokenProvider = accessTokenProvider,
             )
         }
     }

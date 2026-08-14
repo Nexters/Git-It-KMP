@@ -35,6 +35,7 @@ private class FakeNetworkClient : NetworkClient {
     override suspend fun <Res : Any> get(
         url: String,
         headers: Map<String, String>,
+        authenticated: Boolean,
         responseSerializer: KSerializer<Res>,
     ): Res {
         requestedUrl = url
@@ -48,6 +49,7 @@ private class FakeNetworkClient : NetworkClient {
     override suspend fun <Req : Any, Res : Any> post(
         path: String,
         body: Req,
+        authenticated: Boolean,
         requestSerializer: KSerializer<Req>,
         responseSerializer: KSerializer<Res>,
     ): Res = error("호출되면 안 됩니다.")

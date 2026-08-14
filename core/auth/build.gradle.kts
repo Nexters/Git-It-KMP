@@ -4,6 +4,10 @@ plugins {
 }
 
 kotlin {
+    android {
+        withHostTest {}
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(projects.domain)
@@ -13,6 +17,7 @@ kotlin {
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.playServicesAuth)
             implementation(libs.google.identity.googleid)
+            implementation(libs.kotlinx.serialization.json)
         }
         jvmMain.dependencies {
             implementation(libs.kotlinx.serialization.json)

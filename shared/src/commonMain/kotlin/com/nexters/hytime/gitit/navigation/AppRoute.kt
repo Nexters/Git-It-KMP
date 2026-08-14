@@ -15,12 +15,6 @@ sealed interface AppRoute : NavKey {
     data object Bookmark : AppRoute
 
     /**
-     * Google 로그인을 수행하는 로그인 화면이다.
-     */
-    @Serializable
-    data object SignIn : AppRoute
-
-    /**
      * 앱을 시작할 때 표시하는 온보딩 화면이다.
      */
     @Serializable
