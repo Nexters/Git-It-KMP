@@ -2,6 +2,10 @@ plugins {
     alias(libs.plugins.gitit.kmp.library.compose)
 }
 
+compose.resources {
+    publicResClass = true
+}
+
 kotlin {
     sourceSets {
         commonMain.dependencies {

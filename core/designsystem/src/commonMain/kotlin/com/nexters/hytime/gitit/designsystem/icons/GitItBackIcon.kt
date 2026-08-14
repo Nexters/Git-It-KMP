@@ -1,16 +1,15 @@
 package com.nexters.hytime.gitit.designsystem.icons
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonSize
+import git_it_kmp.core.designsystem.generated.resources.Res
+import git_it_kmp.core.designsystem.generated.resources.ic_back
+import git_it_kmp.core.designsystem.generated.resources.ic_back_small
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * 뒤로가기 용도의 chevron left 아이콘을 그린다.
@@ -23,31 +22,10 @@ fun GitItBackIcon(
     size: GitItLiquidGlassIconButtonSize,
     modifier: Modifier = Modifier,
 ) {
-    val color = LocalContentColor.current
-    val iconSize = if (size == GitItLiquidGlassIconButtonSize.Md) 24.dp else 20.dp
-    val strokeWidth = if (size == GitItLiquidGlassIconButtonSize.Md) 2.5.dp else 2.dp
-
-    Canvas(modifier = modifier.size(iconSize)) {
-        val centerX = this.size.width / 2f
-        val centerY = this.size.height / 2f
-        val halfWidth = this.size.width * 0.125f
-        val halfHeight = this.size.height * 0.25f
-        val path =
-            Path().apply {
-                moveTo(centerX + halfWidth, centerY - halfHeight)
-                lineTo(centerX - halfWidth, centerY)
-                lineTo(centerX + halfWidth, centerY + halfHeight)
-            }
-
-        drawPath(
-            path = path,
-            color = color,
-            style =
-                Stroke(
-                    width = strokeWidth.toPx(),
-                    cap = StrokeCap.Round,
-                    join = StrokeJoin.Round,
-                ),
-        )
-    }
+    val isMedium = size == GitItLiquidGlassIconButtonSize.Md
+    Icon(
+        painter = painterResource(if (isMedium) Res.drawable.ic_back else Res.drawable.ic_back_small),
+        contentDescription = null,
+        modifier = modifier.size(width = if (isMedium) 8.5.dp else 7.dp, height = if (isMedium) 14.5.dp else 12.dp),
+    )
 }
