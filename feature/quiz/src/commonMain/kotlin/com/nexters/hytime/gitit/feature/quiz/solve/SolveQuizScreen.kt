@@ -38,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -56,13 +55,13 @@ import androidx.compose.ui.unit.sp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
+import com.nexters.hytime.gitit.designsystem.liquidglass.gitItTopGradientBlur
 import com.nexters.hytime.gitit.designsystem.navigation.GitItBookmarkIcon
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerCard
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerState
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
 import com.skydoves.cloudy.Sky
-import com.skydoves.cloudy.cloudy
 import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
 import git_it_kmp.feature.quiz.generated.resources.Res
@@ -326,7 +325,7 @@ private fun QuizQuestionHeader(
     sky: Sky?,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxWidth().questionBackdrop(sky).statusBarsPadding()) {
+    Column(modifier = modifier.fillMaxWidth().gitItTopGradientBlur(sky).statusBarsPadding()) {
         GitItTopBar(
             type = GitItTopBarType.Default,
             modifier = Modifier.padding(top = 8.dp),
@@ -665,25 +664,6 @@ internal fun SolveQuizUiState.answerCardState(answerId: String): GitItMultipleCh
  */
 @Composable
 private fun Modifier.captureSky(sky: Sky?): Modifier = if (sky == null) this else sky(sky)
-
-/**
- * 고정 질문 영역에 스크롤 콘텐츠의 Sky 블러를 적용한다.
- *
- * @param sky 흐림 배경을 읽을 캡처 상태. Preview에서는 null
- * @return 20px 블러 또는 정적 배경이 적용된 수식자
- */
-@Composable
-private fun Modifier.questionBackdrop(sky: Sky?): Modifier =
-    if (sky == null) {
-        background(GitItTheme.colors.grey700)
-    } else {
-        cloudy(
-            sky = sky,
-            radius = 20,
-            tint = GitItTheme.colors.grey700.copy(alpha = 0.55f),
-            shape = RectangleShape,
-        )
-    }
 
 @Preview
 @Composable
