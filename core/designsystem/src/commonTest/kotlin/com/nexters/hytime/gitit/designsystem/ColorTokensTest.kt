@@ -74,7 +74,7 @@ class ColorTokensTest {
             ).map { it.toArgb().toUInt() }
 
         assertContentEquals(
-            expected = listOf(0x1A7E94BBu, 0x26FFFFFFu, 0x4DFFFFFFu, 0xB3FFFFFFu, 0xB3000000u),
+            expected = listOf(0x0DFFFFFFu, 0x26FFFFFFu, 0x4DFFFFFFu, 0xB3FFFFFFu, 0xB3000000u),
             actual = actual,
         )
     }

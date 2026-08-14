@@ -151,7 +151,7 @@ internal data class GitItLiquidGlassIconButtonStyle(
                     isLiquidGlass && isError -> colors.error
                     isLiquidGlass -> colors.blue100
                     variant == GitItLiquidGlassIconButtonVariant.Primary || variant == GitItLiquidGlassIconButtonVariant.Secondary -> {
-                        colors.white15
+                        colors.white05
                     }
                     else -> Color.Transparent
                 }

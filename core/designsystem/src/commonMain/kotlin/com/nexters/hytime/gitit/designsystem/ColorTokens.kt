@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.Color
  * @property grey300 밝은 중립색
  * @property grey200 매우 밝은 중립색
  * @property grey100 흰색 중립색
- * @property white05 10% 불투명도의 블루 오버레이
+ * @property white05 5% 불투명도의 흰색 오버레이
  * @property white15 15% 불투명도의 흰색 오버레이
  * @property white30 30% 불투명도의 흰색 오버레이
  * @property white70 70% 불투명도의 흰색 오버레이
@@ -81,7 +81,7 @@ internal val defaultGitItColors =
         grey300 = Color(0xFFBCBCBC),
         grey200 = Color(0xFFECECEC),
         grey100 = Color(0xFFFFFFFF),
-        white05 = Color(0x1A7E94BB),
+        white05 = Color(0x0DFFFFFF),
         white15 = Color.White.copy(alpha = 0.15f),
         white30 = Color.White.copy(alpha = 0.30f),
         white70 = Color.White.copy(alpha = 0.70f),
