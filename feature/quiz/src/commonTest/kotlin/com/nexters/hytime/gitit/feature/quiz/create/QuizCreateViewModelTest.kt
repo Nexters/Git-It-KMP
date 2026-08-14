@@ -1,8 +1,6 @@
 package com.nexters.hytime.gitit.feature.quiz.create
 
 import com.nexters.hytime.gitit.feature.quiz.create.generation.QuizGenerationCoordinator
-import com.nexters.hytime.gitit.feature.quiz.create.generation.QuizGenerationSession
-import com.nexters.hytime.gitit.feature.quiz.create.generation.QuizGenerationSessionStore
 import com.nexters.hytime.gitit.feature.quiz.create.generation.QuizGenerationStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -183,27 +181,8 @@ class QuizCreateViewModelTest {
         nowMillis: () -> Long = { 1_000L },
     ): QuizGenerationCoordinator =
         QuizGenerationCoordinator(
-            store = InMemoryQuizGenerationSessionStore(),
             nowMillis = nowMillis,
             scope = scope,
             durationMillisProvider = { 180_000L },
         )
-}
-
-/** 테스트 중 생성 세션을 메모리에 보관한다. */
-private class InMemoryQuizGenerationSessionStore : QuizGenerationSessionStore {
-    private var session: QuizGenerationSession? = null
-
-    /** 메모리에 저장된 생성 세션을 반환한다. */
-    override fun load(): QuizGenerationSession? = session
-
-    /** 전달받은 생성 세션을 메모리에 보관한다. */
-    override fun save(session: QuizGenerationSession) {
-        this.session = session
-    }
-
-    /** 메모리에 저장된 생성 세션을 제거한다. */
-    override fun clear() {
-        session = null
-    }
 }

@@ -14,25 +14,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * 화면 이동과 무관하게 유지할 문제 생성 세션 저장소다.
- */
-interface QuizGenerationSessionStore {
-    /** 저장된 생성 세션을 반환한다. */
-    fun load(): QuizGenerationSession?
-
-    /**
-     * 생성 세션을 저장한다.
-     *
-     * @param session 앱 재실행 후에도 복원할 세션
-     */
-    fun save(session: QuizGenerationSession)
-
-    /** 저장된 생성 세션을 제거한다. */
-    fun clear()
-}
-
-/**
- * 문제 생성 진행률을 계산하기 위한 영속 세션이다.
+ * 현재 프로세스에서 문제 생성 진행률을 계산하기 위한 실행 세션이다.
  *
  * @property projectId 생성 대상 프로젝트 식별자
  * @property startedAtMillis 생성 시작 시각의 Unix epoch millisecond
@@ -41,7 +23,7 @@ interface QuizGenerationSessionStore {
  * @property completionStartProgress 완료 애니메이션을 시작한 진행률. 아직 시작하지 않았다면 null
  * @property failed 서버 실패 신호를 받아 생성이 중단되었는지 여부
  */
-data class QuizGenerationSession(
+private data class QuizGenerationSession(
     val projectId: String,
     val startedAtMillis: Long,
     val durationMillis: Long,
@@ -69,7 +51,7 @@ enum class QuizGenerationStatus {
 }
 
 /**
- * 앱 전체에서 공유할 문제 생성 진행 상태다.
+ * 현재 앱 프로세스에서 공유할 문제 생성 진행 상태다.
  *
  * @property projectId 생성 대상 프로젝트 식별자
  * @property status 생성 세션 상태
@@ -88,13 +70,11 @@ data class QuizGenerationState(
 /**
  * 시작 시각을 기준으로 문제 생성 진행 상태를 계산하고 여러 화면에 공유한다.
  *
- * @param store 프로세스 재시작 후 세션을 복원할 저장소
  * @param nowMillis 현재 Unix epoch millisecond를 반환하는 함수
  * @param scope 화면 생명주기와 독립적으로 진행 상태를 갱신할 앱 범위 코루틴 스코프
  * @param durationMillisProvider 새 생성 세션의 전체 시간을 결정하는 함수
  */
 class QuizGenerationCoordinator(
-    private val store: QuizGenerationSessionStore,
     private val nowMillis: () -> Long = ::currentEpochMillis,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
     private val durationMillisProvider: () -> Long = LocalQuizGenerator::randomDurationMillis,
@@ -105,10 +85,7 @@ class QuizGenerationCoordinator(
     val state: StateFlow<QuizGenerationState> = _state.asStateFlow()
 
     private var updateJob: Job? = null
-
-    init {
-        store.load()?.let { session -> resume(session, showHomeModal = true) }
-    }
+    private var session: QuizGenerationSession? = null
 
     /**
      * 기존 세션을 대체하고 새 문제 생성 타임라인을 시작한다.
@@ -116,14 +93,14 @@ class QuizGenerationCoordinator(
      * @param projectId 생성 대상 프로젝트 식별자
      */
     fun start(projectId: String) {
-        val session =
+        val newSession =
             QuizGenerationSession(
                 projectId = projectId,
                 startedAtMillis = nowMillis(),
                 durationMillis = durationMillisProvider(),
             )
-        store.save(session)
-        resume(session, showHomeModal = false)
+        session = newSession
+        runSession(newSession)
     }
 
     /**
@@ -134,7 +111,7 @@ class QuizGenerationCoordinator(
      * @param projectId 완료된 프로젝트 식별자
      */
     fun complete(projectId: String) {
-        val currentSession = store.load() ?: return
+        val currentSession = session ?: return
         if (currentSession.projectId != projectId || currentSession.completionReceivedAtMillis != null || currentSession.failed) return
 
         val completedSession =
@@ -142,8 +119,8 @@ class QuizGenerationCoordinator(
                 completionReceivedAtMillis = nowMillis(),
                 completionStartProgress = _state.value.progressPercent.coerceIn(0, WAITING_PROGRESS_PERCENT),
             )
-        store.save(completedSession)
-        resume(completedSession, showHomeModal = _state.value.isHomeModalVisible)
+        session = completedSession
+        runSession(completedSession)
     }
 
     /**
@@ -154,12 +131,12 @@ class QuizGenerationCoordinator(
      * @param projectId 생성에 실패한 프로젝트 식별자
      */
     fun fail(projectId: String) {
-        val currentSession = store.load() ?: return
+        val currentSession = session ?: return
         if (currentSession.projectId != projectId || currentSession.completionReceivedAtMillis != null || currentSession.failed) return
 
         val failedSession = currentSession.copy(failed = true)
-        store.save(failedSession)
-        resume(failedSession, showHomeModal = _state.value.isHomeModalVisible)
+        session = failedSession
+        runSession(failedSession)
     }
 
     /** 홈 화면에서 진행 모달을 표시한다. */
@@ -174,29 +151,22 @@ class QuizGenerationCoordinator(
         _state.value = _state.value.copy(isHomeModalVisible = false)
     }
 
-    /** 현재 생성 세션과 저장된 복원 정보를 모두 제거한다. */
+    /** 현재 프로세스에서 실행 중인 생성 세션을 제거한다. */
     fun cancel() {
         updateJob?.cancel()
         updateJob = null
-        store.clear()
+        session = null
         _state.value = QuizGenerationState()
     }
 
     /**
-     * 저장된 세션을 즉시 계산하고 완료 전까지 주기적으로 갱신한다.
+     * 실행 세션을 즉시 계산하고 완료 전까지 주기적으로 갱신한다.
      *
-     * @param session 이어서 표시할 생성 세션
-     * @param showHomeModal 복원 직후 홈 진행 모달을 표시할지 여부
+     * @param session 현재 프로세스에서 이어서 표시할 생성 세션
      */
-    private fun resume(
-        session: QuizGenerationSession,
-        showHomeModal: Boolean,
-    ) {
+    private fun runSession(session: QuizGenerationSession) {
         updateJob?.cancel()
         update(session)
-        if (showHomeModal) {
-            _state.value = _state.value.copy(isHomeModalVisible = true)
-        }
         if (_state.value.status == QuizGenerationStatus.Completed || _state.value.status == QuizGenerationStatus.Failed) return
 
         updateJob =

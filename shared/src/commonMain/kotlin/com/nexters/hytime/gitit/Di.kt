@@ -8,6 +8,8 @@ import com.nexters.hytime.gitit.domain.usecase.LoadGitHubRepositoryUseCase
 import com.nexters.hytime.gitit.domain.usecase.SignInUseCase
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailViewModel
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateViewModel
+import com.nexters.hytime.gitit.feature.quiz.create.QuizCreateViewModel
+import com.nexters.hytime.gitit.feature.quiz.create.generation.QuizGenerationCoordinator
 import com.nexters.hytime.gitit.logging.loggingModule
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
@@ -32,6 +34,8 @@ val appModule: Module =
         single { LoadGitHubRepositoryUseCase(repository = get<GitHubRepositoryRepository>()) }
         viewModel { params -> ProjectDetailViewModel(projectId = params.get<String>()) }
         viewModel { QuestionCreateViewModel(loadGitHubRepository = get()) }
+        single { QuizGenerationCoordinator() }
+        viewModel { params -> QuizCreateViewModel(projectId = params.get<String>(), coordinator = get()) }
     }
 
 /**

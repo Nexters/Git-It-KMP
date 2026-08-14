@@ -6,19 +6,16 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-/** 앱 범위 문제 생성 세션의 저장과 복원 동작을 검증한다. */
+/** 앱 프로세스 범위 문제 생성 세션의 진행 상태 계산을 검증한다. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class QuizGenerationCoordinatorTest {
-    /** 새 생성 세션은 시작 시각과 전체 시간을 저장한다. */
+    /** 새 생성 세션은 메모리에서 대상 프로젝트의 진행 상태를 시작한다. */
     @Test
-    fun start_newSession_persistsTimingInformation() =
+    fun start_newSession_startsProjectProgress() =
         runTest {
-            val store = RecordingQuizGenerationSessionStore()
             val coordinator =
                 QuizGenerationCoordinator(
-                    store = store,
                     nowMillis = { 12_345L },
                     scope = this,
                     durationMillisProvider = { 240_000L },
@@ -26,49 +23,53 @@ class QuizGenerationCoordinatorTest {
 
             coordinator.start("project-127")
 
-            assertEquals(QuizGenerationSession("project-127", 12_345L, 240_000L), store.session)
+            assertEquals("project-127", coordinator.state.value.projectId)
             assertEquals(QuizGenerationStatus.Generating, coordinator.state.value.status)
+            assertEquals(0, coordinator.state.value.progressPercent)
             coordinator.cancel()
         }
 
-    /** 저장된 세션은 현재 시각을 기준으로 진행률과 홈 모달을 복원한다. */
+    /** 새 코디네이터는 이전 프로세스의 생성 상태를 복원하지 않는다. */
     @Test
-    fun initialize_savedSession_restoresElapsedProgress() =
+    fun initialize_newCoordinator_startsIdle() =
         runTest {
-            val store =
-                RecordingQuizGenerationSessionStore(
-                    QuizGenerationSession("project-127", startedAtMillis = 1_000L, durationMillis = 200_000L),
-                )
-            val coordinator =
+            val previousCoordinator =
                 QuizGenerationCoordinator(
-                    store = store,
+                    nowMillis = { 1_000L },
+                    scope = this,
+                )
+            previousCoordinator.start("project-127")
+            val newCoordinator =
+                QuizGenerationCoordinator(
                     nowMillis = { 101_000L },
                     scope = this,
                 )
 
-            assertEquals(QuizGenerationStatus.Generating, coordinator.state.value.status)
-            assertEquals(50, coordinator.state.value.progressPercent)
-            assertTrue(coordinator.state.value.isHomeModalVisible)
-            coordinator.cancel()
+            assertEquals(QuizGenerationStatus.Idle, newCoordinator.state.value.status)
+            assertEquals(null, newCoordinator.state.value.projectId)
+            assertEquals(0, newCoordinator.state.value.progressPercent)
+            previousCoordinator.cancel()
+            newCoordinator.cancel()
         }
 
     /** 서버 완료 신호가 없으면 전체 시간이 지나도 98%에서 대기한다. */
     @Test
-    fun initialize_expiredSession_waitsAtNinetyEightPercent() =
+    fun update_expiredSession_waitsAtNinetyEightPercent() =
         runTest {
+            var nowMillis = 1_000L
             val coordinator =
                 QuizGenerationCoordinator(
-                    store =
-                        RecordingQuizGenerationSessionStore(
-                            QuizGenerationSession("project-127", startedAtMillis = 1_000L, durationMillis = 180_000L),
-                        ),
-                    nowMillis = { 181_000L },
+                    nowMillis = { nowMillis },
                     scope = this,
+                    durationMillisProvider = { 180_000L },
                 )
+            coordinator.start("project-127")
+            nowMillis += 180_000L
+            advanceTimeBy(1_000L)
+            runCurrent()
 
             assertEquals(QuizGenerationStatus.Generating, coordinator.state.value.status)
             assertEquals(98, coordinator.state.value.progressPercent)
-            assertTrue(coordinator.state.value.isHomeModalVisible)
             coordinator.cancel()
         }
 
@@ -79,7 +80,6 @@ class QuizGenerationCoordinatorTest {
             var nowMillis = 1_000L
             val coordinator =
                 QuizGenerationCoordinator(
-                    store = RecordingQuizGenerationSessionStore(),
                     nowMillis = { nowMillis },
                     scope = this,
                     durationMillisProvider = { 300_000L },
@@ -107,7 +107,6 @@ class QuizGenerationCoordinatorTest {
             var nowMillis = 1_000L
             val coordinator =
                 QuizGenerationCoordinator(
-                    store = RecordingQuizGenerationSessionStore(),
                     nowMillis = { nowMillis },
                     scope = this,
                     durationMillisProvider = { 300_000L },
@@ -127,14 +126,12 @@ class QuizGenerationCoordinatorTest {
             assertEquals(100, coordinator.state.value.progressPercent)
         }
 
-    /** 서버 실패 신호는 현재 세션을 실패 상태로 저장하고 갱신 작업을 종료한다. */
+    /** 서버 실패 신호는 현재 메모리 세션을 실패 상태로 바꾸고 갱신 작업을 종료한다. */
     @Test
-    fun fail_activeSession_persistsFailureState() =
+    fun fail_activeSession_updatesFailureState() =
         runTest {
-            val store = RecordingQuizGenerationSessionStore()
             val coordinator =
                 QuizGenerationCoordinator(
-                    store = store,
                     nowMillis = { 1_000L },
                     scope = this,
                     durationMillisProvider = { 300_000L },
@@ -144,53 +141,7 @@ class QuizGenerationCoordinatorTest {
             coordinator.fail("project-127")
 
             assertEquals(QuizGenerationStatus.Failed, coordinator.state.value.status)
-            assertEquals(true, store.session?.failed)
+            assertEquals("project-127", coordinator.state.value.projectId)
             coordinator.cancel()
         }
-
-    /** 실패한 세션은 앱 재시작 뒤 홈 실패 모달 상태로 복원된다. */
-    @Test
-    fun initialize_failedSession_restoresFailureModal() =
-        runTest {
-            val coordinator =
-                QuizGenerationCoordinator(
-                    store =
-                        RecordingQuizGenerationSessionStore(
-                            QuizGenerationSession(
-                                projectId = "project-127",
-                                startedAtMillis = 1_000L,
-                                durationMillis = 300_000L,
-                                failed = true,
-                            ),
-                        ),
-                    nowMillis = { 2_000L },
-                    scope = this,
-                )
-
-            assertEquals(QuizGenerationStatus.Failed, coordinator.state.value.status)
-            assertTrue(coordinator.state.value.isHomeModalVisible)
-            coordinator.cancel()
-        }
-}
-
-/**
- * 마지막으로 저장한 세션을 테스트에서 확인할 수 있는 저장소다.
- *
- * @property session 현재 저장된 세션
- */
-private class RecordingQuizGenerationSessionStore(
-    var session: QuizGenerationSession? = null,
-) : QuizGenerationSessionStore {
-    /** 마지막으로 저장된 생성 세션을 반환한다. */
-    override fun load(): QuizGenerationSession? = session
-
-    /** 전달받은 생성 세션을 마지막 세션으로 기록한다. */
-    override fun save(session: QuizGenerationSession) {
-        this.session = session
-    }
-
-    /** 기록된 생성 세션을 제거한다. */
-    override fun clear() {
-        session = null
-    }
 }

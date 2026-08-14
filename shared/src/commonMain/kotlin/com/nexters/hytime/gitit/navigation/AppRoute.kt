@@ -55,6 +55,16 @@ sealed interface AppRoute : NavKey {
     data object QuestionCreate : AppRoute
 
     /**
+     * 선택한 저장소의 문제 생성 조건을 설정하고 생성 진행 상태를 표시한다.
+     *
+     * @property projectId 문제를 생성할 프로젝트 식별자
+     */
+    @Serializable
+    data class QuizCreate(
+        val projectId: String,
+    ) : AppRoute
+
+    /**
      * 사용자가 프로젝트 또는 학습 세트의 문제를 푸는 화면이다.
      *
      * @property projectId 문제를 불러올 프로젝트 식별자

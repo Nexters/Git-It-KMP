@@ -13,13 +13,16 @@ import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
+import com.nexters.hytime.gitit.feature.quiz.create.QuizCreateRoute
 import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizRoute
+import com.nexters.hytime.gitit.permission.rememberNotificationPermissionState
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
 import com.nexters.hytime.gitit.presentation.splash.IntermediateSplashScreen
 
 @Composable
 actual fun AppNavHost() {
     val uriHandler = LocalUriHandler.current
+    val notificationPermissionState = rememberNotificationPermissionState()
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
@@ -47,13 +50,17 @@ actual fun AppNavHost() {
                     IntermediateSplashScreen(onFinished = { navigateToMainRoute(AppRoute.Home) })
                 }
                 entry<AppRoute.Home> {
-                    HomeRoute(
-                        onNavigateToQuestionCreate = { backStack.add(AppRoute.QuestionCreate) },
-                        onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
-                        onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
-                        onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
-                        onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
-                    )
+                    QuizGenerationHomeHost(
+                        onNavigateToProject = { projectId -> backStack.add(AppRoute.ProjectDetail(projectId)) },
+                    ) {
+                        HomeRoute(
+                            onNavigateToQuestionCreate = { backStack.add(AppRoute.QuestionCreate) },
+                            onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
+                            onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
+                            onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                            onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
+                        )
+                    }
                 }
                 entry<AppRoute.Settings> {
                     SettingsScreen(
@@ -102,7 +109,17 @@ actual fun AppNavHost() {
                 entry<AppRoute.QuestionCreate> {
                     QuestionCreateRoute(
                         onBackClick = { backStack.removeLastOrNull() },
-                        onRepositoryConfirmed = {},
+                        onRepositoryConfirmed = { repository ->
+                            backStack.add(AppRoute.QuizCreate("${repository.ownerName}/${repository.name}"))
+                        },
+                    )
+                }
+                entry<AppRoute.QuizCreate> { route ->
+                    QuizCreateRoute(
+                        projectId = route.projectId,
+                        onBackClick = { backStack.removeLastOrNull() },
+                        onNavigateHome = { navigateToMainRoute(AppRoute.Home) },
+                        onRequestNotificationPermission = notificationPermissionState::requestPermission,
                     )
                 }
                 entry<AppRoute.Quiz> { route ->
