@@ -1,14 +1,12 @@
 package com.nexters.hytime.gitit.feature.projectdetail
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * 프로젝트 상세 화면의 단일 [ProjectDetailUiState]를 관리하는 ViewModel이다.
@@ -85,18 +83,18 @@ class ProjectDetailViewModel(
     }
 
     /**
-     * 문제풀이 바로가기 인텐트. 아직 미구현이다.
+     * 문제풀이 바로가기 인텐트. [ProjectDetailEvent.NavigateToQuiz]를 흘려보낸다.
      */
     fun onQuestionSolvingClick() {
-        // TODO: 문제풀이 화면 연동 후 네비게이션 이벤트를 발행한다.
+        emit(ProjectDetailEvent.NavigateToQuiz(projectId))
     }
 
     /**
-     * 문제풀이 바로가기 인텐트. 아직 미구현이다.
+     * 더보기 메뉴의 문제풀이 바로가기 인텐트다.
      */
     fun onQuestionSolvingShortcutClick() {
         onDismissMoreMenu()
-        // TODO: 문제풀이 화면 연동 후 네비게이션 이벤트를 발행한다.
+        emit(ProjectDetailEvent.NavigateToQuiz(projectId))
     }
 
     /**
@@ -107,7 +105,7 @@ class ProjectDetailViewModel(
     }
 
     private fun emit(event: ProjectDetailEvent) {
-        viewModelScope.launch { _events.emit(event) }
+        _events.tryEmit(event)
     }
 
     private fun loadDummy() {

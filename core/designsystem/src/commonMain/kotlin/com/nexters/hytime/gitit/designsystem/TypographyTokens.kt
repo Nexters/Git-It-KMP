@@ -16,6 +16,8 @@ import org.jetbrains.compose.resources.Font
 /**
  * Git-it의 텍스트 스타일 토큰을 제공한다.
  *
+ * @property splashTitle 중간 스플래시의 핵심 문구에 사용하는 44sp 굵은 스타일
+ * @property splashSubtitle 중간 스플래시의 보조 문구에 사용하는 24sp 세미볼드 스타일
  * @property headline1 가장 큰 화면 제목에 사용하는 30sp 굵은 스타일
  * @property headline2 두 번째 수준 화면 제목에 사용하는 28sp 굵은 스타일
  * @property subtitle1 가장 큰 부제목에 사용하는 24sp 굵은 스타일
@@ -29,6 +31,8 @@ import org.jetbrains.compose.resources.Font
  */
 @Immutable
 class GitItTypography internal constructor(
+    val splashTitle: TextStyle,
+    val splashSubtitle: TextStyle,
     val headline1: TextStyle,
     val headline2: TextStyle,
     val subtitle1: TextStyle,
@@ -57,6 +61,8 @@ internal fun createGitItTypography(): GitItTypography {
     val fontFamily = createGitItFontFamily()
 
     return GitItTypography(
+        splashTitle = textStyle(fontFamily, FontWeight.Bold, 44, 61.6f, -0.88f),
+        splashSubtitle = textStyle(fontFamily, FontWeight.SemiBold, 24, 33.6f),
         headline1 = textStyle(fontFamily, FontWeight.Bold, 30, 37.2f),
         headline2 = textStyle(fontFamily, FontWeight.Bold, 28, 36.4f),
         subtitle1 = textStyle(fontFamily, FontWeight.Bold, 24, 35.52f),
@@ -73,7 +79,7 @@ internal fun createGitItTypography(): GitItTypography {
 /**
  * 영문 글리프를 우선 처리하고 한글 글리프를 폴백하는 폰트 패밀리를 만든다.
  *
- * @return 보통·중간·굵은 굵기를 지원하는 다국어 폰트 패밀리
+ * @return 보통·중간·세미볼드·굵은 굵기를 지원하는 다국어 폰트 패밀리
  */
 @Composable
 private fun createGitItFontFamily(): FontFamily =
@@ -82,6 +88,8 @@ private fun createGitItFontFamily(): FontFamily =
         Font(Res.font.noto_sans_kr_variable, FontWeight.Normal),
         Font(Res.font.plus_jakarta_sans_variable, FontWeight.Medium),
         Font(Res.font.noto_sans_kr_variable, FontWeight.Medium),
+        Font(Res.font.plus_jakarta_sans_variable, FontWeight.SemiBold),
+        Font(Res.font.noto_sans_kr_variable, FontWeight.SemiBold),
         Font(Res.font.plus_jakarta_sans_variable, FontWeight.Bold),
         Font(Res.font.noto_sans_kr_variable, FontWeight.Bold),
     )
@@ -93,20 +101,22 @@ private fun createGitItFontFamily(): FontFamily =
  * @param fontWeight 텍스트 굵기
  * @param fontSize 텍스트 크기(sp)
  * @param lineHeight 줄 높이(sp)
- * @return 글자 간격 0%를 포함한 Compose 텍스트 스타일
+ * @param letterSpacing 글자 사이의 간격(sp)
+ * @return Figma의 크기와 자간을 반영한 Compose 텍스트 스타일
  */
 private fun textStyle(
     fontFamily: FontFamily,
     fontWeight: FontWeight,
     fontSize: Int,
     lineHeight: Float,
+    letterSpacing: Float = 0f,
 ): TextStyle =
     TextStyle(
         fontFamily = fontFamily,
         fontWeight = fontWeight,
         fontSize = fontSize.sp,
         lineHeight = lineHeight.sp,
-        letterSpacing = 0.sp,
+        letterSpacing = letterSpacing.sp,
     )
 
 /**
