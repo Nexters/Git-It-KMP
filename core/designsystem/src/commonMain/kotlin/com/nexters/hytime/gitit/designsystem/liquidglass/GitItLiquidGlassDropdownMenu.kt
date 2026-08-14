@@ -63,7 +63,7 @@ fun GitItLiquidGlassDropdownMenu(
             modifier = modifier,
             shape = DROPDOWN_MENU_SHAPE,
             blurRadius = DROPDOWN_MENU_BLUR_RADIUS,
-            tint = GitItTheme.colors.white05,
+            tint = Color.Transparent,
         ) {
             menuContent()
         }
