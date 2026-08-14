@@ -36,7 +36,10 @@ class SolveQuizViewModel(
     fun onIntent(intent: SolveQuizIntent) {
         when (intent) {
             SolveQuizIntent.Start -> setState { copy(step = QuizStep.MultipleChoice) }
-            SolveQuizIntent.BackClick -> _sideEffects.tryEmit(SolveQuizSideEffect.NavigateBack)
+            SolveQuizIntent.BackClick -> {
+                setState { SolveQuizUiState() }
+                _sideEffects.tryEmit(SolveQuizSideEffect.NavigateBack)
+            }
             SolveQuizIntent.Submit -> submitAnswer()
             SolveQuizIntent.Next -> moveToNextStep()
             SolveQuizIntent.BookmarkClick -> toggleBookmark()

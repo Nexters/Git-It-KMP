@@ -901,31 +901,21 @@ private fun QuizExternalLinkIcon() {
         drawLine(
             color = Color.White,
             start = center,
-            end =
-                androidx.compose.ui.geometry
-                    .Offset(size.width * 0.85f, size.height * 0.15f),
+            end = Offset(size.width * 0.85f, size.height * 0.15f),
             strokeWidth = 2.dp.toPx(),
             cap = StrokeCap.Round,
         )
         drawLine(
             color = Color.White,
-            start =
-                androidx.compose.ui.geometry
-                    .Offset(size.width * 0.55f, size.height * 0.15f),
-            end =
-                androidx.compose.ui.geometry
-                    .Offset(size.width * 0.85f, size.height * 0.15f),
+            start =Offset(size.width * 0.55f, size.height * 0.15f),
+            end = Offset(size.width * 0.85f, size.height * 0.15f),
             strokeWidth = 2.dp.toPx(),
             cap = StrokeCap.Round,
         )
         drawLine(
             color = Color.White,
-            start =
-                androidx.compose.ui.geometry
-                    .Offset(size.width * 0.85f, size.height * 0.15f),
-            end =
-                androidx.compose.ui.geometry
-                    .Offset(size.width * 0.85f, size.height * 0.45f),
+            start = Offset(size.width * 0.85f, size.height * 0.15f),
+            end = Offset(size.width * 0.85f, size.height * 0.45f),
             strokeWidth = 2.dp.toPx(),
             cap = StrokeCap.Round,
         )

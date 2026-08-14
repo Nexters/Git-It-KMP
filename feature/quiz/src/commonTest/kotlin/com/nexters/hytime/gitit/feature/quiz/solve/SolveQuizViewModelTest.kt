@@ -115,6 +115,18 @@ class SolveQuizViewModelTest {
         assertEquals(setOf(1, 2), viewModel.uiState.value.bookmarkedQuestionNumbers)
     }
 
+    /** 학습 완료 화면을 닫으면 다음 진입을 위해 초기 상태로 돌아간다. */
+    @Test
+    fun onIntent_completedBackClick_resetsState() {
+        val viewModel = essayViewModel()
+        viewModel.onIntent(SolveQuizIntent.Submit)
+        viewModel.onIntent(SolveQuizIntent.Next)
+
+        viewModel.onIntent(SolveQuizIntent.BackClick)
+
+        assertEquals(SolveQuizUiState(), viewModel.uiState.value)
+    }
+
     /** 서술형 단계까지 이동한 ViewModel을 만든다. */
     private fun essayViewModel(): SolveQuizViewModel =
         createViewModel().apply {
