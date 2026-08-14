@@ -1,11 +1,11 @@
 package com.nexters.hytime.gitit
 
-import android.content.Context
 import android.app.Application
+import android.content.Context
+import com.nexters.hytime.gitit.auth.AndroidLoginSessionStorage
 import com.nexters.hytime.gitit.auth.AndroidGoogleAuthenticator
 import com.nexters.hytime.gitit.auth.GoogleAuthenticator
 import com.nexters.hytime.gitit.auth.GoogleAuthTokenProvider
-import com.nexters.hytime.gitit.auth.InMemoryLoginSessionStorage
 import com.nexters.hytime.gitit.data.di.dataModule
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
@@ -47,5 +47,5 @@ private val platformModule =
             )
         }
         single<AuthTokenProvider> { GoogleAuthTokenProvider(get()) }
-        single<LoginSessionStorage> { InMemoryLoginSessionStorage() }
+        single<LoginSessionStorage> { AndroidLoginSessionStorage(get<Context>()) }
     }
