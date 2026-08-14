@@ -1,12 +1,14 @@
 package com.nexters.hytime.gitit.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.nexters.hytime.gitit.feature.bookmark.BookmarkRoute
 import com.nexters.hytime.gitit.feature.home.HomeRoute
 import com.nexters.hytime.gitit.feature.my.MyRoute
+import com.nexters.hytime.gitit.feature.my.SettingsScreen
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
@@ -18,6 +20,7 @@ import com.nexters.hytime.gitit.presentation.splash.IntermediateSplashScreen
 
 @Composable
 actual fun AppNavHost() {
+    val uriHandler = LocalUriHandler.current
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
@@ -56,6 +59,12 @@ actual fun AppNavHost() {
                         onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )
                 }
+                entry<AppRoute.Settings> {
+                    SettingsScreen(
+                        onBackClick = { backStack.removeLastOrNull() },
+                        onPolicyClick = { uriHandler.openUri(POLICY_URL) },
+                    )
+                }
                 entry<AppRoute.Bookmark> {
                     BookmarkRoute(
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
@@ -68,6 +77,7 @@ actual fun AppNavHost() {
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                         onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                        onNavigateToSettings = { backStack.add(AppRoute.Settings) },
                     )
                 }
                 entry<AppRoute.ProjectList> {

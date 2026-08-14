@@ -13,12 +13,14 @@ import kotlinx.coroutines.flow.collectLatest
  * @param onNavigateToHome 홈 화면으로 이동하는 콜백
  * @param onNavigateToProjectList 프로젝트 리스트 화면으로 이동하는 콜백
  * @param onNavigateToBookmark 저장한 문제 화면으로 이동하는 콜백
+ * @param onNavigateToSettings 설정 화면으로 이동하는 콜백
  */
 @Composable
 fun MyRoute(
     onNavigateToHome: () -> Unit,
     onNavigateToProjectList: () -> Unit,
     onNavigateToBookmark: () -> Unit,
+    onNavigateToSettings: () -> Unit,
 ) {
     val viewModel = viewModel { MyViewModel() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -26,6 +28,7 @@ fun MyRoute(
     LaunchedEffect(Unit) {
         viewModel.sideEffects.collectLatest { sideEffect ->
             when (sideEffect) {
+                MySideEffect.NavigateToSettings -> onNavigateToSettings()
                 MySideEffect.NavigateToHome -> onNavigateToHome()
                 MySideEffect.NavigateToProjectList -> onNavigateToProjectList()
                 MySideEffect.NavigateToBookmark -> onNavigateToBookmark()
