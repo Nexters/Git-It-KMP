@@ -14,6 +14,7 @@ interface NetworkClient {
      *
      * @param url 요청할 전체 URL
      * @param headers 요청에 추가할 HTTP 헤더. Ktor 타입을 노출하지 않도록 문자열로 받는다
+     * @param authenticated 백엔드 액세스 토큰을 요청에 포함할지 여부
      * @param responseSerializer 응답 본문의 역직렬화기
      * @return 역직렬화된 응답
      * @throws NetworkException HTTP 통신 실패 또는 2xx 외 응답
@@ -21,6 +22,7 @@ interface NetworkClient {
     suspend fun <Res : Any> get(
         url: String,
         headers: Map<String, String> = emptyMap(),
+        authenticated: Boolean = true,
         responseSerializer: KSerializer<Res>,
     ): Res
 
@@ -30,6 +32,7 @@ interface NetworkClient {
      *
      * @param path baseUrl 뒤에 붙는 요청 경로
      * @param body 요청 본문. [requestSerializer]로 직렬화된다.
+     * @param authenticated 백엔드 액세스 토큰을 요청에 포함할지 여부
      * @param requestSerializer 요청 본문의 직렬화기
      * @param responseSerializer 응답 본문의 역직렬화기
      * @return 역직렬화된 응답
@@ -38,6 +41,7 @@ interface NetworkClient {
     suspend fun <Req : Any, Res : Any> post(
         path: String,
         body: Req,
+        authenticated: Boolean = true,
         requestSerializer: KSerializer<Req>,
         responseSerializer: KSerializer<Res>,
     ): Res
@@ -48,23 +52,38 @@ interface NetworkClient {
  *
  * @param url 요청할 전체 URL
  * @param headers 요청에 추가할 HTTP 헤더
+ * @param authenticated 백엔드 액세스 토큰을 요청에 포함할지 여부
  * @return 역직렬화된 응답
  */
 suspend inline fun <reified Res : Any> NetworkClient.get(
     url: String,
     headers: Map<String, String> = emptyMap(),
-): Res = get(url = url, headers = headers, responseSerializer = kotlinx.serialization.serializer())
+    authenticated: Boolean = true,
+): Res =
+    get(
+        url = url,
+        headers = headers,
+        authenticated = authenticated,
+        responseSerializer = kotlinx.serialization.serializer(),
+    )
 
 /**
  * [NetworkClient.post]의 reified 편의 확장이다. 직렬화기를 명시하지 않아도 된다.
+ *
+ * @param path baseUrl 뒤에 붙는 요청 경로
+ * @param body 직렬화할 요청 본문
+ * @param authenticated 백엔드 액세스 토큰을 요청에 포함할지 여부
+ * @return 역직렬화된 응답
  */
 suspend inline fun <reified Req : Any, reified Res : Any> NetworkClient.post(
     path: String,
     body: Req,
+    authenticated: Boolean = true,
 ): Res =
     post(
         path = path,
         body = body,
+        authenticated = authenticated,
         requestSerializer = kotlinx.serialization.serializer(),
         responseSerializer = kotlinx.serialization.serializer(),
     )

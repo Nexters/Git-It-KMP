@@ -1,26 +1,28 @@
 package com.nexters.hytime.gitit.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.nexters.hytime.gitit.feature.bookmark.BookmarkRoute
 import com.nexters.hytime.gitit.feature.home.HomeRoute
 import com.nexters.hytime.gitit.feature.my.MyRoute
+import com.nexters.hytime.gitit.feature.my.SettingsScreen
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
 import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
 import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
-import com.nexters.hytime.gitit.presentation.signin.SignInScreen
 import com.nexters.hytime.gitit.presentation.splash.IntermediateSplashScreen
 
 // NavDisplay가 JVM(Desktop)을 미지원하므로 백스택 기반 직접 렌더를 사용한다.
 @Composable
 actual fun AppNavHost() {
+    val uriHandler = LocalUriHandler.current
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
-            AppRoute.Home,
+            AppRoute.Onboarding,
         )
 
     fun navigateToMainRoute(route: AppRoute) {
@@ -33,8 +35,7 @@ actual fun AppNavHost() {
     }
 
     when (val route = backStack.lastOrNull()) {
-        AppRoute.SignIn -> SignInScreen()
-        AppRoute.Onboarding -> OnboardingRoute(onNavigateToHome = { backStack.add(AppRoute.Home) })
+        AppRoute.Onboarding -> OnboardingRoute(onNavigateToHome = { backStack[0] = AppRoute.Home })
         AppRoute.IntermediateSplash -> {
             IntermediateSplashScreen(onFinished = { navigateToMainRoute(AppRoute.Home) })
         }
@@ -47,6 +48,11 @@ actual fun AppNavHost() {
                 onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
             )
         }
+        AppRoute.Settings ->
+            SettingsScreen(
+                onBackClick = { backStack.removeLastOrNull() },
+                onPolicyClick = { uriHandler.openUri(POLICY_URL) },
+            )
         AppRoute.Bookmark -> {
             BookmarkRoute(
                 onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
@@ -59,6 +65,7 @@ actual fun AppNavHost() {
                 onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                 onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                onNavigateToSettings = { backStack.add(AppRoute.Settings) },
             )
         }
         AppRoute.ProjectList -> {
@@ -100,6 +107,6 @@ actual fun AppNavHost() {
         AppRoute.LiquidGlassExample -> {
             LiquidGlassExampleScreen(onBackClick = { backStack.removeLastOrNull() })
         }
-        else -> SignInScreen()
+        else -> Unit
     }
 }

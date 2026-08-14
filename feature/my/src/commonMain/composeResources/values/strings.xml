@@ -1,0 +1,16 @@
+<resources>
+  <string name="my_settings_content_description">설정</string>
+  <string name="settings_title">설정</string>
+  <string name="settings_learning">학습 설정</string>
+  <string name="settings_development_field">개발 분야</string>
+  <string name="settings_development_field_value">Back-end</string>
+  <string name="settings_development_level">개발 수준</string>
+  <string name="settings_development_level_value">입문</string>
+  <string name="settings_notification">알림</string>
+  <string name="settings_set_created_notification">세트 생성 완료 알림</string>
+  <string name="settings_on">켜짐</string>
+  <string name="settings_general">일반</string>
+  <string name="settings_policy">서비스 약관 및 정책</string>
+  <string name="settings_logout">로그아웃</string>
+  <string name="settings_delete_account">계정 삭제</string>
+</resources>

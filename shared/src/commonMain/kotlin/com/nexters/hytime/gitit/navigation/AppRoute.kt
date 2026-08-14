@@ -15,12 +15,6 @@ sealed interface AppRoute : NavKey {
     data object Bookmark : AppRoute
 
     /**
-     * Google 로그인을 수행하는 로그인 화면이다.
-     */
-    @Serializable
-    data object SignIn : AppRoute
-
-    /**
      * 앱을 시작할 때 표시하는 온보딩 화면이다.
      */
     @Serializable
@@ -43,6 +37,10 @@ sealed interface AppRoute : NavKey {
      */
     @Serializable
     data object My : AppRoute
+
+    /** 사용자 학습 환경과 계정을 관리하는 설정 화면이다. */
+    @Serializable
+    data object Settings : AppRoute
 
     /**
      * 사용자가 불러온 프로젝트 목록 화면이다.

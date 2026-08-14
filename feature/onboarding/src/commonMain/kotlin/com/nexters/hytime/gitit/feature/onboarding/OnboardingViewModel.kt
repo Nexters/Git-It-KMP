@@ -93,15 +93,16 @@ class OnboardingViewModel(
      * 성공 시 [OnboardingEvent.NavigateToHome]을 흘려보낸다.
      */
     fun signIn() {
+        if (_uiState.value.loginStep is LoginStep.Loading) return
         setState { copy(loginStep = LoginStep.Loading) }
         viewModelScope.launch {
             signInUseCase()
-                .onSuccess { account ->
-                    setState { copy(loginStep = LoginStep.Success(account)) }
+                .onSuccess {
+                    setState { copy(loginStep = LoginStep.Success) }
                     _events.emit(OnboardingEvent.NavigateToHome)
                 }.onFailure { error ->
                     logger.e(throwable = error) { "온보딩 로그인 실패" }
-                    setState { copy(loginStep = LoginStep.Error(error.message ?: "알 수 없는 오류")) }
+                    setState { copy(loginStep = LoginStep.Error) }
                 }
         }
     }

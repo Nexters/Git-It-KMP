@@ -52,7 +52,8 @@ internal fun HttpClientConfig<*>.configureGitItHttpClient(networkLogger: Network
     }
 }
 
-private val sensitiveFieldRegex = Regex(""""(id_token|access_token|refresh_token)":"[^"]*"""")
+private val sensitiveFieldRegex =
+    Regex(""""(idToken|accessToken|refreshToken|id_token|access_token|refresh_token)"\s*:\s*"[^"]*"""")
 
 private fun sanitizeSensitiveFields(message: String): String = message.replace(sensitiveFieldRegex, """"$1":"***"""")
 
