@@ -1,14 +1,12 @@
 package com.nexters.hytime.gitit.feature.projectlist
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * 프로젝트 리스트 화면의 상태와 사용자 의도를 관리한다.
@@ -40,14 +38,12 @@ class ProjectListViewModel : ViewModel() {
             ProjectListIntent.ProjectTabClick -> Unit
             ProjectListIntent.SavedTabClick -> emit(ProjectListSideEffect.NavigateToBookmark)
             ProjectListIntent.MyTabClick -> emit(ProjectListSideEffect.NavigateToMy)
-            is ProjectListIntent.PlayProjectClick -> {
-                // TODO: 문제풀이 화면 route 추가 후 연결한다.
-            }
+            is ProjectListIntent.PlayProjectClick -> emit(ProjectListSideEffect.NavigateToQuiz(intent.projectId))
         }
     }
 
     private fun emit(sideEffect: ProjectListSideEffect) {
-        viewModelScope.launch { _sideEffects.emit(sideEffect) }
+        _sideEffects.tryEmit(sideEffect)
     }
 }
 

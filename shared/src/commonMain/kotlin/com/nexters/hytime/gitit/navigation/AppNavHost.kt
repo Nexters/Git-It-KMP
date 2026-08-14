@@ -17,8 +17,10 @@ internal val appRouteSavedStateConfiguration =
                     subclass(AppRoute.My.serializer())
                     subclass(AppRoute.LiquidGlassExample.serializer())
                     subclass(AppRoute.Onboarding.serializer())
+                    subclass(AppRoute.IntermediateSplash.serializer())
                     subclass(AppRoute.ProjectDetail.serializer())
                     subclass(AppRoute.ProjectList.serializer())
+                    subclass(AppRoute.Quiz.serializer())
                 }
             }
     }
