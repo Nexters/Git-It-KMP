@@ -52,7 +52,7 @@ fun Modifier.gitItTopGradientBlur(sky: Sky?): Modifier {
 private const val TOP_BLUR_RADIUS = 20
 
 /** 블러와 dim이 아래쪽으로 흐려지기 시작하는 정규화 위치. */
-private const val TOP_BLUR_FADE_START = 0.25f
+private const val TOP_BLUR_FADE_START = 0.75f
 
 /** 상단 dim의 최대 불투명도. */
-private const val TOP_DIM_ALPHA = 0.5f
+private const val TOP_DIM_ALPHA = 0.6f
