@@ -24,6 +24,7 @@ class AccountRepositoryImpl(
                 networkClient.post<SignInWithGoogleRequest, LoginApiResponse>(
                     PATH_SIGN_IN_GOOGLE,
                     SignInWithGoogleRequest(idToken),
+                    authenticated = false,
                 )
             val data =
                 response.data?.takeIf {

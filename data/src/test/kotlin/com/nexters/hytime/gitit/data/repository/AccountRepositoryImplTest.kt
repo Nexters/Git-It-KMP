@@ -19,6 +19,7 @@ class AccountRepositoryImplTest {
 
         assertEquals("/api/v1/auth/login/google", networkClient.requestedPath)
         assertEquals("""{"idToken":"google-token"}""", networkClient.requestBody)
+        assertEquals(false, networkClient.requestedAuthenticated)
         assertEquals("access-token", session.accessToken)
         assertEquals("refresh-token", session.refreshToken)
         assertEquals(true, session.needsCuration)
