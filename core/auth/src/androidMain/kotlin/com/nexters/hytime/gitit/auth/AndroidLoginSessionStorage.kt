@@ -6,6 +6,8 @@ import android.security.keystore.KeyProperties
 import android.util.AtomicFile
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.domain.model.LoginSession
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.ByteArrayInputStream
@@ -27,40 +29,46 @@ class AndroidLoginSessionStorage(
     context: Context,
 ) : LoginSessionStorage {
     /** 암호화 키를 보관하는 Android Keystore다. */
-    private val keyStore =
+    private val keyStore by lazy {
         KeyStore.getInstance(KEY_STORE_PROVIDER).apply {
             load(null)
         }
+    }
 
     /** 암호화된 세션을 원자적으로 읽고 쓸 파일이다. */
     private val sessionFile = AtomicFile(context.applicationContext.noBackupFilesDir.resolve(SESSION_FILE_NAME))
 
-    override fun save(session: LoginSession) {
-        val encryptedSession = encryptSession(session, getOrCreateKey())
-        val output = sessionFile.startWrite()
-        try {
-            output.write(encryptedSession)
-            sessionFile.finishWrite(output)
-        } catch (exception: Exception) {
-            sessionFile.failWrite(output)
-            throw exception
+    override suspend fun save(session: LoginSession) {
+        withContext(Dispatchers.IO) {
+            val encryptedSession = encryptSession(session, getOrCreateKey())
+            val output = sessionFile.startWrite()
+            try {
+                output.write(encryptedSession)
+                sessionFile.finishWrite(output)
+            } catch (exception: Exception) {
+                sessionFile.failWrite(output)
+                throw exception
+            }
         }
     }
 
-    override fun load(): LoginSession? {
-        if (!sessionFile.baseFile.exists()) return null
+    override suspend fun load(): LoginSession? =
+        withContext(Dispatchers.IO) {
+            if (!sessionFile.baseFile.exists()) return@withContext null
 
-        return try {
-            decryptSession(sessionFile.readFully(), getOrCreateKey())
-        } catch (_: Exception) {
-            clear()
-            runCatching { keyStore.deleteEntry(KEY_ALIAS) }
-            null
+            try {
+                decryptSession(sessionFile.readFully(), getOrCreateKey())
+            } catch (_: Exception) {
+                sessionFile.delete()
+                runCatching { keyStore.deleteEntry(KEY_ALIAS) }
+                null
+            }
         }
-    }
 
-    override fun clear() {
-        sessionFile.delete()
+    override suspend fun clear() {
+        withContext(Dispatchers.IO) {
+            sessionFile.delete()
+        }
     }
 
     /**

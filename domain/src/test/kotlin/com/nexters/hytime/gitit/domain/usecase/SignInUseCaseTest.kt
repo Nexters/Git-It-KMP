@@ -28,10 +28,13 @@ class SignInUseCaseTest {
                 sessionStorage = storage,
             )
 
-        val result = runBlocking { useCase() }
+        val (result, storedSession) =
+            runBlocking {
+                useCase() to storage.load()
+            }
 
         assertEquals(Unit, result.getOrThrow())
-        assertEquals(session, storage.load())
+        assertEquals(session, storedSession)
     }
 }
 
@@ -39,13 +42,13 @@ class SignInUseCaseTest {
 private class FakeLoginSessionStorage : LoginSessionStorage {
     private var session: LoginSession? = null
 
-    override fun save(session: LoginSession) {
+    override suspend fun save(session: LoginSession) {
         this.session = session
     }
 
-    override fun load(): LoginSession? = session
+    override suspend fun load(): LoginSession? = session
 
-    override fun clear() {
+    override suspend fun clear() {
         session = null
     }
 }

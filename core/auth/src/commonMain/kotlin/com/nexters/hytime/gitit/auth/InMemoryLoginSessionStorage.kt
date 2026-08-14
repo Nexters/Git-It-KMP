@@ -7,13 +7,13 @@ import com.nexters.hytime.gitit.domain.model.LoginSession
 class InMemoryLoginSessionStorage : LoginSessionStorage {
     private var session: LoginSession? = null
 
-    override fun save(session: LoginSession) {
+    override suspend fun save(session: LoginSession) {
         this.session = session
     }
 
-    override fun load(): LoginSession? = session
+    override suspend fun load(): LoginSession? = session
 
-    override fun clear() {
+    override suspend fun clear() {
         session = null
     }
 }
