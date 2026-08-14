@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,9 @@ enum class GitItMultipleChoiceAnswerState {
     /** 선택 결과를 표시하지 않는 펼친 상태다. */
     Default,
 
+    /** 채점 전 사용자가 선택한 답안을 테두리로 강조하는 상태다. */
+    Selected,
+
     /** 답안 내용을 숨긴 접힌 상태다. */
     Folded,
 
@@ -73,6 +77,7 @@ internal val GitItMultipleChoiceAnswerState.backgroundColor: Color
     get() =
         when (this) {
             GitItMultipleChoiceAnswerState.Default,
+            GitItMultipleChoiceAnswerState.Selected,
             GitItMultipleChoiceAnswerState.Folded,
             GitItMultipleChoiceAnswerState.Expanded,
             -> GitItTheme.colors.grey600
@@ -91,6 +96,7 @@ internal val GitItMultipleChoiceAnswerState.labelColor: Color
     get() =
         when (this) {
             GitItMultipleChoiceAnswerState.Default,
+            GitItMultipleChoiceAnswerState.Selected,
             GitItMultipleChoiceAnswerState.Folded,
             GitItMultipleChoiceAnswerState.Expanded,
             -> GitItTheme.colors.blue200
@@ -111,13 +117,15 @@ internal val GitItMultipleChoiceAnswerState.showsAnswer: Boolean
 
 /** 접힘·펼침 애니메이션을 사용하는 상태인지 여부다. */
 internal val GitItMultipleChoiceAnswerState.isToggleState: Boolean
-    get() = this != GitItMultipleChoiceAnswerState.Default
+    get() = this != GitItMultipleChoiceAnswerState.Default && this != GitItMultipleChoiceAnswerState.Selected
 
 /** Chevron 방향이다. null이면 아이콘을 표시하지 않는다. */
 internal val GitItMultipleChoiceAnswerState.chevronExpanded: Boolean?
     get() =
         when (this) {
-            GitItMultipleChoiceAnswerState.Default -> null
+            GitItMultipleChoiceAnswerState.Default,
+            GitItMultipleChoiceAnswerState.Selected,
+            -> null
             GitItMultipleChoiceAnswerState.Folded,
             GitItMultipleChoiceAnswerState.IncorrectFolded,
             GitItMultipleChoiceAnswerState.CorrectFolded,
@@ -152,6 +160,12 @@ fun GitItMultipleChoiceAnswerCard(
                 .clip(RoundedCornerShape(12.dp))
                 .background(state.backgroundColor)
                 .then(
+                    if (state == GitItMultipleChoiceAnswerState.Selected) {
+                        Modifier.border(1.dp, GitItTheme.colors.blue100, RoundedCornerShape(12.dp))
+                    } else {
+                        Modifier
+                    },
+                ).then(
                     if (onClick != null) {
                         Modifier.clickable(role = Role.Button, onClick = onClick)
                     } else {

@@ -13,6 +13,7 @@ import com.skydoves.cloudy.Sky
 import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
 import git_it_kmp.core.designsystem.generated.resources.Res
+import git_it_kmp.core.designsystem.generated.resources.ic_bookmark
 import git_it_kmp.core.designsystem.generated.resources.ic_nav_bookmark
 import git_it_kmp.core.designsystem.generated.resources.ic_nav_file_text
 import git_it_kmp.core.designsystem.generated.resources.ic_nav_home
@@ -115,7 +116,7 @@ private fun mainNavItems(): List<MainNavItem> =
     listOf(
         MainNavItem(GitItMainNavDestination.Home, "홈") { HomeIcon() },
         MainNavItem(GitItMainNavDestination.Project, "프로젝트") { FileTextIcon() },
-        MainNavItem(GitItMainNavDestination.Saved, "저장") { BookmarkIcon() },
+        MainNavItem(GitItMainNavDestination.Saved, "저장") { GitItBookmarkIcon() },
         MainNavItem(GitItMainNavDestination.My, "마이") { UserIcon() },
     )
 
@@ -140,14 +141,25 @@ private fun FileTextIcon() {
 }
 
 /**
- * 저장 탭 아이콘을 그린다.
+ * 북마크 아이콘을 그린다.
+ *
+ * @param modifier 아이콘의 크기와 배치를 지정할 수식자
+ * @param filled 내부를 채워 저장 상태를 강조할지 여부
  */
 @Composable
-private fun BookmarkIcon() {
+fun GitItBookmarkIcon(
+    modifier: Modifier = Modifier,
+    filled: Boolean = false,
+) {
     Icon(
-        painterResource(Res.drawable.ic_nav_bookmark),
+        painterResource(if (filled) Res.drawable.ic_bookmark else Res.drawable.ic_nav_bookmark),
         contentDescription = null,
-        modifier = Modifier.size(width = 16.078.dp, height = 20.dp),
+        modifier =
+            if (filled) {
+                modifier.size(20.dp)
+            } else {
+                modifier.size(width = 16.078.dp, height = 20.dp)
+            },
     )
 }
 
