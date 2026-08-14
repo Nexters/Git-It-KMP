@@ -28,13 +28,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassContainer
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonSize
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonVariant
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
 import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
 import git_it_kmp.feature.my.generated.resources.Res
 import git_it_kmp.feature.my.generated.resources.my_default_avatar
+import git_it_kmp.feature.my.generated.resources.my_settings
+import git_it_kmp.feature.my.generated.resources.my_settings_content_description
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * 마이 학습 화면의 순수 UI 영역이다.
@@ -67,7 +74,28 @@ fun MyScreen(
                     .padding(horizontal = 20.dp),
         ) {
             Spacer(Modifier.height(24.dp))
-            MyProfileHeader(profile = uiState.profile)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MyProfileHeader(
+                    profile = uiState.profile,
+                    modifier = Modifier.weight(1f),
+                )
+                val settingsButton: @Composable () -> Unit = {
+                    GitItLiquidGlassIconButton(
+                        onClick = { onIntent(MyIntent.SettingsClick) },
+                        size = GitItLiquidGlassIconButtonSize.Md,
+                        variant = GitItLiquidGlassIconButtonVariant.Secondary,
+                    ) {
+                        SettingsIcon(
+                            contentDescription = stringResource(Res.string.my_settings_content_description),
+                        )
+                    }
+                }
+                if (sky != null) {
+                    GitItLiquidGlassContainer(sky = sky) { settingsButton() }
+                } else {
+                    settingsButton()
+                }
+            }
             Spacer(Modifier.height(29.dp))
 
             Text(
@@ -99,6 +127,24 @@ fun MyScreen(
             sky = sky,
         )
     }
+}
+
+/**
+ * 설정 진입을 나타내는 피그마 원본 톱니바퀴 아이콘을 표시한다.
+ *
+ * @param contentDescription 접근성 서비스에 전달할 설명
+ * @param modifier 외부 배치와 추가 수식자
+ */
+@Composable
+private fun SettingsIcon(
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+) {
+    Image(
+        painter = painterResource(Res.drawable.my_settings),
+        contentDescription = contentDescription,
+        modifier = modifier.size(18.1.dp),
+    )
 }
 
 /**

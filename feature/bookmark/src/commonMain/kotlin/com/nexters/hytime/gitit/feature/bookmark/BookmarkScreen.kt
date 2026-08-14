@@ -1,6 +1,6 @@
 package com.nexters.hytime.gitit.feature.bookmark
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,11 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +32,9 @@ import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
 import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
+import git_it_kmp.core.designsystem.generated.resources.Res
+import git_it_kmp.core.designsystem.generated.resources.ic_bookmark
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * 저장한 문제 화면의 순수 UI 영역이다.
@@ -291,31 +289,11 @@ private fun BookmarkActionButton(
  */
 @Composable
 private fun BookmarkIcon(modifier: Modifier = Modifier) {
-    val color = GitItTheme.colors.blue100
-
-    Canvas(modifier = modifier) {
-        val path =
-            Path().apply {
-                moveTo(size.width * 0.28f, size.height * 0.15f)
-                lineTo(size.width * 0.72f, size.height * 0.15f)
-                lineTo(size.width * 0.72f, size.height * 0.85f)
-                lineTo(size.width * 0.5f, size.height * 0.68f)
-                lineTo(size.width * 0.28f, size.height * 0.85f)
-                close()
-            }
-        drawPath(
-            path = path,
-            color = color,
-            style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
-        )
-        drawLine(
-            color = color,
-            start = Offset(size.width * 0.28f, size.height * 0.15f),
-            end = Offset(size.width * 0.72f, size.height * 0.15f),
-            strokeWidth = 1.8.dp.toPx(),
-            cap = StrokeCap.Round,
-        )
-    }
+    Image(
+        painter = painterResource(Res.drawable.ic_bookmark),
+        contentDescription = null,
+        modifier = modifier,
+    )
 }
 
 @Preview

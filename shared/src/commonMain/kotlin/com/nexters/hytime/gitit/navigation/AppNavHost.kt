@@ -7,6 +7,10 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
+/** 설정 화면에서 연결할 서비스 약관 및 정책 문서 주소다. */
+internal const val POLICY_URL =
+    "https://app.notion.com/p/Git-it-3bb7221e5fe78005bcd9fab953906df1?source=copy_link"
+
 internal val appRouteSavedStateConfiguration =
     SavedStateConfiguration {
         serializersModule =
@@ -15,6 +19,7 @@ internal val appRouteSavedStateConfiguration =
                     subclass(AppRoute.Bookmark.serializer())
                     subclass(AppRoute.Home.serializer())
                     subclass(AppRoute.My.serializer())
+                    subclass(AppRoute.Settings.serializer())
                     subclass(AppRoute.LiquidGlassExample.serializer())
                     subclass(AppRoute.Onboarding.serializer())
                     subclass(AppRoute.IntermediateSplash.serializer())

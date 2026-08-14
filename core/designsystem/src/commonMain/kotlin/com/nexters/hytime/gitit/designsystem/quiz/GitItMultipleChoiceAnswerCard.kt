@@ -8,7 +8,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,14 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import git_it_kmp.core.designsystem.generated.resources.Res
+import git_it_kmp.core.designsystem.generated.resources.ic_chevron_right
+import org.jetbrains.compose.resources.painterResource
 
 /** 객관식 답안 카드의 표시 상태다. */
 enum class GitItMultipleChoiceAnswerState {
@@ -249,20 +248,12 @@ private fun GitItMultipleChoiceChevron(
             label = "answerCardChevron",
         )
 
-    Canvas(modifier = modifier.size(12.dp).rotate(rotation)) {
-        val path =
-            Path().apply {
-                moveTo(size.width * 0.25f, size.height * 0.4f)
-                lineTo(size.width * 0.5f, size.height * 0.6f)
-                lineTo(size.width * 0.75f, size.height * 0.4f)
-            }
-
-        drawPath(
-            path = path,
-            color = color,
-            style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
-        )
-    }
+    Icon(
+        painter = painterResource(Res.drawable.ic_chevron_right),
+        contentDescription = null,
+        modifier = modifier.size(width = 5.6.dp, height = 9.6.dp).rotate(rotation + 90f),
+        tint = color,
+    )
 }
 
 /** 객관식 답안 카드 상태 전환 시간이다. */

@@ -1,6 +1,6 @@
 package com.nexters.hytime.gitit.designsystem.card
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,22 +17,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import git_it_kmp.core.designsystem.generated.resources.Res
+import git_it_kmp.core.designsystem.generated.resources.ic_play_learning
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * Figma의 학습 세트 카드를 렌더링한다.
@@ -159,14 +156,6 @@ fun GitItLearningCard(
     }
 }
 
-/** Figma에서 내보낸 34×34 재생 아이콘의 원본 path 데이터다. */
-private const val PLAY_ICON_PATH =
-    "M17 2C25.2843 2 32 8.71573 32 17C32 25.2843 25.2843 32 17 32C8.71573 32 2 25.2843 2 17" +
-        "C2 8.71573 8.71573 2 17 2Z" +
-        "M13.8271 11.7188C13.5614 11.5874 13.2501 11.7807 13.25 12.0771V21.9238" +
-        "C13.2503 22.2201 13.5615 22.4134 13.8271 22.2822L23.7754 17.3584" +
-        "C24.0721 17.2115 24.0722 16.7885 23.7754 16.6416L13.8271 11.7188Z"
-
 /**
  * 재생 아이콘을 독립된 클릭 영역으로 렌더링한다.
  *
@@ -180,31 +169,17 @@ private fun GitItPlayButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val path = remember { PathParser().parsePathString(PLAY_ICON_PATH).toPath() }
-    val iconColor = GitItTheme.colors.grey200
-
-    Canvas(
+    Image(
+        painter = painterResource(Res.drawable.ic_play_learning),
+        contentDescription = contentDescription,
         modifier =
             modifier
                 .size(34.dp)
-                .semantics { this.contentDescription = contentDescription }
                 .clickable(
                     role = Role.Button,
                     onClick = onClick,
                 ),
-    ) {
-        withTransform(
-            transformBlock = {
-                scale(
-                    scaleX = size.width / 34f,
-                    scaleY = size.height / 34f,
-                    pivot = Offset.Zero,
-                )
-            },
-        ) {
-            drawPath(path = path, color = iconColor)
-        }
-    }
+    )
 }
 
 /**

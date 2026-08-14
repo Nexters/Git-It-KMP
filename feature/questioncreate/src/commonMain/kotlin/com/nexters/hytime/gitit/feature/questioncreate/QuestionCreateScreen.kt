@@ -1,7 +1,6 @@
 package com.nexters.hytime.gitit.feature.questioncreate
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,13 +29,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,6 +41,7 @@ import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
 import com.nexters.hytime.gitit.domain.model.GitHubRepository
+import git_it_kmp.core.designsystem.generated.resources.ic_clear_circle
 import git_it_kmp.feature.questioncreate.generated.resources.Res
 import git_it_kmp.feature.questioncreate.generated.resources.ic_chevron_right
 import git_it_kmp.feature.questioncreate.generated.resources.question_create_avatar_description
@@ -67,6 +63,7 @@ import git_it_kmp.feature.questioncreate.generated.resources.question_create_rej
 import git_it_kmp.feature.questioncreate.generated.resources.question_create_title
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import git_it_kmp.core.designsystem.generated.resources.Res as DesignSystemRes
 
 /**
  * 질문 생성을 시작할 GitHub 저장소를 입력하고 확인하는 화면이다.
@@ -204,35 +201,16 @@ private fun RepositoryUrlField(
                 },
             )
             if (value.isNotEmpty()) {
-                val clearIconColor = GitItTheme.colors.grey400
                 val clearDescription = stringResource(Res.string.question_create_clear)
-                Canvas(
+                Image(
+                    painter = painterResource(DesignSystemRes.drawable.ic_clear_circle),
+                    contentDescription = clearDescription,
                     modifier =
                         Modifier
                             .size(36.dp)
                             .clickable(role = Role.Button, onClick = onClear)
-                            .semantics { contentDescription = clearDescription }
                             .padding(8.dp),
-                ) {
-                    val strokeWidth = 2.dp.toPx()
-                    drawCircle(
-                        color = clearIconColor,
-                        radius = (size.minDimension - strokeWidth) / 2f,
-                        style = Stroke(width = strokeWidth),
-                    )
-                    drawLine(
-                        clearIconColor,
-                        Offset(size.width * 0.25f, size.height * 0.25f),
-                        Offset(size.width * 0.75f, size.height * 0.75f),
-                        strokeWidth,
-                    )
-                    drawLine(
-                        clearIconColor,
-                        Offset(size.width * 0.75f, size.height * 0.25f),
-                        Offset(size.width * 0.25f, size.height * 0.75f),
-                        strokeWidth,
-                    )
-                }
+                )
             }
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(accentColor))

@@ -1,6 +1,5 @@
 package com.nexters.hytime.gitit.feature.projectlist
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,13 +18,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,10 +38,12 @@ import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
+import git_it_kmp.core.designsystem.generated.resources.ic_play
 import git_it_kmp.feature.projectlist.generated.resources.Res
 import git_it_kmp.feature.projectlist.generated.resources.projectlist_thumbnail_base
 import git_it_kmp.feature.projectlist.generated.resources.projectlist_thumbnail_mark
 import org.jetbrains.compose.resources.painterResource
+import git_it_kmp.core.designsystem.generated.resources.Res as DesignSystemRes
 
 /**
  * 프로젝트 리스트 화면의 순수 UI 영역이다.
@@ -317,16 +318,12 @@ private fun PlayIcon(
     modifier: Modifier = Modifier,
     color: Color,
 ) {
-    Canvas(modifier = modifier) {
-        val path =
-            Path().apply {
-                moveTo(size.width * 0.28f, size.height * 0.2f)
-                lineTo(size.width * 0.78f, size.height * 0.5f)
-                lineTo(size.width * 0.28f, size.height * 0.8f)
-                close()
-            }
-        drawPath(path = path, color = color)
-    }
+    Icon(
+        painter = painterResource(DesignSystemRes.drawable.ic_play),
+        contentDescription = null,
+        modifier = modifier,
+        tint = color,
+    )
 }
 
 @Preview

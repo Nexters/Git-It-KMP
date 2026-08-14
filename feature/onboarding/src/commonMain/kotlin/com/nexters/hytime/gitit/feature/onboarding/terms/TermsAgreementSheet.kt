@@ -3,7 +3,6 @@ package com.nexters.hytime.gitit.feature.onboarding.terms
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,12 +32,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import git_it_kmp.core.designsystem.generated.resources.ic_check
+import git_it_kmp.core.designsystem.generated.resources.ic_chevron_detail
 import git_it_kmp.feature.onboarding.generated.resources.Res
 import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_all
 import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_cancel
@@ -45,7 +44,9 @@ import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_next
 import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_privacy
 import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_service
 import git_it_kmp.feature.onboarding.generated.resources.terms_agreement_title
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import git_it_kmp.core.designsystem.generated.resources.Res as DesignSystemRes
 
 /**
  * 약관 동의 체크 상태를 보관하는 UI 상태다.
@@ -78,15 +79,16 @@ private fun CheckIcon(
     val backgroundColor = if (checked) GitItTheme.colors.blue100 else GitItTheme.colors.white15
     val checkColor = GitItTheme.colors.grey600
 
-    Canvas(modifier = modifier.size(23.dp)) {
-        drawCircle(color = backgroundColor, radius = size.minDimension / 2f)
-        val path =
-            Path().apply {
-                moveTo(size.width * 0.30f, size.height * 0.50f)
-                lineTo(size.width * 0.45f, size.height * 0.65f)
-                lineTo(size.width * 0.72f, size.height * 0.35f)
-            }
-        drawPath(path = path, color = checkColor, style = Stroke(width = size.width * 0.12f, cap = StrokeCap.Round))
+    Box(
+        modifier = modifier.size(23.dp).background(backgroundColor, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(DesignSystemRes.drawable.ic_check),
+            contentDescription = null,
+            modifier = Modifier.size(width = 10.1202.dp, height = 9.2002.dp),
+            tint = checkColor,
+        )
     }
 }
 
@@ -97,15 +99,12 @@ private fun CheckIcon(
  */
 @Composable
 private fun ChevronIcon(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier.size(12.dp)) {
-        val path =
-            Path().apply {
-                moveTo(0f, 0f)
-                lineTo(size.width * 0.5f, size.height * 0.5f)
-                lineTo(0f, size.height)
-            }
-        drawPath(path = path, color = GitItTheme.colors.grey400, style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round))
-    }
+    Icon(
+        painter = painterResource(DesignSystemRes.drawable.ic_chevron_detail),
+        contentDescription = null,
+        modifier = modifier.size(width = 7.dp, height = 13.dp),
+        tint = GitItTheme.colors.grey400,
+    )
 }
 
 /**

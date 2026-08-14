@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.feature.projectdetail
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,16 +19,15 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +37,12 @@ import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconBut
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonVariant
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
+import git_it_kmp.core.designsystem.generated.resources.Res
+import git_it_kmp.core.designsystem.generated.resources.ic_menu
+import git_it_kmp.core.designsystem.generated.resources.ic_play_circle
+import git_it_kmp.core.designsystem.generated.resources.ic_play_project
+import git_it_kmp.core.designsystem.generated.resources.ic_users
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * 프로젝트 상세 화면의 순수 UI 영역이다. 상태와 콜백만 주입받아 상태를 소유하지 않는다.
@@ -227,21 +233,11 @@ private fun ProjectHeader(
                 )
             }
         }
-        Box(
-            modifier =
-                Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(GitItTheme.colors.grey100)
-                    .clickable(onClick = onQuestionSolvingClick),
-            contentAlignment = Alignment.Center,
-        ) {
-            // TODO: 재생버튼 아이콘 리소스 추가 후 교체한다.
-            PlayIcon(
-                modifier = Modifier.size(20.dp),
-                color = GitItTheme.colors.grey700,
-            )
-        }
+        Image(
+            painter = painterResource(Res.drawable.ic_play_project),
+            contentDescription = null,
+            modifier = Modifier.size(40.dp).clickable(onClick = onQuestionSolvingClick),
+        )
     }
 }
 
@@ -357,19 +353,11 @@ private fun LearningSetCard(
                     style = GitItTheme.typography.body1,
                 )
             }
-            Box(
-                modifier =
-                    Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(GitItTheme.colors.blue400),
-                contentAlignment = Alignment.Center,
-            ) {
-                PlayIcon(
-                    modifier = Modifier.size(16.dp),
-                    color = GitItTheme.colors.blue100,
-                )
-            }
+            Image(
+                painter = painterResource(Res.drawable.ic_play_circle),
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+            )
         }
         Spacer(Modifier.height(25.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -493,89 +481,22 @@ private fun MoreMenuItem(
 
 @Composable
 private fun MenuIcon() {
-    androidx.compose.foundation.Canvas(modifier = Modifier.size(20.dp)) {
-        val w = size.width
-        val y1 = size.height * 0.3f
-        val y2 = size.height * 0.5f
-        val y3 = size.height * 0.7f
-        drawLine(
-            Color.White,
-            start =
-                androidx.compose.ui.geometry
-                    .Offset(w * 0.25f, y1),
-            end =
-                androidx.compose.ui.geometry
-                    .Offset(w * 0.75f, y1),
-            strokeWidth = 2.dp.toPx(),
-            cap = androidx.compose.ui.graphics.StrokeCap.Round,
-        )
-        drawLine(
-            Color.White,
-            start =
-                androidx.compose.ui.geometry
-                    .Offset(w * 0.25f, y2),
-            end =
-                androidx.compose.ui.geometry
-                    .Offset(w * 0.75f, y2),
-            strokeWidth = 2.dp.toPx(),
-            cap = androidx.compose.ui.graphics.StrokeCap.Round,
-        )
-        drawLine(
-            Color.White,
-            start =
-                androidx.compose.ui.geometry
-                    .Offset(w * 0.25f, y3),
-            end =
-                androidx.compose.ui.geometry
-                    .Offset(w * 0.75f, y3),
-            strokeWidth = 2.dp.toPx(),
-            cap = androidx.compose.ui.graphics.StrokeCap.Round,
-        )
-    }
+    Icon(
+        painter = painterResource(Res.drawable.ic_menu),
+        contentDescription = null,
+        modifier = Modifier.size(width = 17.dp, height = 12.dp),
+        tint = Color.White,
+    )
 }
 
 @Composable
 private fun UsersIcon(modifier: Modifier = Modifier) {
-    androidx.compose.foundation.Canvas(modifier = modifier) {
-        val r = size.minDimension * 0.22f
-        drawCircle(
-            Color.White,
-            radius = r,
-            center =
-                androidx.compose.ui.geometry
-                    .Offset(size.width * 0.35f, size.height * 0.4f),
-        )
-        drawCircle(
-            Color.White,
-            radius = r * 0.7f,
-            center =
-                androidx.compose.ui.geometry
-                    .Offset(size.width * 0.7f, size.height * 0.5f),
-        )
-    }
-}
-
-/**
- * 재생 버튼에 사용하는 삼각형 아이콘을 그린다.
- *
- * @param modifier 아이콘의 크기와 배치를 지정할 수식자
- * @param color 아이콘 색상
- */
-@Composable
-private fun PlayIcon(
-    modifier: Modifier = Modifier.size(12.dp),
-    color: Color = Color.White,
-) {
-    androidx.compose.foundation.Canvas(modifier = modifier) {
-        val path =
-            Path().apply {
-                moveTo(size.width * 0.32f, size.height * 0.18f)
-                lineTo(size.width * 0.84f, size.height * 0.5f)
-                lineTo(size.width * 0.32f, size.height * 0.82f)
-                close()
-            }
-        drawPath(path = path, color = color)
-    }
+    Icon(
+        painter = painterResource(Res.drawable.ic_users),
+        contentDescription = null,
+        modifier = modifier,
+        tint = GitItTheme.colors.blue100,
+    )
 }
 
 @Preview
