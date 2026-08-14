@@ -1,5 +1,8 @@
+@file:Suppress("ktlint:standard:function-naming")
+
 package com.nexters.hytime.gitit.data.repository
 
+import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.network.api.NetworkClient
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.KSerializer
@@ -40,6 +43,52 @@ class AccountRepositoryImplTest {
             val result = runBlocking { AccountRepositoryImpl(LoginFakeNetworkClient(response)).signInWithGoogle("token") }
             assertTrue(result.isFailure, response)
         }
+    }
+
+    /** 기기 정보 등록 API에 인증된 요청과 OpenAPI 필드명을 사용하는지 검증한다. */
+    @Test
+    fun registerDevice_알림이활성화되면_fid를전송한다() {
+        val networkClient = LoginFakeNetworkClient("""{"success":true}""")
+        val deviceInfo =
+            DeviceInfo(
+                deviceId = "firebase-installation-id",
+                deviceType = "android",
+                appVersion = "1.0",
+                osVersion = "16",
+                deviceToken = "firebase-installation-id",
+            )
+
+        val result = runBlocking { AccountRepositoryImpl(networkClient).registerDevice(deviceInfo) }
+
+        assertEquals(Unit, result.getOrThrow())
+        assertEquals("/api/v1/members/me/device", networkClient.requestedPath)
+        assertEquals(
+            """{"deviceId":"firebase-installation-id","deviceType":"android","appVersion":"1.0","osVersion":"16","deviceToken":"firebase-installation-id"}""",
+            networkClient.requestBody,
+        )
+        assertEquals(true, networkClient.requestedAuthenticated)
+    }
+
+    /** 알림이 비활성화되면 deviceToken을 생략하고 성공하지 않은 응답을 실패로 변환하는지 검증한다. */
+    @Test
+    fun registerDevice_알림이비활성화되고응답이실패면_토큰없이실패를반환한다() {
+        val networkClient = LoginFakeNetworkClient("""{"success":false,"message":"등록 실패"}""")
+        val deviceInfo =
+            DeviceInfo(
+                deviceId = "firebase-installation-id",
+                deviceType = "android",
+                appVersion = "1.0",
+                osVersion = "16",
+                deviceToken = null,
+            )
+
+        val result = runBlocking { AccountRepositoryImpl(networkClient).registerDevice(deviceInfo) }
+
+        assertTrue(result.isFailure)
+        assertEquals(
+            """{"deviceId":"firebase-installation-id","deviceType":"android","appVersion":"1.0","osVersion":"16"}""",
+            networkClient.requestBody,
+        )
     }
 
     private companion object {

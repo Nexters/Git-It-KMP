@@ -34,6 +34,8 @@ private data class TestResponse(
 private data class AuthTestRequest(
     val idToken: String,
     val id_token: String,
+    val deviceId: String,
+    val deviceToken: String,
 )
 
 /** [KtorNetworkClient]의 요청 구성과 오류 변환을 검증한다. */
@@ -170,7 +172,7 @@ class KtorNetworkClientTest {
 
     /** 요청과 응답 본문의 인증 토큰을 네트워크 로그에서 마스킹하는지 검증한다. */
     @Test
-    fun post_authTokensAreMaskedFromLogs() {
+    fun post_sensitiveIdentifiersAreMaskedFromLogs() {
         val logs = mutableListOf<String>()
         val httpClient =
             HttpClient(
@@ -191,7 +193,10 @@ class KtorNetworkClientTest {
                 json = json,
                 baseUrl = "https://example.com",
                 accessTokenProvider = { null },
-            ).post<AuthTestRequest, TestResponse>("/test", AuthTestRequest("id-secret", "legacy-id"))
+            ).post<AuthTestRequest, TestResponse>(
+                "/test",
+                AuthTestRequest("id-secret", "legacy-id", "device-id", "device-token"),
+            )
         }
 
         val message = logs.joinToString()
@@ -201,5 +206,7 @@ class KtorNetworkClientTest {
         assertFalse("refresh-secret" in message)
         assertFalse("legacy-access" in message)
         assertFalse("legacy-refresh" in message)
+        assertFalse("device-id" in message)
+        assertFalse("device-token" in message)
     }
 }

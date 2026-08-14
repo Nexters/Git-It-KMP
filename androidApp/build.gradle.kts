@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.koin.android)
 
     implementation(libs.androidx.activity.compose)
+    implementation(libs.kotlinx.coroutines.core)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)

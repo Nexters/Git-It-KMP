@@ -28,4 +28,35 @@ class NotificationContentTest {
 
         invalidPayloads.forEach { payload -> assertNull(payload.toNotificationContent(), payload.toString()) }
     }
+
+    /** 알림이 활성화되면 정리한 FID를 기기 ID와 푸시 토큰으로 사용하는지 검증한다. */
+    @Test
+    fun createAndroidDeviceInfo_알림이활성화되면_fid를토큰으로사용한다() {
+        val deviceInfo =
+            createAndroidDeviceInfo(
+                installationId = " firebase-installation-id ",
+                appVersion = "1.0",
+                osVersion = "16",
+                notificationsEnabled = true,
+            )
+
+        assertEquals("firebase-installation-id", deviceInfo?.deviceId)
+        assertEquals("firebase-installation-id", deviceInfo?.deviceToken)
+        assertEquals("android", deviceInfo?.deviceType)
+    }
+
+    /** 알림이 비활성화되면 기기 ID는 유지하고 푸시 토큰만 제외하는지 검증한다. */
+    @Test
+    fun createAndroidDeviceInfo_알림이비활성화되면_토큰을제외한다() {
+        val deviceInfo =
+            createAndroidDeviceInfo(
+                installationId = "firebase-installation-id",
+                appVersion = "1.0",
+                osVersion = "16",
+                notificationsEnabled = false,
+            )
+
+        assertEquals("firebase-installation-id", deviceInfo?.deviceId)
+        assertNull(deviceInfo?.deviceToken)
+    }
 }

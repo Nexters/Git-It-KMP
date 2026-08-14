@@ -12,12 +12,29 @@ import com.google.firebase.messaging.RemoteMessage
 import com.nexters.hytime.gitit.BuildConfig
 import com.nexters.hytime.gitit.MainActivity
 import com.nexters.hytime.gitit.R
+import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
+import com.nexters.hytime.gitit.domain.model.DeviceInfo
+import com.nexters.hytime.gitit.domain.repository.AccountRepository
 import com.nexters.hytime.gitit.logging.gitItLogger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
-/** data-only FCM 메시지를 Android 시스템 알림으로 표시한다. */
+/** FCM 앱 설치 등록을 서버와 동기화하고 data-only 메시지를 Android 시스템 알림으로 표시한다. */
 class GitItFirebaseMessagingService : FirebaseMessagingService() {
     /** FCM 수신과 토큰 갱신 상태를 기록하는 로거다. */
     private val logger by lazy { gitItLogger(tag = "FCM") }
+
+    /** 회원 기기 정보를 등록하는 저장소다. */
+    private val accountRepository by inject<AccountRepository>()
+
+    /** API 호출 가능 여부를 확인할 로그인 세션 저장소다. */
+    private val sessionStorage by inject<LoginSessionStorage>()
+
+    /** 서비스 콜백 이후에도 기기 등록 요청을 완료하는 코루틴 범위다. */
+    private val registrationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**
      * data payload의 제목과 본문을 검증한 뒤 학습 알림을 게시한다.
@@ -34,12 +51,31 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     /**
-     * 등록된 Firebase Installation ID를 디버그 빌드에서 테스트 발송용으로 기록한다.
+     * 등록된 Firebase Installation ID를 회원의 기기 정보와 동기화한다.
      *
      * @param installationId Firebase가 앱 인스턴스에 발급한 식별자
      */
     override fun onRegistered(installationId: String) {
-        if (BuildConfig.DEBUG) logger.d { "FCM Installation ID: $installationId" }
+        registrationScope.launch { registerDevice(installationId) }
+    }
+
+    /**
+     * 로그인 상태라면 현재 Firebase 앱 설치 정보를 서버에 등록한다.
+     *
+     * @param installationId FCM 직접 발송 대상으로 사용하는 Firebase Installation ID
+     */
+    private suspend fun registerDevice(installationId: String) {
+        if (sessionStorage.load() == null) return
+        val deviceInfo =
+            createAndroidDeviceInfo(
+                installationId = installationId,
+                appVersion = BuildConfig.VERSION_NAME,
+                osVersion = Build.VERSION.RELEASE.ifBlank { Build.VERSION.SDK_INT.toString() },
+                notificationsEnabled = getSystemService(NotificationManager::class.java).areNotificationsEnabled(),
+            ) ?: return
+        accountRepository
+            .registerDevice(deviceInfo)
+            .onFailure { error -> logger.w(throwable = error) { "회원 기기 정보 등록 실패" } }
     }
 
     /**
@@ -120,4 +156,30 @@ internal fun Map<String, String>.toNotificationContent(): NotificationContent? {
     val title = get("title")?.trim().orEmpty()
     val body = get("body")?.trim().orEmpty()
     return if (title.isBlank() || body.isBlank()) null else NotificationContent(title, body)
+}
+
+/**
+ * Firebase Installation ID와 현재 앱 환경을 서버 기기 정보로 변환한다.
+ *
+ * @param installationId FCM 직접 발송 대상으로 사용하는 Firebase Installation ID
+ * @param appVersion 설치된 앱 버전
+ * @param osVersion 기기 Android 버전
+ * @param notificationsEnabled 시스템 알림 활성화 여부
+ * @return 유효한 FID면 등록할 기기 정보, 비어 있으면 `null`
+ */
+internal fun createAndroidDeviceInfo(
+    installationId: String,
+    appVersion: String,
+    osVersion: String,
+    notificationsEnabled: Boolean,
+): DeviceInfo? {
+    val normalizedInstallationId = installationId.trim()
+    if (normalizedInstallationId.isEmpty()) return null
+    return DeviceInfo(
+        deviceId = normalizedInstallationId,
+        deviceType = "android",
+        appVersion = appVersion,
+        osVersion = osVersion,
+        deviceToken = normalizedInstallationId.takeIf { notificationsEnabled },
+    )
 }
