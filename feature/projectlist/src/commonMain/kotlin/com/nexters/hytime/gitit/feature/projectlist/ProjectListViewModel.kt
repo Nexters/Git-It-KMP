@@ -53,6 +53,7 @@ class ProjectListViewModel : ViewModel() {
                     }
                 }
             ProjectListIntent.DismissDeleteClick -> setState { copy(pendingDeleteProjectId = null) }
+            is ProjectListIntent.ProjectClick -> emit(ProjectListSideEffect.NavigateToProjectDetail(intent.projectId))
             is ProjectListIntent.PlayProjectClick -> emit(ProjectListSideEffect.NavigateToQuiz(intent.projectId))
         }
     }

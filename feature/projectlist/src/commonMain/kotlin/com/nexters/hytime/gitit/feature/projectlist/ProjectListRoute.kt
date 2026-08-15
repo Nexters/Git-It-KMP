@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.collectLatest
  * @param onNavigateToHome 홈 화면으로 이동하는 콜백
  * @param onNavigateToMy 마이 화면으로 이동하는 콜백
  * @param onNavigateToBookmark 저장한 문제 화면으로 이동하는 콜백
+ * @param onNavigateToProjectDetail 선택한 프로젝트의 상세 화면으로 이동하는 콜백
  * @param onNavigateToQuiz 선택한 프로젝트의 문제 풀이 화면으로 이동하는 콜백
  */
 @Composable
@@ -26,6 +27,7 @@ fun ProjectListRoute(
     onNavigateToHome: () -> Unit,
     onNavigateToMy: () -> Unit,
     onNavigateToBookmark: () -> Unit,
+    onNavigateToProjectDetail: (String) -> Unit,
     onNavigateToQuiz: (String) -> Unit,
 ) {
     val viewModel = viewModel { ProjectListViewModel() }
@@ -39,6 +41,7 @@ fun ProjectListRoute(
                 ProjectListSideEffect.NavigateToHome -> onNavigateToHome()
                 ProjectListSideEffect.NavigateToMy -> onNavigateToMy()
                 ProjectListSideEffect.NavigateToBookmark -> onNavigateToBookmark()
+                is ProjectListSideEffect.NavigateToProjectDetail -> onNavigateToProjectDetail(sideEffect.projectId)
                 is ProjectListSideEffect.NavigateToQuiz -> onNavigateToQuiz(sideEffect.projectId)
             }
         }

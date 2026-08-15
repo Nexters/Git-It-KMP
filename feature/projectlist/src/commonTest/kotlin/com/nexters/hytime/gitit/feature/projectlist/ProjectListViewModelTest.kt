@@ -76,4 +76,16 @@ class ProjectListViewModelTest {
 
             assertEquals(ProjectListSideEffect.NavigateToQuiz("project-1"), sideEffect.await())
         }
+
+    /** 프로젝트 카드를 선택하면 프로젝트 상세 이동 이벤트를 발행하는지 검증한다. */
+    @Test
+    fun projectClick_emitsNavigateToProjectDetail() =
+        runBlocking {
+            val viewModel = ProjectListViewModel()
+            val sideEffect = async(start = CoroutineStart.UNDISPATCHED) { viewModel.sideEffects.first() }
+
+            viewModel.onIntent(ProjectListIntent.ProjectClick("project-1"))
+
+            assertEquals(ProjectListSideEffect.NavigateToProjectDetail("project-1"), sideEffect.await())
+        }
 }

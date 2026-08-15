@@ -123,6 +123,7 @@ fun ProjectListScreen(
                 ProjectCard(
                     item = project,
                     isDeleteMode = isDeleteMode,
+                    onClick = { onIntent(ProjectListIntent.ProjectClick(project.id)) },
                     onPlayClick = { onIntent(ProjectListIntent.PlayProjectClick(project.id)) },
                     onDeleteClick = { onIntent(ProjectListIntent.DeleteProjectClick(project.id)) },
                 )
@@ -283,6 +284,7 @@ private fun ProjectListEmptyState(modifier: Modifier = Modifier) {
  *
  * @param item 카드에 표시할 프로젝트 정보
  * @param isDeleteMode 진행 정보 대신 삭제 버튼을 표시하는지 여부
+ * @param onClick 프로젝트 상세 화면 이동을 요청하는 콜백
  * @param onPlayClick 문제풀이 버튼 클릭 콜백
  * @param onDeleteClick 프로젝트 삭제 버튼 클릭 콜백
  * @param modifier 카드의 외부 배치와 추가 수식자
@@ -291,6 +293,7 @@ private fun ProjectListEmptyState(modifier: Modifier = Modifier) {
 private fun ProjectCard(
     item: ProjectListItem,
     isDeleteMode: Boolean,
+    onClick: () -> Unit,
     onPlayClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -302,6 +305,7 @@ private fun ProjectCard(
                 .wrapContentHeight()
                 .clip(RoundedCornerShape(12.dp))
                 .background(GitItTheme.colors.grey600)
+                .then(if (isDeleteMode) Modifier else Modifier.clickable(role = Role.Button, onClick = onClick))
                 .padding(start = 18.dp, top = 16.dp, end = 18.dp, bottom = if (isDeleteMode) 18.dp else 16.dp),
     ) {
         Row(verticalAlignment = Alignment.Top) {

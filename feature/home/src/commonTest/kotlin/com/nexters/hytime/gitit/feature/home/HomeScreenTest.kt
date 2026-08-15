@@ -44,4 +44,16 @@ class HomeScreenTest {
 
             assertEquals(HomeSideEffect.NavigateToQuiz("project-1"), sideEffect.await())
         }
+
+    /** 홈 카드를 선택하면 프로젝트 상세 이동 이벤트를 발행하는지 검증한다. */
+    @Test
+    fun learningCardClick_emitsNavigateToProjectDetail() =
+        runBlocking {
+            val viewModel = HomeViewModel()
+            val sideEffect = async(start = CoroutineStart.UNDISPATCHED) { viewModel.sideEffects.first() }
+
+            viewModel.onIntent(HomeIntent.LearningCardClick("project-1"))
+
+            assertEquals(HomeSideEffect.NavigateToProjectDetail("project-1"), sideEffect.await())
+        }
 }

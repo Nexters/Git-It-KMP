@@ -46,6 +46,7 @@ actual fun AppNavHost() {
                 onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                onNavigateToProjectDetail = { projectId -> backStack.add(AppRoute.ProjectDetail(projectId)) },
                 onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
             )
         }
@@ -82,6 +83,7 @@ actual fun AppNavHost() {
                 onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                onNavigateToProjectDetail = { projectId -> backStack.add(AppRoute.ProjectDetail(projectId)) },
                 onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
             )
         }
@@ -93,6 +95,7 @@ actual fun AppNavHost() {
                 onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                onNavigateToProjectDetail = {},
                 onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
             )
         }
