@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.domain.repository
 
+import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
 
 /**
@@ -17,4 +18,12 @@ interface AccountRepository {
      * @return 백엔드 검증 결과를 담은 [Result]. 성공 시 로그인 세션, 실패 시 예외.
      */
     suspend fun signInWithGoogle(idToken: String): Result<LoginSession>
+
+    /**
+     * 현재 회원의 푸시 발송 대상 기기 정보를 등록하거나 갱신한다.
+     *
+     * @param deviceInfo 서버에 덮어쓸 현재 앱 설치 정보
+     * @return 등록 결과. 성공 시 [Unit], 실패 시 예외를 담는다
+     */
+    suspend fun registerDevice(deviceInfo: DeviceInfo): Result<Unit>
 }
