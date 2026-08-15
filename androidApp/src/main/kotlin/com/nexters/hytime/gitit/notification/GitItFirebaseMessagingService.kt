@@ -22,7 +22,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
-/** FCM 앱 설치 등록을 서버와 동기화하고 data-only 메시지를 Android 시스템 알림으로 표시한다. */
+/** FCM 앱 설치 등록을 서버와 동기화하고 수신 메시지를 Android 시스템 알림으로 표시한다. */
 class GitItFirebaseMessagingService : FirebaseMessagingService() {
     /** FCM 수신과 토큰 갱신 상태를 기록하는 로거다. */
     private val logger by lazy { gitItLogger(tag = "FCM") }
@@ -37,17 +37,26 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
     private val registrationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**
-     * data payload의 제목과 본문을 검증한 뒤 학습 알림을 게시한다.
+     * data 또는 notification payload의 제목과 본문을 검증한 뒤 학습 알림을 게시한다.
      *
      * @param remoteMessage Firebase가 전달한 원본 메시지
      */
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        val content = remoteMessage.data.toNotificationContent()
+        logger.i {
+            "FCM 메시지 수신: messageId=${remoteMessage.messageId}, " +
+                "dataKeys=${remoteMessage.data.keys}, notification=${remoteMessage.notification != null}"
+        }
+        val content =
+            remoteMessage.data.toNotificationContent()
+                ?: remoteMessage.notification?.let { notification ->
+                    createNotificationContent(notification.title, notification.body)
+                }
         if (content == null) {
-            logger.w { "FCM data payload에 title 또는 body가 없습니다." }
+            logger.w { "FCM payload에 title 또는 body가 없습니다." }
             return
         }
         showNotification(content, remoteMessage.messageId)
+        logger.i { "FCM 알림 표시 완료: messageId=${remoteMessage.messageId}" }
     }
 
     /**
@@ -56,6 +65,7 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
      * @param installationId Firebase가 앱 인스턴스에 발급한 식별자
      */
     override fun onRegistered(installationId: String) {
+        logger.i { "FCM 등록 완료" }
         registrationScope.launch { registerDevice(installationId) }
     }
 
@@ -153,9 +163,23 @@ internal data class NotificationContent(
  * @return 제목과 본문이 모두 있으면 알림 내용, 아니면 `null`
  */
 internal fun Map<String, String>.toNotificationContent(): NotificationContent? {
-    val title = get("title")?.trim().orEmpty()
-    val body = get("body")?.trim().orEmpty()
-    return if (title.isBlank() || body.isBlank()) null else NotificationContent(title, body)
+    return createNotificationContent(get("title"), get("body"))
+}
+
+/**
+ * nullable 제목과 본문을 시스템 알림 내용으로 정리한다.
+ *
+ * @param title 공백을 제거할 알림 제목
+ * @param body 공백을 제거할 알림 본문
+ * @return 제목과 본문이 모두 있으면 알림 내용, 아니면 `null`
+ */
+internal fun createNotificationContent(
+    title: String?,
+    body: String?,
+): NotificationContent? {
+    val normalizedTitle = title?.trim().orEmpty()
+    val normalizedBody = body?.trim().orEmpty()
+    return if (normalizedTitle.isBlank() || normalizedBody.isBlank()) null else NotificationContent(normalizedTitle, normalizedBody)
 }
 
 /**

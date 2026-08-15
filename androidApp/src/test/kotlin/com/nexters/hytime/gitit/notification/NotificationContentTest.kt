@@ -29,6 +29,14 @@ class NotificationContentTest {
         invalidPayloads.forEach { payload -> assertNull(payload.toNotificationContent(), payload.toString()) }
     }
 
+    /** notification payload의 제목과 본문도 알림 내용으로 변환하는지 검증한다. */
+    @Test
+    fun createNotificationContent_notificationPayload가있으면_알림내용을반환한다() {
+        val content = createNotificationContent(" 새 학습 세트 ", " 문제가 준비됐어요. ")
+
+        assertEquals(NotificationContent("새 학습 세트", "문제가 준비됐어요."), content)
+    }
+
     /** 알림이 활성화되면 정리한 FID를 기기 ID와 푸시 토큰으로 사용하는지 검증한다. */
     @Test
     fun createAndroidDeviceInfo_알림이활성화되면_fid를토큰으로사용한다() {
