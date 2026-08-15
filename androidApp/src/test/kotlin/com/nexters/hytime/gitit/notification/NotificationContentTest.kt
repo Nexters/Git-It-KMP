@@ -4,8 +4,44 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-/** FCM data payload가 시스템 알림 내용으로 변환되는 조건을 검증한다. */
+/** FCM data payload가 문제 생성 결과와 시스템 알림 내용으로 변환되는 조건을 검증한다. */
 class NotificationContentTest {
+    /** 서버가 정의한 세 상태를 프로젝트 식별자와 함께 생성 결과로 변환하는지 검증한다. */
+    @Test
+    fun toQuizGenerationResult_지원상태이면_생성결과를반환한다() {
+        val expectedStatuses =
+            mapOf(
+                "success" to QuizGenerationResultStatus.Success,
+                "failed" to QuizGenerationResultStatus.Failed,
+                "rejected" to QuizGenerationResultStatus.Rejected,
+            )
+
+        expectedStatuses.forEach { (payloadStatus, expectedStatus) ->
+            val result =
+                mapOf(
+                    "projectId" to " project-127 ",
+                    "status" to payloadStatus,
+                ).toQuizGenerationResult()
+
+            assertEquals(QuizGenerationResult("project-127", expectedStatus), result)
+        }
+    }
+
+    /** 프로젝트 식별자가 없거나 지원하지 않는 상태이면 생성 결과로 처리하지 않는지 검증한다. */
+    @Test
+    fun toQuizGenerationResult_필수값이잘못되면_null을반환한다() {
+        val invalidPayloads =
+            listOf(
+                emptyMap(),
+                mapOf("projectId" to "project-127"),
+                mapOf("status" to "success"),
+                mapOf("projectId" to " ", "status" to "success"),
+                mapOf("projectId" to "project-127", "status" to "completed"),
+            )
+
+        invalidPayloads.forEach { payload -> assertNull(payload.toQuizGenerationResult(), payload.toString()) }
+    }
+
     /** 제목과 본문이 있으면 주변 공백을 제거한 알림 내용을 반환하는지 검증한다. */
     @Test
     fun toNotificationContent_제목과본문이있으면_알림내용을반환한다() {
