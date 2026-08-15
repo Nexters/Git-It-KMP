@@ -62,7 +62,6 @@ import org.jetbrains.compose.resources.painterResource
  * @param onQuestionSolvingShortcutClick 더보기 메뉴의 문제풀이 바로가기 콜백
  * @param onDeleteProjectClick 삭제 콜백
  * @param onLearningSetClick 학습 세트 진입 콜백
- * @param onReviewStartClick 복습 시작 콜백
  * @param modifier 화면의 크기와 배치를 지정할 수식자
  */
 @Composable
@@ -76,7 +75,6 @@ fun ProjectDetailScreen(
     onQuestionSolvingShortcutClick: () -> Unit,
     onDeleteProjectClick: () -> Unit,
     onLearningSetClick: (String) -> Unit,
-    onReviewStartClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val sky = rememberGitItMainNavSky()
@@ -119,10 +117,6 @@ fun ProjectDetailScreen(
                 items(uiState.learningSets, key = { it.id }) { set ->
                     LearningSetCard(item = set, onClick = { onLearningSetClick(set.id) })
                     Spacer(Modifier.height(12.dp))
-                }
-                item {
-                    Spacer(Modifier.height(4.dp))
-                    ReviewCard(onReviewStartClick = onReviewStartClick)
                 }
             }
         }
@@ -403,52 +397,6 @@ private fun LearningSetCard(
 }
 
 /**
- * 복습 카드. 제목·설명·"복습 시작" 버튼을 배치한다.
- *
- * @param onReviewStartClick 복습 시작 콜백
- */
-@Composable
-private fun ReviewCard(onReviewStartClick: () -> Unit) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(GitItTheme.colors.blue400)
-                .padding(horizontal = 14.dp, vertical = 18.dp),
-    ) {
-        Text(
-            text = "아이디어 PT 오답 복습",
-            color = GitItTheme.colors.blue100,
-            style = GitItTheme.typography.subtitle3,
-        )
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = "해당 프로젝트의 모든 세트에서 학습한 내용을 복습하여\n학습을 완료하세요.",
-            color = GitItTheme.colors.grey200,
-            style = GitItTheme.typography.caption1,
-        )
-        Spacer(Modifier.height(18.dp))
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(GitItTheme.colors.blue100)
-                    .clickable(onClick = onReviewStartClick)
-                    .padding(vertical = 10.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = "복습 시작",
-                color = GitItTheme.colors.grey700,
-                style = GitItTheme.typography.body2,
-            )
-        }
-    }
-}
-
-/**
  * 더보기 드롭다운 메뉴.
  *
  * @param onSavedQuestionsClick 저장한 문제 콜백
@@ -531,7 +479,6 @@ private fun ProjectDetailScreenPreview() {
             onQuestionSolvingShortcutClick = {},
             onDeleteProjectClick = {},
             onLearningSetClick = {},
-            onReviewStartClick = {},
         )
     }
 }

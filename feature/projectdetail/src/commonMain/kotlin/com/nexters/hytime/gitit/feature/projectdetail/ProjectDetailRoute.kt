@@ -54,6 +54,5 @@ fun ProjectDetailRoute(
         onQuestionSolvingShortcutClick = viewModel::onQuestionSolvingShortcutClick,
         onDeleteProjectClick = viewModel::onDeleteProjectClick,
         onLearningSetClick = viewModel::onLearningSetClick,
-        onReviewStartClick = viewModel::onReviewStartClick,
     )
 }

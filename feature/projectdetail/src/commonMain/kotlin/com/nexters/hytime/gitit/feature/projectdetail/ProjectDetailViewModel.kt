@@ -97,13 +97,6 @@ class ProjectDetailViewModel(
         emit(ProjectDetailEvent.NavigateToQuiz(projectId))
     }
 
-    /**
-     * 복습 시작 인텐트. 아직 미구현이다.
-     */
-    fun onReviewStartClick() {
-        // TODO: 복습 화면 연동 후 네비게이션 이벤트를 발행한다.
-    }
-
     private fun emit(event: ProjectDetailEvent) {
         _events.tryEmit(event)
     }
