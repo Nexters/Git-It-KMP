@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nexters.hytime.gitit.designsystem.GitItColors
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import git_it_kmp.core.designsystem.generated.resources.Res
 import git_it_kmp.core.designsystem.generated.resources.ic_play_learning
@@ -60,6 +62,8 @@ fun GitItLearningCard(
     backgroundColor: Color = GitItTheme.colors.purple300,
     playContentDescription: String = "재생",
 ) {
+    val progressColors = resolveLearningCardProgressColors(backgroundColor, GitItTheme.colors)
+
     Column(
         modifier =
             modifier
@@ -110,14 +114,14 @@ fun GitItLearningCard(
                     .fillMaxWidth()
                     .height(5.dp)
                     .clip(RoundedCornerShape(99.dp))
-                    .background(GitItTheme.colors.purple200),
+                    .background(progressColors.trackColor),
         ) {
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth(normalizedProgress(progress))
                         .fillMaxHeight()
-                        .background(GitItTheme.colors.purple400),
+                        .background(progressColors.indicatorColor),
             )
         }
 
@@ -157,6 +161,35 @@ fun GitItLearningCard(
         }
     }
 }
+
+/**
+ * 학습 카드 배경에 대응하는 프로그레스바 색상을 묶는다.
+ *
+ * @property trackColor 진행되지 않은 영역의 색상
+ * @property indicatorColor 진행된 영역의 색상
+ */
+@Immutable
+internal data class LearningCardProgressColors(
+    val trackColor: Color,
+    val indicatorColor: Color,
+)
+
+/**
+ * Figma의 학습 카드 배경별 프로그레스바 색상을 원시 색상 토큰에 매핑한다.
+ *
+ * @param backgroundColor 카드에 적용된 배경색
+ * @param colors 매핑에 사용할 Git-it 원시 색상 토큰
+ * @return 배경색에 대응하는 트랙과 진행 영역 색상
+ */
+internal fun resolveLearningCardProgressColors(
+    backgroundColor: Color,
+    colors: GitItColors,
+): LearningCardProgressColors =
+    when (backgroundColor) {
+        colors.blue100 -> LearningCardProgressColors(colors.grey200, colors.blue200)
+        colors.blue500 -> LearningCardProgressColors(colors.purple300, colors.blue400)
+        else -> LearningCardProgressColors(colors.purple200, colors.purple400)
+    }
 
 /**
  * 재생 아이콘을 독립된 클릭 영역으로 렌더링한다.

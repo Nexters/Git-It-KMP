@@ -33,6 +33,13 @@ class HomeScreenTest {
         assertEquals(8f, learningCardAngle(page = 1, pageOffset = 0.5f))
     }
 
+    /** 빈 카드가 일반 화면과 폴드 화면의 오른쪽 끝까지 이어지는 개수로 계산된다. */
+    @Test
+    fun emptyLearningProjectCardCount_viewportWidth_fillsTrailingEdge() {
+        assertEquals(3, emptyLearningProjectCardCount(360.dp))
+        assertEquals(5, emptyLearningProjectCardCount(700.dp))
+    }
+
     /** 홈 카드의 재생 버튼이 문제 풀이 이동 이벤트를 발행하는지 검증한다. */
     @Test
     fun learningPlayClick_emitsNavigateToQuiz() =

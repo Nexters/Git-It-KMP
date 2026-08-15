@@ -29,6 +29,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -286,67 +289,41 @@ private fun LearningSection(
  */
 @Composable
 private fun EmptyLearningProjects(showMessage: Boolean = true) {
-    Box(
+    BoxWithConstraints(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .height(237.dp),
         contentAlignment = Alignment.Center,
     ) {
-        val outlineColor = GitItTheme.colors.blue300.copy(alpha = 0.26f)
+        val fillColor = GitItTheme.colors.blue500.copy(alpha = 0.3f)
+        val outlineColor = GitItTheme.colors.blue300.copy(alpha = 0.3f)
+        val cardCount = emptyLearningProjectCardCount(maxWidth)
         Canvas(Modifier.fillMaxSize()) {
-            drawRoundRect(
-                color = outlineColor,
-                topLeft =
-                    androidx.compose.ui.geometry
-                        .Offset(20.dp.toPx(), 27.dp.toPx()),
-                size =
-                    androidx.compose.ui.geometry
-                        .Size(154.dp.toPx(), 192.dp.toPx()),
-                cornerRadius =
-                    androidx.compose.ui.geometry
-                        .CornerRadius(12.dp.toPx()),
-                style = Stroke(1.dp.toPx()),
-            )
-            rotate(
-                degrees = 16f,
-                pivot =
-                    androidx.compose.ui.geometry
-                        .Offset(253.dp.toPx(), 123.dp.toPx()),
-            ) {
-                drawRoundRect(
-                    color = outlineColor,
-                    topLeft =
-                        androidx.compose.ui.geometry
-                            .Offset(176.dp.toPx(), 27.dp.toPx()),
-                    size =
-                        androidx.compose.ui.geometry
-                            .Size(154.dp.toPx(), 192.dp.toPx()),
-                    cornerRadius =
-                        androidx.compose.ui.geometry
-                            .CornerRadius(12.dp.toPx()),
-                    style = Stroke(1.dp.toPx()),
-                )
-            }
-            rotate(
-                degrees = -12f,
-                pivot =
-                    androidx.compose.ui.geometry
-                        .Offset(405.dp.toPx(), 123.dp.toPx()),
-            ) {
-                drawRoundRect(
-                    color = outlineColor,
-                    topLeft =
-                        androidx.compose.ui.geometry
-                            .Offset(328.dp.toPx(), 27.dp.toPx()),
-                    size =
-                        androidx.compose.ui.geometry
-                            .Size(154.dp.toPx(), 192.dp.toPx()),
-                    cornerRadius =
-                        androidx.compose.ui.geometry
-                            .CornerRadius(12.dp.toPx()),
-                    style = Stroke(1.dp.toPx()),
-                )
+            val cardSize = Size(154.dp.toPx(), 192.dp.toPx())
+            val cornerRadius = CornerRadius(12.dp.toPx())
+
+            repeat(cardCount) { index ->
+                val left = (20 + index * 154 + if (index % 2 == 1) 2 else 0).dp.toPx()
+                val topLeft = Offset(left, 27.dp.toPx())
+                rotate(
+                    degrees = learningCardAngle(index, index.coerceAtMost(1).toFloat()),
+                    pivot = Offset(left + 77.dp.toPx(), 123.dp.toPx()),
+                ) {
+                    drawRoundRect(
+                        color = fillColor,
+                        topLeft = topLeft,
+                        size = cardSize,
+                        cornerRadius = cornerRadius,
+                    )
+                    drawRoundRect(
+                        color = outlineColor,
+                        topLeft = topLeft,
+                        size = cardSize,
+                        cornerRadius = cornerRadius,
+                        style = Stroke(1.dp.toPx()),
+                    )
+                }
             }
         }
         if (showMessage) {
@@ -359,6 +336,14 @@ private fun EmptyLearningProjects(showMessage: Boolean = true) {
         }
     }
 }
+
+/**
+ * 빈 카드 영역이 화면 오른쪽까지 이어지도록 필요한 카드 수를 계산한다.
+ *
+ * @param availableWidth 빈 카드 영역에 사용할 수 있는 화면 너비
+ * @return 화면 끝을 넘어 그려질 최소 카드 수
+ */
+internal fun emptyLearningProjectCardCount(availableWidth: Dp): Int = (((availableWidth.value - 20f) / 154f).toInt() + 1).coerceAtLeast(1)
 
 /**
  * 카드를 수평으로 넘기며 현재 카드가 정면을 향하도록 회전시킨다.
