@@ -179,7 +179,7 @@ private fun ProjectDetailTopBar(
 }
 
 /**
- * 헤더 영역: 썸네일·칩·제목·스타 수/기술스택·문제풀이 바로가기 버튼을 배치한다.
+ * 헤더 영역: 썸네일·제목·스타 수/기술스택·문제풀이 바로가기 버튼을 배치한다.
  *
  * @param uiState 단일 UI 상태
  * @param onQuestionSolvingClick 문제풀이 바로가기 콜백
@@ -191,30 +191,20 @@ private fun ProjectHeader(
 ) {
     val project = uiState.project ?: return
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Bottom,
+    Box(
+        modifier =
+            Modifier
+                .size(99.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(GitItTheme.colors.grey600),
+        contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(99.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(GitItTheme.colors.grey600),
-            contentAlignment = Alignment.Center,
-        ) {
-            // TODO: data 연동 후 AsyncImage로 교체한다.
-            Text(
-                text = project.name.take(1),
-                color = GitItTheme.colors.grey100,
-                style = GitItTheme.typography.headline2,
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-            CategoryChip(text = project.category, isCategory = true)
-            CategoryChip(text = project.difficulty, isCategory = false)
-        }
+        // TODO: data 연동 후 AsyncImage로 교체한다.
+        Text(
+            text = project.name.take(1),
+            color = GitItTheme.colors.grey100,
+            style = GitItTheme.typography.headline2,
+        )
     }
 
     Spacer(Modifier.height(31.dp))
@@ -260,35 +250,6 @@ private fun ProjectHeader(
             painter = painterResource(Res.drawable.ic_play_project),
             contentDescription = null,
             modifier = Modifier.size(40.dp).clickable(onClick = onQuestionSolvingClick),
-        )
-    }
-}
-
-/**
- * 카테고리/난이도 칩이다.
- *
- * @param text 칩 텍스트
- * @param isCategory true면 blue400 배경(카테고리), false면 grey500 배경(난이도)
- */
-@Composable
-private fun CategoryChip(
-    text: String,
-    isCategory: Boolean,
-) {
-    val background = if (isCategory) GitItTheme.colors.blue400 else GitItTheme.colors.grey500
-    Box(
-        modifier =
-            Modifier
-                .height(28.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(background)
-                .padding(horizontal = if (isCategory) 9.dp else 7.dp, vertical = 5.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = text,
-            color = GitItTheme.colors.blue100,
-            style = GitItTheme.typography.body3,
         )
     }
 }
@@ -465,8 +426,6 @@ private fun ProjectDetailScreenPreview() {
                         ProjectInfo(
                             name = "Nexters",
                             thumbnailUrl = "",
-                            category = "Back-end",
-                            difficulty = "입문",
                             starCount = "3.6k",
                             techStack = "Kotlin · Compose · Coroutines",
                         ),

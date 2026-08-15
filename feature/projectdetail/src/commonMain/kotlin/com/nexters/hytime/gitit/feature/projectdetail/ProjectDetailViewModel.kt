@@ -100,8 +100,6 @@ class ProjectDetailViewModel(
                     ProjectInfo(
                         name = "Nexters",
                         thumbnailUrl = "",
-                        category = "Back-end",
-                        difficulty = "입문",
                         starCount = "3.6k",
                         techStack = "Kotlin · Compose · Coroutines",
                     ),
