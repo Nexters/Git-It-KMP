@@ -60,12 +60,12 @@ private val dummyMyUiState =
             ),
         weeklyStudy =
             listOf(
+                MyWeeklyStudy(day = "월", solvedCount = 14),
+                MyWeeklyStudy(day = "화", solvedCount = 8),
                 MyWeeklyStudy(day = "수", solvedCount = 18),
                 MyWeeklyStudy(day = "목", solvedCount = 11),
                 MyWeeklyStudy(day = "금", solvedCount = 14),
                 MyWeeklyStudy(day = "토", solvedCount = 11),
                 MyWeeklyStudy(day = "일", solvedCount = 18),
-                MyWeeklyStudy(day = "월", solvedCount = 14),
-                MyWeeklyStudy(day = "화", solvedCount = 8),
             ),
     )

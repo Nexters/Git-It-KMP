@@ -269,7 +269,8 @@ private fun WeeklyStudyCard(
     items: List<MyWeeklyStudy>,
     modifier: Modifier = Modifier,
 ) {
-    val maxSolvedCount = items.maxOfOrNull(MyWeeklyStudy::solvedCount) ?: 0
+    val orderedItems = fixedWeeklyStudyItems(items)
+    val maxSolvedCount = orderedItems.maxOfOrNull(MyWeeklyStudy::solvedCount) ?: 0
 
     Column(
         modifier =
@@ -297,11 +298,11 @@ private fun WeeklyStudyCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.Bottom,
             ) {
-                items.forEachIndexed { index, item ->
+                orderedItems.forEachIndexed { index, item ->
                     WeeklyStudyBar(
                         item = item,
                         maxSolvedCount = maxSolvedCount,
-                        isToday = index == items.lastIndex,
+                        isToday = index == orderedItems.lastIndex,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -311,7 +312,7 @@ private fun WeeklyStudyCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items.forEach { item ->
+                orderedItems.forEach { item ->
                     Text(
                         text = item.day,
                         color = GitItTheme.colors.grey100,
@@ -374,6 +375,20 @@ internal fun weeklyStudyBarHeight(
     maxSolvedCount: Int,
 ): Float = 81f * solvedCount.coerceIn(0, maxSolvedCount.coerceAtLeast(0)) / maxSolvedCount.coerceAtLeast(1)
 
+/** 그래프에 표시할 월요일부터 일요일까지의 요일 순서다. */
+private val WEEK_DAYS = listOf("월", "화", "수", "목", "금", "토", "일")
+
+/**
+ * 주간 학습량을 월요일부터 일요일 순서의 7개 항목으로 정규화한다.
+ *
+ * @param items 순서가 정해지지 않은 요일별 학습량
+ * @return 월요일부터 일요일까지 정렬되고 누락된 요일은 0으로 채운 목록
+ */
+internal fun fixedWeeklyStudyItems(items: List<MyWeeklyStudy>): List<MyWeeklyStudy> {
+    val itemsByDay = items.associateBy(MyWeeklyStudy::day)
+    return WEEK_DAYS.map { day -> itemsByDay[day] ?: MyWeeklyStudy(day = day, solvedCount = 0) }
+}
+
 @Preview
 @Composable
 private fun MyScreenPreview() {
@@ -390,13 +405,13 @@ private fun MyScreenPreview() {
                         ),
                     weeklyStudy =
                         listOf(
+                            MyWeeklyStudy(day = "월", solvedCount = 14),
+                            MyWeeklyStudy(day = "화", solvedCount = 8),
                             MyWeeklyStudy(day = "수", solvedCount = 18),
                             MyWeeklyStudy(day = "목", solvedCount = 11),
                             MyWeeklyStudy(day = "금", solvedCount = 14),
                             MyWeeklyStudy(day = "토", solvedCount = 11),
                             MyWeeklyStudy(day = "일", solvedCount = 18),
-                            MyWeeklyStudy(day = "월", solvedCount = 14),
-                            MyWeeklyStudy(day = "화", solvedCount = 8),
                         ),
                 ),
             onIntent = {},
