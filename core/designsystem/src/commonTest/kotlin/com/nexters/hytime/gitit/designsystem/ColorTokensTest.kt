@@ -66,6 +66,7 @@ class ColorTokensTest {
     fun opacityColors_matchFigmaAlphaValues() {
         val actual =
             listOf(
+                defaultGitItColors.white05,
                 defaultGitItColors.white15,
                 defaultGitItColors.white30,
                 defaultGitItColors.white70,
@@ -73,7 +74,7 @@ class ColorTokensTest {
             ).map { it.toArgb().toUInt() }
 
         assertContentEquals(
-            expected = listOf(0x26FFFFFFu, 0x4DFFFFFFu, 0xB3FFFFFFu, 0xB3000000u),
+            expected = listOf(0x0DFFFFFFu, 0x26FFFFFFu, 0x4DFFFFFFu, 0xB3FFFFFFu, 0xB3000000u),
             actual = actual,
         )
     }

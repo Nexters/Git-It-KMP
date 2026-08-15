@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kotlin.math.cos
@@ -35,12 +36,14 @@ internal enum class GitItLiquidGlassBorderKind {
  * @param color 보더 색상. 알파는 사용되지 않는다
  * @param startAlpha 시작점(밝은 모서리) 알파(0f..1f)
  * @param endAlpha 끝점(흐린 모서리) 알파(0f..1f)
+ * @param cornerRadius 테두리 모서리 반지름. null이면 높이의 절반을 사용한다
  */
 internal fun DrawScope.drawGitItLiquidGlassBorder(
     borderKind: GitItLiquidGlassBorderKind,
     color: Color = Color.White,
     startAlpha: Float = GIT_IT_LIQUID_GLASS_BORDER_START_ALPHA,
     endAlpha: Float = GIT_IT_LIQUID_GLASS_BORDER_END_ALPHA,
+    cornerRadius: Dp? = null,
 ) {
     require(startAlpha in 0f..1f) { "startAlpha는 0f..1f 범위여야 한다: $startAlpha" }
     require(endAlpha in 0f..1f) { "endAlpha는 0f..1f 범위여야 한다: $endAlpha" }
@@ -66,7 +69,7 @@ internal fun DrawScope.drawGitItLiquidGlassBorder(
 
     drawRoundRect(
         brush = borderBrush,
-        cornerRadius = CornerRadius(size.height / 2f, size.height / 2f),
+        cornerRadius = CornerRadius(cornerRadius?.toPx() ?: (size.height / 2f)),
         style = Stroke(width = strokeWidth),
     )
 }

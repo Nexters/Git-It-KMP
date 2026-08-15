@@ -1,0 +1,5 @@
+<resources>
+  <string name="project_delete">프로젝트 삭제</string>
+  <string name="project_menu_button_description">프로젝트 메뉴</string>
+  <string name="project_play_button_description">문제 풀이 시작</string>
+</resources>

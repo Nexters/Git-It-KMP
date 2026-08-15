@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.collectLatest
 /**
  * 프로젝트 리스트 화면의 진입점(Route)이다.
  *
- * @param onBackClick 이전 화면으로 이동하는 콜백. null이면 뒤로가기 버튼을 표시하지 않는다
  * @param onNavigateToHome 홈 화면으로 이동하는 콜백
  * @param onNavigateToMy 마이 화면으로 이동하는 콜백
  * @param onNavigateToBookmark 저장한 문제 화면으로 이동하는 콜백
@@ -18,7 +17,6 @@ import kotlinx.coroutines.flow.collectLatest
  */
 @Composable
 fun ProjectListRoute(
-    onBackClick: (() -> Unit)?,
     onNavigateToHome: () -> Unit,
     onNavigateToMy: () -> Unit,
     onNavigateToBookmark: () -> Unit,
@@ -30,7 +28,6 @@ fun ProjectListRoute(
     LaunchedEffect(Unit) {
         viewModel.sideEffects.collectLatest { sideEffect ->
             when (sideEffect) {
-                ProjectListSideEffect.NavigateBack -> onBackClick?.invoke()
                 ProjectListSideEffect.NavigateToHome -> onNavigateToHome()
                 ProjectListSideEffect.NavigateToMy -> onNavigateToMy()
                 ProjectListSideEffect.NavigateToBookmark -> onNavigateToBookmark()
@@ -42,6 +39,5 @@ fun ProjectListRoute(
     ProjectListScreen(
         uiState = uiState,
         onIntent = viewModel::onIntent,
-        showBackButton = onBackClick != null,
     )
 }

@@ -23,7 +23,7 @@ actual fun AppNavHost() {
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
-            AppRoute.Onboarding,
+            AppRoute.Home,
         )
 
     fun navigateToMainRoute(route: AppRoute) {
@@ -78,12 +78,6 @@ actual fun AppNavHost() {
                 }
                 entry<AppRoute.ProjectList> {
                     ProjectListRoute(
-                        onBackClick =
-                            if (backStack.size > 1) {
-                                { backStack.removeLastOrNull() }
-                            } else {
-                                null
-                            },
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                         onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },

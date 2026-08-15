@@ -42,7 +42,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -62,13 +61,13 @@ import androidx.compose.ui.unit.sp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
+import com.nexters.hytime.gitit.designsystem.liquidglass.gitItTopGradientBlur
 import com.nexters.hytime.gitit.designsystem.navigation.GitItBookmarkIcon
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerCard
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerState
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
 import com.skydoves.cloudy.Sky
-import com.skydoves.cloudy.cloudy
 import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
 import git_it_kmp.feature.quiz.generated.resources.Res
@@ -241,9 +240,10 @@ private fun QuizQuestionScreen(
     val sky = if (LocalInspectionMode.current) null else rememberSky()
     var headerHeightPx by remember { mutableIntStateOf(0) }
     val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
+    val measuredSky = if (headerHeightPx > 0) sky else null
 
-    LaunchedEffect(sky, headerHeightPx) {
-        if (headerHeightPx > 0) sky?.invalidate()
+    LaunchedEffect(measuredSky, uiState) {
+        measuredSky?.invalidate()
     }
 
     Box(
@@ -257,13 +257,13 @@ private fun QuizQuestionScreen(
             onIntent = onIntent,
             onSourceClick = onSourceClick,
             topPadding = headerHeight + 20.dp,
-            modifier = Modifier.fillMaxSize().captureSky(sky),
+            modifier = Modifier.fillMaxSize().captureSky(measuredSky),
         )
         QuizQuestionHeader(
             questionNumber = uiState.multipleChoiceQuestion.number,
             questionText = uiState.multipleChoiceQuestion.text,
             onBackClick = { onIntent(SolveQuizIntent.BackClick) },
-            sky = sky,
+            sky = measuredSky,
             modifier =
                 Modifier
                     .align(Alignment.TopCenter)
@@ -370,7 +370,7 @@ private fun QuizQuestionHeader(
     sky: Sky?,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxWidth().questionBackdrop(sky).statusBarsPadding()) {
+    Column(modifier = modifier.fillMaxWidth().gitItTopGradientBlur(sky).statusBarsPadding()) {
         GitItTopBar(
             type = GitItTopBarType.Default,
             modifier = Modifier.padding(top = 8.dp),
@@ -408,7 +408,9 @@ private fun QuizQuestionHeader(
  *
  * @param isBookmarked 현재 문제의 저장 상태
  * @param onBookmarkClick 저장 상태를 전환하는 콜백
- * @param onSubmitClick 현재 선택 답안을 채점하는 콜백
+ * @param buttonText 하단 버튼에 표시할 문구
+ * @param isButtonEnabled 하단 버튼을 누를 수 있는지 여부
+ * @param onButtonClick 현재 단계의 답안을 제출하거나 다음 단계로 이동하는 콜백
  * @param modifier 하단 바의 크기와 배치를 지정할 수식자
  */
 @Composable
@@ -478,14 +480,15 @@ private fun QuizEssayScreen(
     val sky = if (LocalInspectionMode.current) null else rememberSky()
     var headerHeightPx by remember { mutableIntStateOf(0) }
     val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
+    val measuredSky = if (headerHeightPx > 0) sky else null
 
-    LaunchedEffect(sky, headerHeightPx) {
-        if (headerHeightPx > 0) sky?.invalidate()
+    LaunchedEffect(measuredSky, uiState) {
+        measuredSky?.invalidate()
     }
 
     Box(modifier = modifier.fillMaxSize().background(GitItTheme.colors.grey700)) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().captureSky(sky),
+            modifier = Modifier.fillMaxSize().captureSky(measuredSky),
             contentPadding = PaddingValues(start = 20.dp, top = headerHeight + 20.dp, end = 20.dp, bottom = 164.dp),
         ) {
             item {
@@ -506,7 +509,7 @@ private fun QuizEssayScreen(
             questionNumber = uiState.essayQuestion.number,
             questionText = uiState.essayQuestion.text,
             onBackClick = { onIntent(SolveQuizIntent.BackClick) },
-            sky = sky,
+            sky = measuredSky,
             modifier =
                 Modifier
                     .align(Alignment.TopCenter)
@@ -956,25 +959,6 @@ internal fun SolveQuizUiState.answerCardState(answerId: String): GitItMultipleCh
  */
 @Composable
 private fun Modifier.captureSky(sky: Sky?): Modifier = if (sky == null) this else sky(sky)
-
-/**
- * 고정 질문 영역에 스크롤 콘텐츠의 Sky 블러를 적용한다.
- *
- * @param sky 흐림 배경을 읽을 캡처 상태. Preview에서는 null
- * @return 20px 블러 또는 정적 배경이 적용된 수식자
- */
-@Composable
-private fun Modifier.questionBackdrop(sky: Sky?): Modifier =
-    if (sky == null) {
-        background(GitItTheme.colors.grey700)
-    } else {
-        cloudy(
-            sky = sky,
-            radius = 20,
-            tint = GitItTheme.colors.grey700.copy(alpha = 0.55f),
-            shape = RectangleShape,
-        )
-    }
 
 @Preview
 @Composable
