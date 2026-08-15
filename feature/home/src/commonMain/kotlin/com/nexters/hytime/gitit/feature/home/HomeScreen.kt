@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -65,12 +68,14 @@ fun HomeScreen(
 ) {
     val sky = rememberGitItMainNavSky()
 
-    Box(
+    BoxWithConstraints(
         modifier =
             modifier
                 .fillMaxSize()
                 .background(GitItTheme.colors.grey700),
     ) {
+        val viewportSize = DpSize(maxWidth, maxHeight)
+
         Column(
             modifier =
                 Modifier
@@ -86,7 +91,11 @@ fun HomeScreen(
             Spacer(Modifier.height(22.dp))
             ProjectImport(onClick = { onIntent(HomeIntent.LoadProjectClick) })
             Spacer(Modifier.height(40.dp))
-            LearningSection(uiState = uiState, onIntent = onIntent)
+            LearningSection(
+                uiState = uiState,
+                viewportSize = viewportSize,
+                onIntent = onIntent,
+            )
         }
 
         GitItMainNavBar(
@@ -203,11 +212,13 @@ private fun ProjectImport(onClick: () -> Unit) {
  * 학습 중인 레포지토리 제목과 카드 또는 빈 상태를 표시한다.
  *
  * @param uiState 학습 카드 목록을 포함한 홈 상태
+ * @param viewportSize 카드가 사용할 수 있는 화면 크기
  * @param onIntent 카드와 전체 보기 입력을 전달할 콜백
  */
 @Composable
 private fun LearningSection(
     uiState: HomeUiState,
+    viewportSize: DpSize,
     onIntent: (HomeIntent) -> Unit,
 ) {
     Row(
@@ -251,7 +262,11 @@ private fun LearningSection(
             if (uiState.learningProjects.size < 3) {
                 EmptyLearningProjects(showMessage = false)
             }
-            LearningProjectPager(projects = uiState.learningProjects, onIntent = onIntent)
+            LearningProjectPager(
+                projects = uiState.learningProjects,
+                viewportSize = viewportSize,
+                onIntent = onIntent,
+            )
         }
     }
 }
@@ -341,14 +356,17 @@ private fun EmptyLearningProjects(showMessage: Boolean = true) {
  * 카드를 수평으로 넘기며 현재 카드가 정면을 향하도록 회전시킨다.
  *
  * @param projects 표시할 학습 프로젝트 목록
+ * @param viewportSize 카드 크기와 마지막 페이지 여백을 계산할 화면 크기
  * @param onIntent 카드 입력을 전달할 콜백
  */
 @Composable
 private fun LearningProjectPager(
     projects: List<HomeLearningProject>,
+    viewportSize: DpSize,
     onIntent: (HomeIntent) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = projects::size)
+    val cardSize = learningCardSize(viewportSize.height)
     // 실제 데이터의 개수와 무관하게 카드 순서대로 세 색상을 반복한다.
     val backgroundColors =
         listOf(
@@ -362,9 +380,13 @@ private fun LearningProjectPager(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .height(237.dp),
-        contentPadding = PaddingValues(start = 20.dp, end = 186.dp),
-        pageSize = PageSize.Fixed(154.dp),
+                .height(cardSize.height + 45.dp),
+        contentPadding =
+            PaddingValues(
+                start = 20.dp,
+                end = (viewportSize.width - 20.dp - cardSize.width).coerceAtLeast(20.dp),
+            ),
+        pageSize = PageSize.Fixed(cardSize.width),
         beyondViewportPageCount = 2,
         userScrollEnabled = projects.size > 2,
         key = { projects[it].id },
@@ -388,10 +410,28 @@ private fun LearningProjectPager(
                 backgroundColor = backgroundColors[page % backgroundColors.size],
                 onCardClick = { onIntent(HomeIntent.LearningCardClick(project.id)) },
                 onPlayClick = { onIntent(HomeIntent.LearningPlayClick(project.id)) },
-                modifier = Modifier.graphicsLayer { rotationZ = learningCardAngle(page, pageOffset) },
+                modifier =
+                    Modifier
+                        .size(cardSize)
+                        .graphicsLayer { rotationZ = learningCardAngle(page, pageOffset) },
             )
         }
     }
+}
+
+/**
+ * 화면 하단의 가용 공간에 맞춰 학습 카드 크기를 최소·최대 범위에서 확대한다.
+ *
+ * @param viewportHeight 홈 화면 전체 높이
+ * @return 806dp 이하에서는 154×192dp, 874dp 이상에서는 209×260dp인 카드 크기
+ */
+internal fun learningCardSize(viewportHeight: Dp): DpSize {
+    val height = (viewportHeight - 614.dp).coerceIn(192.dp, 260.dp)
+    val growthFraction = (height - 192.dp) / 68.dp
+    return DpSize(
+        width = 154.dp + 55.dp * growthFraction,
+        height = height,
+    )
 }
 
 /**

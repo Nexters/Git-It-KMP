@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * 홈 화면의 상태와 사용자 의도를 관리한다.
  */
 class HomeViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(HomeUiState())
+    private val _uiState = MutableStateFlow(HomeUiState(learningProjects = dummyLearningProjects))
 
     /**
      * 홈 화면이 구독할 현재 UI 상태이다.

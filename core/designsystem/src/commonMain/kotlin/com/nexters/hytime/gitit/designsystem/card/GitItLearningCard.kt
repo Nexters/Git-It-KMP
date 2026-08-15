@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -60,20 +60,21 @@ fun GitItLearningCard(
     backgroundColor: Color = GitItTheme.colors.purple300,
     playContentDescription: String = "재생",
 ) {
-    Box(
+    Column(
         modifier =
             modifier
                 .size(width = 154.dp, height = 192.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(backgroundColor)
-                .clickable(role = Role.Button, onClick = onCardClick),
+                .clickable(role = Role.Button, onClick = onCardClick)
+                .padding(top = 16.dp, bottom = 18.dp),
     ) {
         Row(
             modifier =
                 Modifier
-                    .offset(x = 13.dp, y = 17.dp)
-                    .width(132.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    .fillMaxWidth()
+                    .padding(start = 14.dp, end = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top,
         ) {
             Column(
@@ -102,56 +103,57 @@ fun GitItLearningCard(
             )
         }
 
-        Column(
+        Box(
             modifier =
                 Modifier
-                    .offset(x = 13.dp, y = 119.dp)
-                    .width(128.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+                    .padding(start = 14.dp, end = 14.dp, top = 12.dp)
+                    .fillMaxWidth()
+                    .height(5.dp)
+                    .clip(RoundedCornerShape(99.dp))
+                    .background(GitItTheme.colors.purple200),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Box(
-                    modifier =
-                        Modifier
-                            .height(19.dp)
-                            .clip(RoundedCornerShape(99.dp))
-                            .background(GitItTheme.colors.purple400)
-                            .padding(horizontal = 5.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = setLabel,
-                        color = GitItTheme.colors.grey100,
-                        maxLines = 1,
-                        style = GitItTheme.typography.caption2,
-                    )
-                }
-                Text(
-                    text = description,
-                    modifier = Modifier.fillMaxWidth(),
-                    color = GitItTheme.colors.grey100,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = GitItTheme.typography.caption1,
-                )
-            }
-
             Box(
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .height(5.dp)
+                        .fillMaxWidth(normalizedProgress(progress))
+                        .fillMaxHeight()
+                        .background(GitItTheme.colors.purple400),
+            )
+        }
+
+        Spacer(Modifier.weight(1f))
+
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .height(19.dp)
                         .clip(RoundedCornerShape(99.dp))
-                        .background(GitItTheme.colors.purple200),
+                        .background(GitItTheme.colors.purple400)
+                        .padding(horizontal = 5.dp),
+                contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth(normalizedProgress(progress))
-                            .fillMaxHeight()
-                            .background(GitItTheme.colors.purple400),
+                Text(
+                    text = setLabel,
+                    color = GitItTheme.colors.grey100,
+                    maxLines = 1,
+                    style = GitItTheme.typography.caption2,
                 )
             }
+            Text(
+                text = description,
+                modifier = Modifier.fillMaxWidth(),
+                color = GitItTheme.colors.grey100,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = GitItTheme.typography.caption1,
+            )
         }
     }
 }

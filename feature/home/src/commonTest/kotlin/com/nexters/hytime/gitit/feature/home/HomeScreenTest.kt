@@ -1,5 +1,7 @@
 package com.nexters.hytime.gitit.feature.home
 
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -7,8 +9,16 @@ import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** 홈 카드 앵글 계산을 검증한다. */
+/** 홈 화면의 카드 배치와 입력 처리를 검증한다. */
 class HomeScreenTest {
+    /** 화면 높이에 따라 카드 크기가 Figma의 최소·최대 범위로 제한된다. */
+    @Test
+    fun learningCardSize_viewportHeight_returnsMinAndMaxSize() {
+        assertEquals(DpSize(154.dp, 192.dp), learningCardSize(700.dp))
+        assertEquals(DpSize(209.dp, 260.dp), learningCardSize(874.dp))
+        assertEquals(DpSize(209.dp, 260.dp), learningCardSize(1_000.dp))
+    }
+
     /** 현재 카드와 다음 카드가 Figma에 정의된 각도를 사용한다. */
     @Test
     fun learningCardAngle_currentAndAdjacent_returnsFigmaAngles() {
