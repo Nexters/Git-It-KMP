@@ -24,6 +24,7 @@ dependencies {
     implementation(libs.compose.gradlePlugin)
     implementation(libs.composeCompiler.gradlePlugin)
     implementation(libs.ktlint.gradlePlugin)
+    implementation(libs.google.services.gradlePlugin)
 
     // 생성된 `LibrariesForLibs` 타입을 노출한다.
     // 이게 있어야 precompiled script plugin에서 `the<LibrariesForLibs>()`로

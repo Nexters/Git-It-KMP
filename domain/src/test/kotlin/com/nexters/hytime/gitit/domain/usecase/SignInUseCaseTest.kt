@@ -2,6 +2,7 @@ package com.nexters.hytime.gitit.domain.usecase
 
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
+import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
 import com.nexters.hytime.gitit.domain.repository.AccountRepository
 import kotlinx.coroutines.runBlocking
@@ -24,6 +25,8 @@ class SignInUseCaseTest {
                 accountRepository =
                     object : AccountRepository {
                         override suspend fun signInWithGoogle(idToken: String): Result<LoginSession> = Result.success(session)
+
+                        override suspend fun registerDevice(deviceInfo: DeviceInfo): Result<Unit> = Result.success(Unit)
                     },
                 sessionStorage = storage,
             )
