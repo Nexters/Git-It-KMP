@@ -5,6 +5,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.nexters.hytime.gitit.feature.bookmark.BookmarkRoute
 import com.nexters.hytime.gitit.feature.home.HomeRoute
+import com.nexters.hytime.gitit.feature.my.AccountDeleteRoute
 import com.nexters.hytime.gitit.feature.my.MyRoute
 import com.nexters.hytime.gitit.feature.my.SettingsScreen
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
@@ -52,6 +53,12 @@ actual fun AppNavHost() {
             SettingsScreen(
                 onBackClick = { backStack.removeLastOrNull() },
                 onPolicyClick = { uriHandler.openUri(POLICY_URL) },
+                onDeleteAccountClick = { backStack.add(AppRoute.AccountDelete) },
+            )
+        AppRoute.AccountDelete ->
+            AccountDeleteRoute(
+                onBackClick = { backStack.removeLastOrNull() },
+                onDeleteAccountClick = {},
             )
         AppRoute.Bookmark -> {
             BookmarkRoute(
