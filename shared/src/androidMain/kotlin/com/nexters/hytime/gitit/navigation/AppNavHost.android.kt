@@ -23,7 +23,7 @@ actual fun AppNavHost() {
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
-            AppRoute.Onboarding,
+            AppRoute.Home,
         )
 
     fun navigateToMainRoute(route: AppRoute) {
