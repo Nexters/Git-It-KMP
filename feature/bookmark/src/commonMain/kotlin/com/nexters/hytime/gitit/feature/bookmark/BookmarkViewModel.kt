@@ -51,9 +51,6 @@ class BookmarkViewModel : ViewModel() {
                     )
                 }
             }
-            is BookmarkIntent.ExplanationClick -> {
-                // TODO: 해설 화면 route 추가 후 연결한다.
-            }
             is BookmarkIntent.SolveClick -> {
                 // TODO: 문제풀이 화면 route 추가 후 연결한다.
             }

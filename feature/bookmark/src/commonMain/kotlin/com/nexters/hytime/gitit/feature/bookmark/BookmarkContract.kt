@@ -74,15 +74,6 @@ sealed interface BookmarkIntent {
     ) : BookmarkIntent
 
     /**
-     * 해설 보기 선택.
-     *
-     * @property questionId 선택한 문제 식별자
-     */
-    data class ExplanationClick(
-        val questionId: String,
-    ) : BookmarkIntent
-
-    /**
      * 문제 풀기 선택.
      *
      * @property questionId 선택한 문제 식별자

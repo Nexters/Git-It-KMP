@@ -25,6 +25,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -73,18 +74,20 @@ fun BookmarkScreen(
                     color = GitItTheme.colors.grey100,
                     style = GitItTheme.typography.subtitle1,
                 )
-                Spacer(Modifier.height(16.dp))
-                BookmarkFilterRow(
-                    filters = uiState.filters,
-                    selectedFilterId = uiState.selectedFilterId,
-                    onFilterClick = { filterId -> onIntent(BookmarkIntent.FilterClick(filterId)) },
-                )
-                Spacer(Modifier.height(22.dp))
-                Text(
-                    text = "${uiState.questions.size}개",
-                    color = GitItTheme.colors.grey400,
-                    style = GitItTheme.typography.body2,
-                )
+                if (uiState.questions.isNotEmpty()) {
+                    Spacer(Modifier.height(16.dp))
+                    BookmarkFilterRow(
+                        filters = uiState.filters,
+                        selectedFilterId = uiState.selectedFilterId,
+                        onFilterClick = { filterId -> onIntent(BookmarkIntent.FilterClick(filterId)) },
+                    )
+                    Spacer(Modifier.height(22.dp))
+                    Text(
+                        text = "${uiState.questions.size}개",
+                        color = GitItTheme.colors.grey400,
+                        style = GitItTheme.typography.body2,
+                    )
+                }
             }
 
             items(uiState.questions, key = { it.id }) { question ->
@@ -92,10 +95,18 @@ fun BookmarkScreen(
                     question = question,
                     isBookmarked = uiState.bookmarkChanges[question.id] ?: true,
                     onBookmarkClick = { onIntent(BookmarkIntent.BookmarkClick(question.id)) },
-                    onExplanationClick = { onIntent(BookmarkIntent.ExplanationClick(question.id)) },
                     onSolveClick = { onIntent(BookmarkIntent.SolveClick(question.id)) },
                 )
             }
+        }
+
+        if (uiState.questions.isEmpty()) {
+            BookmarkEmptyState(
+                modifier =
+                    Modifier
+                        .align(Alignment.Center)
+                        .padding(horizontal = 20.dp),
+            )
         }
 
         GitItMainNavBar(
@@ -113,6 +124,33 @@ fun BookmarkScreen(
                     .align(Alignment.BottomCenter)
                     .padding(start = 27.dp, end = 27.dp, bottom = 29.dp),
             sky = sky,
+        )
+    }
+}
+
+/**
+ * 저장한 문제가 없을 때 안내 문구를 표시한다.
+ *
+ * @param modifier 외부 배치와 추가 수식자
+ */
+@Composable
+private fun BookmarkEmptyState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = "Nothing saved yet.",
+            color = GitItTheme.colors.grey200,
+            style = GitItTheme.typography.subtitle1,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = "아직 저장한 문제가 없네요!\n다시 확인하고 싶은 문제를 저장해 보세요.",
+            color = GitItTheme.colors.grey400,
+            style = GitItTheme.typography.body2,
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -186,7 +224,6 @@ private fun BookmarkFilterChip(
  * @param question 표시할 저장 문제
  * @param isBookmarked 현재 문제의 북마크 상태
  * @param onBookmarkClick 북마크 버튼 선택 콜백
- * @param onExplanationClick 해설 보기 선택 콜백
  * @param onSolveClick 문제 풀기 선택 콜백
  * @param modifier 외부 배치와 추가 수식자
  */
@@ -195,7 +232,6 @@ private fun BookmarkedQuestionCard(
     question: BookmarkedQuestion,
     isBookmarked: Boolean,
     onBookmarkClick: () -> Unit,
-    onExplanationClick: () -> Unit,
     onSolveClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -237,15 +273,8 @@ private fun BookmarkedQuestionCard(
             )
             Spacer(Modifier.weight(1f))
             BookmarkActionButton(
-                label = "해설보기",
-                onClick = onExplanationClick,
-                primary = false,
-            )
-            Spacer(Modifier.size(6.dp))
-            BookmarkActionButton(
                 label = "문제 풀기",
                 onClick = onSolveClick,
-                primary = true,
             )
         }
     }
@@ -256,14 +285,12 @@ private fun BookmarkedQuestionCard(
  *
  * @param label 버튼 라벨
  * @param onClick 버튼 선택 콜백
- * @param primary 강조 버튼 여부
  * @param modifier 외부 배치와 추가 수식자
  */
 @Composable
 private fun BookmarkActionButton(
     label: String,
     onClick: () -> Unit,
-    primary: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -271,13 +298,13 @@ private fun BookmarkActionButton(
             modifier
                 .size(width = 82.dp, height = 30.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(if (primary) GitItTheme.colors.purple100 else GitItTheme.colors.grey500)
+                .background(GitItTheme.colors.purple100)
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
-            color = if (primary) GitItTheme.colors.grey700 else GitItTheme.colors.grey300,
+            color = GitItTheme.colors.grey700,
             style = GitItTheme.typography.body3,
         )
     }
