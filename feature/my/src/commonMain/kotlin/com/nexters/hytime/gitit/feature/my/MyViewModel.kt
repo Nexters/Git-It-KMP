@@ -51,7 +51,13 @@ class MyViewModel : ViewModel() {
 /** domain/data 연동 전까지 화면에 표시할 더미 마이 학습 상태다. */
 private val dummyMyUiState =
     MyUiState(
-        profile = MyProfile(name = "김이박", role = "Junior Developer"),
+        profile =
+            MyProfile(
+                name = "김이박",
+                email = "kimlee@github.io",
+                developmentField = "Back-end",
+                learningLevel = "입문",
+            ),
         stats =
             listOf(
                 MyStudyStat(label = "이번 주", value = "13문제"),

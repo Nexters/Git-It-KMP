@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +26,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassContainer
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
@@ -71,10 +73,12 @@ fun MyScreen(
                     .statusBarsPadding()
                     .padding(horizontal = 20.dp),
         ) {
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(28.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MyProfileHeader(
-                    profile = uiState.profile,
+                Text(
+                    text = "마이",
+                    color = GitItTheme.colors.grey100,
+                    style = GitItTheme.typography.subtitle1.copy(fontSize = 22.sp, lineHeight = 32.56.sp),
                     modifier = Modifier.weight(1f),
                 )
                 val settingsButton: @Composable () -> Unit = {
@@ -94,14 +98,17 @@ fun MyScreen(
                     settingsButton()
                 }
             }
-            Spacer(Modifier.height(29.dp))
+            Spacer(Modifier.height(30.dp))
+
+            MyProfileHeader(profile = uiState.profile)
+            Spacer(Modifier.height(40.dp))
 
             Text(
                 text = "학습 현황",
-                color = GitItTheme.colors.grey100,
-                style = GitItTheme.typography.subtitle2,
+                color = GitItTheme.colors.grey400,
+                style = GitItTheme.typography.body3,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(10.dp))
 
             MyStatsCard(stats = uiState.stats)
             Spacer(Modifier.height(12.dp))
@@ -161,19 +168,56 @@ private fun MyProfileHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AvatarIcon()
-        Spacer(Modifier.size(11.dp))
+        Spacer(Modifier.width(15.dp))
         Column {
             Text(
                 text = profile.name,
                 color = GitItTheme.colors.grey100,
-                style = GitItTheme.typography.subtitle3,
+                style = GitItTheme.typography.subtitle2,
             )
             Text(
-                text = profile.role,
+                text = profile.email,
                 color = GitItTheme.colors.grey400,
-                style = GitItTheme.typography.body3,
+                style = GitItTheme.typography.caption1,
             )
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                MyProfileTag(
+                    text = profile.developmentField,
+                    backgroundColor = GitItTheme.colors.blue400,
+                )
+                MyProfileTag(
+                    text = profile.learningLevel,
+                    backgroundColor = GitItTheme.colors.grey500,
+                )
+            }
         }
+    }
+}
+
+/**
+ * 프로필의 개발 분야 또는 학습 수준 태그를 표시한다.
+ *
+ * @param text 태그에 표시할 값
+ * @param backgroundColor 태그 종류를 구분하는 배경색
+ */
+@Composable
+private fun MyProfileTag(
+    text: String,
+    backgroundColor: androidx.compose.ui.graphics.Color,
+) {
+    Box(
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(backgroundColor)
+                .padding(start = 10.dp, top = 3.dp, end = 10.dp, bottom = 4.dp),
+    ) {
+        Text(
+            text = text,
+            color = GitItTheme.colors.blue100,
+            style = GitItTheme.typography.body3,
+        )
     }
 }
 
@@ -187,7 +231,7 @@ private fun AvatarIcon(modifier: Modifier = Modifier) {
     Image(
         painter = painterResource(Res.drawable.my_default_avatar),
         contentDescription = null,
-        modifier = modifier.size(40.dp),
+        modifier = modifier.size(78.dp).clip(CircleShape),
     )
 }
 
@@ -396,7 +440,13 @@ private fun MyScreenPreview() {
         MyScreen(
             uiState =
                 MyUiState(
-                    profile = MyProfile(name = "김이박", role = "Junior Developer"),
+                    profile =
+                        MyProfile(
+                            name = "김이박",
+                            email = "kimlee@github.io",
+                            developmentField = "Back-end",
+                            learningLevel = "입문",
+                        ),
                     stats =
                         listOf(
                             MyStudyStat(label = "이번 주", value = "13문제"),
