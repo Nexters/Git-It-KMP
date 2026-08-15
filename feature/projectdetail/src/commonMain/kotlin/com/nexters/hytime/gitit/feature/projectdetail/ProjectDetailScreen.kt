@@ -22,10 +22,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,10 +40,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.button.GitItButton
+import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
+import com.nexters.hytime.gitit.designsystem.button.GitItButtonStyle
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassDropdownMenu
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassDropdownMenuItem
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
@@ -53,11 +65,16 @@ import git_it_kmp.core.designsystem.generated.resources.ic_menu
 import git_it_kmp.core.designsystem.generated.resources.ic_play_circle
 import git_it_kmp.core.designsystem.generated.resources.ic_play_project
 import git_it_kmp.feature.projectdetail.generated.resources.ic_star
+import git_it_kmp.feature.projectdetail.generated.resources.project_detail_delete_cancel
+import git_it_kmp.feature.projectdetail.generated.resources.project_detail_delete_confirm
+import git_it_kmp.feature.projectdetail.generated.resources.project_detail_delete_sheet_description
+import git_it_kmp.feature.projectdetail.generated.resources.project_detail_delete_sheet_title
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import git_it_kmp.feature.projectdetail.generated.resources.Res as ProjectDetailRes
 
 /**
- * 프로젝트 상세 화면의 순수 UI 영역이다. 상태와 콜백만 주입받아 상태를 소유하지 않는다.
+ * 프로젝트 상세 화면의 순수 UI 영역이다. 비즈니스 상태와 콜백을 주입받는다.
  *
  * @param uiState 단일 UI 상태
  * @param onBackClick 뒤로가기 콜백
@@ -65,7 +82,7 @@ import git_it_kmp.feature.projectdetail.generated.resources.Res as ProjectDetail
  * @param onDismissMoreMenu 더보기 메뉴 닫기 콜백
  * @param onSavedQuestionsClick 저장한 문제 콜백
  * @param onQuestionSolvingClick 문제풀이 바로가기 콜백
- * @param onDeleteProjectClick 삭제 콜백
+ * @param onDeleteProjectClick 프로젝트 삭제 확인 콜백
  * @param onLearningSetClick 학습 세트 진입 콜백
  * @param modifier 화면의 크기와 배치를 지정할 수식자
  */
@@ -83,6 +100,7 @@ fun ProjectDetailScreen(
 ) {
     val sky = rememberGitItMainNavSky()
     val dismissMenuInteractionSource = remember { MutableInteractionSource() }
+    var showDeleteSheet by remember { mutableStateOf(false) }
 
     Box(
         modifier =
@@ -167,13 +185,27 @@ fun ProjectDetailScreen(
             )
             ProjectDetailMoreMenu(
                 onSavedQuestionsClick = onSavedQuestionsClick,
-                onDeleteProjectClick = onDeleteProjectClick,
+                onDeleteProjectClick = {
+                    onDismissMoreMenu()
+                    showDeleteSheet = true
+                },
                 modifier =
                     Modifier
                         .align(Alignment.TopEnd)
                         .padding(top = 102.dp, end = 20.dp)
                         .width(160.dp),
                 sky = sky,
+            )
+        }
+
+        if (showDeleteSheet) {
+            ProjectDeleteSheet(
+                projectName = uiState.project?.name.orEmpty(),
+                onConfirm = {
+                    showDeleteSheet = false
+                    onDeleteProjectClick()
+                },
+                onDismiss = { showDeleteSheet = false },
             )
         }
     }
@@ -219,21 +251,7 @@ private fun ProjectHeader(
 ) {
     val project = uiState.project ?: return
 
-    Box(
-        modifier =
-            Modifier
-                .size(99.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(GitItTheme.colors.grey600),
-        contentAlignment = Alignment.Center,
-    ) {
-        // TODO: data 연동 후 AsyncImage로 교체한다.
-        Text(
-            text = project.name.take(1),
-            color = GitItTheme.colors.grey100,
-            style = GitItTheme.typography.headline2,
-        )
-    }
+    ProjectThumbnail(projectName = project.name, size = 99.dp)
 
     Spacer(Modifier.height(31.dp))
 
@@ -414,6 +432,121 @@ private fun ProjectDetailMoreMenu(
             text = "삭제하기",
             color = GitItTheme.colors.error,
             onClick = onDeleteProjectClick,
+        )
+    }
+}
+
+/**
+ * 프로젝트 삭제를 확인하는 바텀시트를 표시한다.
+ *
+ * @param projectName 썸네일 대체 문자로 사용할 프로젝트 이름
+ * @param onConfirm 삭제 확인 시 실행할 동작
+ * @param onDismiss 취소 또는 시트 바깥 영역 선택 시 실행할 동작
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProjectDeleteSheet(
+    projectName: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.fillMaxWidth(),
+        sheetState = sheetState,
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        containerColor = GitItTheme.colors.grey600,
+        contentColor = GitItTheme.colors.grey100,
+        scrimColor = GitItTheme.colors.black70,
+        tonalElevation = 0.dp,
+        dragHandle = { ProjectDeleteSheetDragHandle() },
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(Modifier.height(22.dp))
+            ProjectThumbnail(projectName = projectName, size = 128.dp)
+            Spacer(Modifier.height(22.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = stringResource(ProjectDetailRes.string.project_detail_delete_sheet_title),
+                    color = GitItTheme.colors.grey100,
+                    style = GitItTheme.typography.subtitle1.copy(fontSize = 22.sp, lineHeight = 32.56.sp),
+                )
+                Text(
+                    text = stringResource(ProjectDetailRes.string.project_detail_delete_sheet_description),
+                    color = GitItTheme.colors.grey400,
+                    style = GitItTheme.typography.body2,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Spacer(Modifier.height(24.dp))
+            GitItButton(
+                text = stringResource(ProjectDetailRes.string.project_detail_delete_confirm),
+                onClick = onConfirm,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                style = GitItButtonStyle.Primary,
+                state = GitItButtonState.Error,
+            )
+            Spacer(Modifier.height(8.dp))
+            GitItButton(
+                text = stringResource(ProjectDetailRes.string.project_detail_delete_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                style = GitItButtonStyle.Text,
+            )
+        }
+    }
+}
+
+/** Figma 바텀시트 상단의 58×4dp grabber를 그린다. */
+@Composable
+private fun ProjectDeleteSheetDragHandle() {
+    Box(
+        modifier = Modifier.fillMaxWidth().height(16.dp).padding(top = 5.dp),
+        contentAlignment = Alignment.TopCenter,
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(width = 58.dp, height = 4.dp)
+                    .clip(RoundedCornerShape(99.dp))
+                    .background(GitItTheme.colors.grey400),
+        )
+    }
+}
+
+/**
+ * 프로젝트 이름의 첫 글자를 썸네일 대체 이미지로 표시한다.
+ *
+ * @param projectName 첫 글자를 표시할 프로젝트 이름
+ * @param size 썸네일의 가로·세로 크기
+ */
+@Composable
+private fun ProjectThumbnail(
+    projectName: String,
+    size: Dp,
+) {
+    Box(
+        modifier =
+            Modifier
+                .size(size)
+                .clip(RoundedCornerShape(10.dp))
+                .background(GitItTheme.colors.grey600),
+        contentAlignment = Alignment.Center,
+    ) {
+        // TODO: data 연동 후 AsyncImage로 교체한다.
+        Text(
+            text = projectName.take(1),
+            color = GitItTheme.colors.grey100,
+            style = GitItTheme.typography.headline2,
         )
     }
 }

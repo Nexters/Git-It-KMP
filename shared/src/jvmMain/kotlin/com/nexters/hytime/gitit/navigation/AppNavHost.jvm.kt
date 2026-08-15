@@ -103,6 +103,7 @@ actual fun AppNavHost() {
             ProjectDetailRoute(
                 projectId = route.projectId,
                 onBackClick = { backStack.removeLastOrNull() },
+                onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                 onNavigateToSavedQuestions = {},
                 onNavigateToLearningSet = { projectId, setId -> backStack.add(AppRoute.Quiz(projectId, setId)) },
                 onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },

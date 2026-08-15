@@ -65,12 +65,10 @@ class ProjectDetailViewModel(
         emit(ProjectDetailEvent.NavigateToSavedQuestions)
     }
 
-    /**
-     * 프로젝트 삭제 인텐트. 삭제 API 연동은 아직 미구현이다.
-     */
+    /** 프로젝트 삭제를 확정하고 홈 화면 이동 이벤트를 흘려보낸다. */
     fun onDeleteProjectClick() {
-        onDismissMoreMenu()
-        // TODO: 삭제 유스케이스 연동 후 구현한다.
+        // TODO: 삭제 유스케이스 연동 후 홈 이동 전에 프로젝트를 삭제한다.
+        emit(ProjectDetailEvent.NavigateToHome)
     }
 
     /**

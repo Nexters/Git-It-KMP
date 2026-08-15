@@ -62,6 +62,9 @@ sealed interface ProjectDetailEvent {
     /** 저장한 문제 화면으로 이동. */
     data object NavigateToSavedQuestions : ProjectDetailEvent
 
+    /** 홈 화면으로 이동. */
+    data object NavigateToHome : ProjectDetailEvent
+
     /**
      * 문제 풀이 화면으로 이동.
      *
