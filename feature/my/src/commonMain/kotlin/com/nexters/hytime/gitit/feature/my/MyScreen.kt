@@ -40,6 +40,10 @@ import git_it_kmp.feature.my.generated.resources.Res
 import git_it_kmp.feature.my.generated.resources.my_default_avatar
 import git_it_kmp.feature.my.generated.resources.my_settings
 import git_it_kmp.feature.my.generated.resources.my_settings_content_description
+import git_it_kmp.feature.my.generated.resources.my_weekly_study_complete
+import git_it_kmp.feature.my.generated.resources.my_weekly_study_empty
+import git_it_kmp.feature.my.generated.resources.my_weekly_study_in_progress
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -331,7 +335,7 @@ private fun WeeklyStudyCard(
             style = GitItTheme.typography.caption2,
         )
         Text(
-            text = "이번 주 학습을 하루도 놓치지 않았어요",
+            text = stringResource(weeklyStudyMessageResource(orderedItems)),
             color = GitItTheme.colors.grey100,
             style = GitItTheme.typography.subtitle3,
         )
@@ -432,6 +436,19 @@ internal fun fixedWeeklyStudyItems(items: List<MyWeeklyStudy>): List<MyWeeklyStu
     val itemsByDay = items.associateBy(MyWeeklyStudy::day)
     return WEEK_DAYS.map { day -> itemsByDay[day] ?: MyWeeklyStudy(day = day, solvedCount = 0) }
 }
+
+/**
+ * 이번 주 학습한 날짜 수에 맞는 그래프 안내 문구를 반환한다.
+ *
+ * @param items 월요일부터 일요일까지 정규화된 주간 학습량
+ * @return 학습 전·진행 중·7일 완료 상태에 대응하는 안내 문구 리소스
+ */
+internal fun weeklyStudyMessageResource(items: List<MyWeeklyStudy>): StringResource =
+    when {
+        items.none { it.solvedCount > 0 } -> Res.string.my_weekly_study_empty
+        items.all { it.solvedCount > 0 } -> Res.string.my_weekly_study_complete
+        else -> Res.string.my_weekly_study_in_progress
+    }
 
 @Preview
 @Composable

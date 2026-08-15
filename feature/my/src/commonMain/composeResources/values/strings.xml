@@ -1,5 +1,8 @@
 <resources>
   <string name="my_settings_content_description">설정</string>
+  <string name="my_weekly_study_empty">이번 주 첫 문제를 풀어볼까요?</string>
+  <string name="my_weekly_study_in_progress">이번 주도 차근차근 풀고 있어요</string>
+  <string name="my_weekly_study_complete">이번 주 학습을 하루도 놓치지 않았어요</string>
   <string name="settings_title">설정</string>
   <string name="settings_learning">학습 설정</string>
   <string name="settings_development_field">개발 분야</string>
