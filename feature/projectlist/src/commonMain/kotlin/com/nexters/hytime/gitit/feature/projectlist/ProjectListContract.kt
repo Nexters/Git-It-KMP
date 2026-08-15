@@ -44,6 +44,21 @@ sealed interface ProjectListIntent {
     /** 마이 탭 선택. */
     data object MyTabClick : ProjectListIntent
 
+    /** 팝업 메뉴에서 프로젝트 삭제 선택. */
+    data object DeleteMenuClick : ProjectListIntent
+
+    /** 프로젝트 삭제 화면에서 뒤로가기 선택. */
+    data object DeleteModeBackClick : ProjectListIntent
+
+    /**
+     * 삭제 화면에서 프로젝트의 마이너스 버튼 선택.
+     *
+     * @property projectId 삭제할 프로젝트 식별자
+     */
+    data class DeleteProjectClick(
+        val projectId: String,
+    ) : ProjectListIntent
+
     /**
      * 문제풀이 버튼 선택.
      *
@@ -58,6 +73,12 @@ sealed interface ProjectListIntent {
  * 프로젝트 리스트 화면이 한 번만 전달해야 하는 이벤트다.
  */
 sealed interface ProjectListSideEffect {
+    /** 프로젝트 삭제 화면으로 이동. */
+    data object NavigateToProjectDelete : ProjectListSideEffect
+
+    /** 현재 화면을 닫고 이전 화면으로 이동. */
+    data object NavigateBack : ProjectListSideEffect
+
     /** 홈 화면으로 이동. */
     data object NavigateToHome : ProjectListSideEffect
 

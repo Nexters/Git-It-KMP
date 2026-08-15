@@ -78,6 +78,19 @@ actual fun AppNavHost() {
                 }
                 entry<AppRoute.ProjectList> {
                     ProjectListRoute(
+                        onNavigateToProjectDelete = { backStack.add(AppRoute.ProjectDelete) },
+                        onBackClick = { backStack.removeLastOrNull() },
+                        onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
+                        onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
+                        onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                        onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
+                    )
+                }
+                entry<AppRoute.ProjectDelete> {
+                    ProjectListRoute(
+                        isDeleteMode = true,
+                        onNavigateToProjectDelete = {},
+                        onBackClick = { backStack.removeLastOrNull() },
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                         onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
