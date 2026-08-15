@@ -85,7 +85,10 @@ fun HomeScreen(
                     .statusBarsPadding()
                     .padding(top = 23.dp),
         ) {
-            HomeProfile(uiState = uiState)
+            HomeProfile(
+                uiState = uiState,
+                onClick = { onIntent(HomeIntent.MyTabClick) },
+            )
             Spacer(Modifier.height(18.dp))
             HomeTitle()
             Spacer(Modifier.height(22.dp))
@@ -123,9 +126,13 @@ fun HomeScreen(
  * 사용자 프로필을 Figma 인라인 툴바 규격으로 표시한다.
  *
  * @param uiState 사용자 이름과 역할을 포함한 홈 상태
+ * @param onClick 프로필 선택 시 마이 화면 이동 의도를 전달할 동작
  */
 @Composable
-private fun HomeProfile(uiState: HomeUiState) {
+private fun HomeProfile(
+    uiState: HomeUiState,
+    onClick: () -> Unit,
+) {
     GitItTopBar(
         type = GitItTopBarType.InlineUser,
         userName = uiState.userName,
@@ -136,6 +143,7 @@ private fun HomeProfile(uiState: HomeUiState) {
                     Modifier
                         .size(40.dp)
                         .clip(CircleShape)
+                        .clickable(role = Role.Button, onClick = onClick)
                         .background(GitItTheme.colors.grey300),
                 contentAlignment = Alignment.Center,
             ) {
