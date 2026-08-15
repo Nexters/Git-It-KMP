@@ -47,8 +47,9 @@ import git_it_kmp.core.designsystem.generated.resources.Res
 import git_it_kmp.core.designsystem.generated.resources.ic_menu
 import git_it_kmp.core.designsystem.generated.resources.ic_play_circle
 import git_it_kmp.core.designsystem.generated.resources.ic_play_project
-import git_it_kmp.core.designsystem.generated.resources.ic_users
+import git_it_kmp.feature.projectdetail.generated.resources.ic_star
 import org.jetbrains.compose.resources.painterResource
+import git_it_kmp.feature.projectdetail.generated.resources.Res as ProjectDetailRes
 
 /**
  * 프로젝트 상세 화면의 순수 UI 영역이다. 상태와 콜백만 주입받아 상태를 소유하지 않는다.
@@ -175,7 +176,7 @@ private fun ProjectDetailTopBar(
 }
 
 /**
- * 헤더 영역: 썸네일·칩·제목·참여자/기술스택·문제풀이 바로가기 버튼을 배치한다.
+ * 헤더 영역: 썸네일·칩·제목·스타 수/기술스택·문제풀이 바로가기 버튼을 배치한다.
  *
  * @param uiState 단일 UI 상태
  * @param onQuestionSolvingClick 문제풀이 바로가기 콜백
@@ -228,10 +229,10 @@ private fun ProjectHeader(
             )
             Spacer(Modifier.height(5.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                UsersIcon(modifier = Modifier.size(14.dp))
+                StarIcon()
                 Spacer(Modifier.width(5.dp))
                 Text(
-                    text = "${project.memberCount}명",
+                    text = project.starCount,
                     color = GitItTheme.colors.blue100,
                     style = GitItTheme.typography.caption1,
                 )
@@ -437,14 +438,19 @@ private fun MenuIcon() {
     )
 }
 
+/** Figma 프로젝트 스타 아이콘을 16dp 영역 중앙에 표시한다. */
 @Composable
-private fun UsersIcon(modifier: Modifier = Modifier) {
-    Icon(
-        painter = painterResource(Res.drawable.ic_users),
-        contentDescription = null,
-        modifier = modifier,
-        tint = GitItTheme.colors.blue100,
-    )
+private fun StarIcon() {
+    Box(
+        modifier = Modifier.size(16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painter = painterResource(ProjectDetailRes.drawable.ic_star),
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+        )
+    }
 }
 
 @Preview
@@ -460,7 +466,7 @@ private fun ProjectDetailScreenPreview() {
                             thumbnailUrl = "",
                             category = "Back-end",
                             difficulty = "입문",
-                            memberCount = 13,
+                            starCount = "3.6k",
                             techStack = "Kotlin · Compose · Coroutines",
                         ),
                     learningSets =
