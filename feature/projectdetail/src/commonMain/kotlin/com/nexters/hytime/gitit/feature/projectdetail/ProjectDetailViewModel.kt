@@ -89,14 +89,6 @@ class ProjectDetailViewModel(
         emit(ProjectDetailEvent.NavigateToQuiz(projectId))
     }
 
-    /**
-     * 더보기 메뉴의 문제풀이 바로가기 인텐트다.
-     */
-    fun onQuestionSolvingShortcutClick() {
-        onDismissMoreMenu()
-        emit(ProjectDetailEvent.NavigateToQuiz(projectId))
-    }
-
     private fun emit(event: ProjectDetailEvent) {
         _events.tryEmit(event)
     }
