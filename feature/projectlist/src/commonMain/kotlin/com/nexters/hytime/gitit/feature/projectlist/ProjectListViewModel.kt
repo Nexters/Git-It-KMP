@@ -41,8 +41,18 @@ class ProjectListViewModel : ViewModel() {
             ProjectListIntent.DeleteMenuClick -> emit(ProjectListSideEffect.NavigateToProjectDelete)
             ProjectListIntent.DeleteModeBackClick -> emit(ProjectListSideEffect.NavigateBack)
             is ProjectListIntent.DeleteProjectClick -> {
-                setState { copy(projects = projects.filterNot { it.id == intent.projectId }) }
+                setState { copy(pendingDeleteProjectId = intent.projectId) }
             }
+            ProjectListIntent.ConfirmDeleteClick ->
+                _uiState.value.pendingDeleteProjectId?.let { projectId ->
+                    setState {
+                        copy(
+                            projects = projects.filterNot { it.id == projectId },
+                            pendingDeleteProjectId = null,
+                        )
+                    }
+                }
+            ProjectListIntent.DismissDeleteClick -> setState { copy(pendingDeleteProjectId = null) }
             is ProjectListIntent.PlayProjectClick -> emit(ProjectListSideEffect.NavigateToQuiz(intent.projectId))
         }
     }

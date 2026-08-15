@@ -25,9 +25,9 @@ class ProjectListViewModelTest {
             assertEquals(ProjectListSideEffect.NavigateBack, navigateBack.await())
         }
 
-    /** 삭제 버튼이 선택한 프로젝트만 목록에서 제거하는지 검증한다. */
+    /** 삭제 확인 모달에서 확인해야 선택한 프로젝트가 목록에서 제거되는지 검증한다. */
     @Test
-    fun deleteProjectClick_projectSelected_removesOnlySelectedProject() {
+    fun confirmDeleteClick_projectSelected_removesOnlySelectedProject() {
         val viewModel = ProjectListViewModel()
         val deletedProjectId =
             viewModel.uiState.value.projects
@@ -36,11 +36,33 @@ class ProjectListViewModelTest {
 
         viewModel.onIntent(ProjectListIntent.DeleteProjectClick(deletedProjectId))
 
+        assertEquals(deletedProjectId, viewModel.uiState.value.pendingDeleteProjectId)
+        assertEquals(3, viewModel.uiState.value.projects.size)
+
+        viewModel.onIntent(ProjectListIntent.ConfirmDeleteClick)
+
         assertFalse(
             viewModel.uiState.value.projects
                 .any { it.id == deletedProjectId },
         )
         assertEquals(2, viewModel.uiState.value.projects.size)
+        assertEquals(null, viewModel.uiState.value.pendingDeleteProjectId)
+    }
+
+    /** 삭제 확인 모달을 취소하면 프로젝트 목록을 유지하는지 검증한다. */
+    @Test
+    fun dismissDeleteClick_projectSelected_keepsProjects() {
+        val viewModel = ProjectListViewModel()
+        val deletedProjectId =
+            viewModel.uiState.value.projects
+                .first()
+                .id
+
+        viewModel.onIntent(ProjectListIntent.DeleteProjectClick(deletedProjectId))
+        viewModel.onIntent(ProjectListIntent.DismissDeleteClick)
+
+        assertEquals(3, viewModel.uiState.value.projects.size)
+        assertEquals(null, viewModel.uiState.value.pendingDeleteProjectId)
     }
 
     /** 프로젝트 카드의 플레이 버튼이 문제 풀이 이동 이벤트를 발행하는지 검증한다. */
