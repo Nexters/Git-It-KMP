@@ -26,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -368,9 +369,12 @@ private fun ProjectDeleteSheet(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = Modifier.fillMaxWidth(),
+        sheetState = sheetState,
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         containerColor = GitItTheme.colors.grey600,
         contentColor = GitItTheme.colors.grey100,
@@ -383,7 +387,7 @@ private fun ProjectDeleteSheet(
                 Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(bottom = 24.dp),
+                    .padding(bottom = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(22.dp))
