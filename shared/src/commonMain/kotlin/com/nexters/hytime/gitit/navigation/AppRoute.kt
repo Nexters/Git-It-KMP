@@ -49,6 +49,12 @@ sealed interface AppRoute : NavKey {
     data object ProjectList : AppRoute
 
     /**
+     * 사용자가 프로젝트를 삭제할 수 있는 목록 화면이다.
+     */
+    @Serializable
+    data object ProjectDelete : AppRoute
+
+    /**
      * 질문 생성을 시작할 GitHub 저장소를 입력하고 확인하는 화면이다.
      */
     @Serializable

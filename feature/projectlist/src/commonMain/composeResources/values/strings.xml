@@ -1,5 +1,10 @@
 <resources>
+  <string name="project_list_title">프로젝트</string>
   <string name="project_delete">프로젝트 삭제</string>
+  <string name="project_delete_sheet_title">프로젝트를 삭제할까요?</string>
+  <string name="project_delete_sheet_description">학습 문제와 진도가 모두 삭제되며,\n이 작업은 취소할 수 없습니다.</string>
+  <string name="project_delete_confirm">삭제</string>
+  <string name="project_delete_cancel">취소</string>
   <string name="project_menu_button_description">프로젝트 메뉴</string>
   <string name="project_play_button_description">문제 풀이 시작</string>
 </resources>

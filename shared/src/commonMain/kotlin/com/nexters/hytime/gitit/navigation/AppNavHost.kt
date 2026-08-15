@@ -24,6 +24,7 @@ internal val appRouteSavedStateConfiguration =
                     subclass(AppRoute.Onboarding.serializer())
                     subclass(AppRoute.IntermediateSplash.serializer())
                     subclass(AppRoute.ProjectDetail.serializer())
+                    subclass(AppRoute.ProjectDelete.serializer())
                     subclass(AppRoute.ProjectList.serializer())
                     subclass(AppRoute.Quiz.serializer())
                 }
