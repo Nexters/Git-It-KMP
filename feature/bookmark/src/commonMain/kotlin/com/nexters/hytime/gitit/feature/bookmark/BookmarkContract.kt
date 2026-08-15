@@ -6,11 +6,13 @@ package com.nexters.hytime.gitit.feature.bookmark
  * @property filters 프로젝트 필터 목록
  * @property selectedFilterId 선택된 필터 식별자
  * @property questions 저장한 문제 목록
+ * @property bookmarkChanges 사용자가 변경한 문제별 북마크 상태
  */
 data class BookmarkUiState(
     val filters: List<BookmarkFilter> = emptyList(),
     val selectedFilterId: String = "",
     val questions: List<BookmarkedQuestion> = emptyList(),
+    val bookmarkChanges: Map<String, Boolean> = emptyMap(),
 )
 
 /**
