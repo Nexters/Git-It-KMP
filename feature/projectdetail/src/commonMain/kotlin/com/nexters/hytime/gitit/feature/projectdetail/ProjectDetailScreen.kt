@@ -310,7 +310,7 @@ private fun ProjectTotalProgress(progress: Int) {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(10.dp)
+                    .height(8.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(GitItTheme.colors.grey400),
         ) {
@@ -318,7 +318,7 @@ private fun ProjectTotalProgress(progress: Int) {
                 modifier =
                     Modifier
                         .fillMaxWidth(progress / 100f)
-                        .height(10.dp)
+                        .height(8.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(GitItTheme.colors.blue200),
             )
