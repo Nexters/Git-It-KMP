@@ -78,6 +78,9 @@ internal fun QuizCreateReadyScreen(
 @Composable
 private fun QuizCreateReadyPreview() {
     GitItTheme {
-        QuizCreateReadyScreen(onBackClick = {}, onStartClick = {})
+        QuizCreateReadyScreen(
+            onBackClick = {},
+            onStartClick = {},
+        )
     }
 }

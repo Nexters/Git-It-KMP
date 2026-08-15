@@ -39,21 +39,14 @@ fun QuizCreateScreen(
                     onBackClick = { onIntent(QuizCreateIntent.BackClick) },
                     onNextClick = { onIntent(QuizCreateIntent.NextClick) },
                 )
-            QuizCreateStage.Topics ->
-                QuizCreateTopicsScreen(
-                    selected = uiState.topics,
-                    onToggle = { onIntent(QuizCreateIntent.ToggleTopic(it)) },
-                    onBackClick = { onIntent(QuizCreateIntent.BackClick) },
-                    onNextClick = { onIntent(QuizCreateIntent.NextClick) },
-                )
             QuizCreateStage.Ready ->
                 QuizCreateReadyScreen(
                     onBackClick = { onIntent(QuizCreateIntent.BackClick) },
-                    onStartClick = { onIntent(QuizCreateIntent.StartGeneration) },
+                    onStartClick = { onIntent(QuizCreateIntent.StartCreate) },
                 )
-            QuizCreateStage.Generating ->
-                QuizCreateGeneratingScreen(
-                    step = uiState.generationStep,
+            QuizCreateStage.Create ->
+                QuizCreateProgressScreen(
+                    step = uiState.createStep,
                     onWaitAtHomeClick = { onIntent(QuizCreateIntent.WaitAtHome) },
                 )
         }
@@ -62,6 +55,7 @@ fun QuizCreateScreen(
             QuizCreateReminderSheet(
                 onEnableClick = { onIntent(QuizCreateIntent.EnableReminder) },
                 onDismissClick = { onIntent(QuizCreateIntent.DismissReminder) },
+                onCloseRequest = { onIntent(QuizCreateIntent.CloseReminder) },
             )
         }
     }
@@ -74,7 +68,7 @@ private fun QuizCreateScreenPreview() {
         QuizCreateScreen(
             uiState =
                 QuizCreateUiState(
-                    projectId = "preview-project",
+                    repositoryUrl = "https://github.com/Nexters/Git-It-KMP",
                     stage = QuizCreateStage.Knowledge,
                 ),
             onIntent = {},

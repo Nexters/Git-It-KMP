@@ -12,19 +12,23 @@ import org.koin.core.parameter.parametersOf
 /**
  * 문제 생성 상태와 화면 밖 이벤트를 연결한다.
  *
- * @param projectId 문제를 생성할 프로젝트 식별자
+ * @param repositoryUrl 프로젝트로 등록할 GitHub 저장소 URL
  * @param onBackClick 이전 화면으로 이동하는 콜백
  * @param onNavigateHome 홈 화면으로 이동하는 콜백
  * @param onRequestNotificationPermission 리마인드 알림 권한을 요청하는 콜백
  */
 @Composable
 fun QuizCreateRoute(
-    projectId: String,
+    repositoryUrl: String,
     onBackClick: () -> Unit,
     onNavigateHome: () -> Unit,
     onRequestNotificationPermission: () -> Unit = {},
 ) {
-    val viewModel = koinViewModel<QuizCreateViewModel>(key = "quiz-create:$projectId", parameters = { parametersOf(projectId) })
+    val viewModel =
+        koinViewModel<QuizCreateViewModel>(
+            key = "quiz-create:$repositoryUrl",
+            parameters = { parametersOf(repositoryUrl) },
+        )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {

@@ -1,11 +1,19 @@
 package com.nexters.hytime.gitit.feature.quiz.create
 
-import com.nexters.hytime.gitit.feature.quiz.create.generation.QuizGenerationCoordinator
-import com.nexters.hytime.gitit.feature.quiz.create.generation.QuizGenerationStatus
+import com.nexters.hytime.gitit.domain.model.ProjectGenerationStatus
+import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
+import com.nexters.hytime.gitit.domain.model.ProjectRegistration
+import com.nexters.hytime.gitit.domain.repository.ProjectRepository
+import com.nexters.hytime.gitit.domain.usecase.RegisterProjectUseCase
+import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStatus
+import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStore
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -37,9 +45,9 @@ class QuizCreateViewModelTest {
         Dispatchers.resetMain()
     }
 
-    /** 이해도와 주제를 선택해야 준비 단계까지 이동한다. */
+    /** 이해도를 선택하면 준비 단계로 바로 이동한다. */
     @Test
-    fun onIntent_requiredSelections_movesToReadyStage() {
+    fun onIntent_knowledgeSelected_movesToReadyStage() {
         val viewModel = createViewModel()
 
         viewModel.onIntent(QuizCreateIntent.NextClick)
@@ -47,142 +55,279 @@ class QuizCreateViewModelTest {
 
         viewModel.onIntent(QuizCreateIntent.SelectKnowledge(QuizKnowledgeLevel.SomeCode))
         viewModel.onIntent(QuizCreateIntent.NextClick)
-        viewModel.onIntent(QuizCreateIntent.ToggleTopic(QuizCreateTopic.FeatureFlow))
-        viewModel.onIntent(QuizCreateIntent.NextClick)
 
         assertEquals(QuizCreateStage.Ready, viewModel.uiState.value.stage)
-        assertTrue(QuizCreateTopic.FeatureFlow in viewModel.uiState.value.topics)
     }
 
-    /** 같은 문제 주제를 다시 누르면 선택에서 제거한다. */
+    /** 준비 단계에서 뒤로 가면 이해도 선택 단계로 돌아간다. */
     @Test
-    fun onIntent_sameTopicTwice_removesSelection() {
+    fun onIntent_readyBackClick_returnsToKnowledgeStage() {
         val viewModel = createViewModel()
 
-        viewModel.onIntent(QuizCreateIntent.ToggleTopic(QuizCreateTopic.CodeIntent))
-        viewModel.onIntent(QuizCreateIntent.ToggleTopic(QuizCreateTopic.CodeIntent))
+        viewModel.onIntent(QuizCreateIntent.SelectKnowledge(QuizKnowledgeLevel.SomeCode))
+        viewModel.onIntent(QuizCreateIntent.NextClick)
+        viewModel.onIntent(QuizCreateIntent.BackClick)
 
-        assertFalse(QuizCreateTopic.CodeIntent in viewModel.uiState.value.topics)
+        assertEquals(QuizCreateStage.Knowledge, viewModel.uiState.value.stage)
     }
 
     /** 생성 진행률은 유효 범위로 보정된다. */
     @Test
-    fun onIntent_generationProgress_clampsAndCompletes() =
+    fun onIntent_createProgress_clampsAndCompletes() =
         runTest(dispatcher) {
-            val coordinator = createCoordinator(this)
-            val viewModel = createReadyViewModel(coordinator = coordinator)
+            val store = createStore(backgroundScope)
+            val viewModel = createReadyViewModel(store = store)
 
-            viewModel.onIntent(QuizCreateIntent.StartGeneration)
+            viewModel.onIntent(QuizCreateIntent.StartCreate)
+            runCurrent()
             viewModel.onIntent(
-                QuizCreateIntent.GenerationProgressChanged(
-                    step = QuizGenerationStep.Questions,
+                QuizCreateIntent.CreateProgressChanged(
+                    step = QuizCreateStep.Questions,
                     progressPercent = 130,
                 ),
             )
 
-            assertEquals(QuizCreateStage.Generating, viewModel.uiState.value.stage)
-            assertEquals(QuizGenerationStep.Questions, viewModel.uiState.value.generationStep)
+            assertEquals(QuizCreateStage.Create, viewModel.uiState.value.stage)
+            assertEquals(QuizCreateStep.Questions, viewModel.uiState.value.createStep)
             assertEquals(100, viewModel.uiState.value.progressPercent)
-
-            assertEquals(100, viewModel.uiState.value.progressPercent)
-            coordinator.cancel()
+            store.cancel()
         }
 
-    /** 생성 실패 신호는 앱 범위 코디네이터의 실패 상태로 전달된다. */
+    /** 생성 실패 신호는 앱 범위 Store의 실패 상태로 전달된다. */
     @Test
-    fun onIntent_generationFailure_updatesCoordinatorFailure() =
+    fun onIntent_createFailure_updatesStoreFailure() =
         runTest(dispatcher) {
-            val coordinator = createCoordinator(this)
-            val viewModel = createReadyViewModel(coordinator = coordinator)
-            viewModel.onIntent(QuizCreateIntent.StartGeneration)
-            viewModel.onIntent(QuizCreateIntent.GenerationFailed)
+            val store = createStore(backgroundScope)
+            val viewModel = createReadyViewModel(store = store)
+            viewModel.onIntent(QuizCreateIntent.StartCreate)
+            runCurrent()
+            viewModel.onIntent(QuizCreateIntent.CreateFailed)
             runCurrent()
 
-            assertEquals(QuizGenerationStatus.Failed, coordinator.state.value.status)
-            assertEquals(QuizCreateStage.Generating, viewModel.uiState.value.stage)
-            coordinator.cancel()
+            assertEquals(QuizCreateStatus.Failed, store.state.value.status)
+            assertEquals(QuizCreateStage.Create, viewModel.uiState.value.stage)
+            store.cancel()
         }
 
     /** FCM 완료 신호로 세션이 끝나면 홈 모달을 열고 홈 이동 이벤트를 전달한다. */
     @Test
-    fun startGeneration_sessionCompletes_movesToCompletedStage() =
+    fun startCreate_sessionCompletes_movesToCompletedStage() =
         runTest(dispatcher) {
             var nowMillis = 1_000L
-            val coordinator = createCoordinator(scope = this, nowMillis = { nowMillis })
-            val viewModel = createReadyViewModel(coordinator)
+            val store = createStore(scope = backgroundScope, nowMillis = { nowMillis })
+            val viewModel = createReadyViewModel(store)
             val event = backgroundScope.async { viewModel.events.first() }
             runCurrent()
 
-            viewModel.onIntent(QuizCreateIntent.StartGeneration)
+            viewModel.onIntent(QuizCreateIntent.StartCreate)
             runCurrent()
-            coordinator.complete("project-127")
+            store.complete("project-127")
             nowMillis += 1_000L
             advanceTimeBy(1_000L)
             runCurrent()
 
-            assertEquals(QuizGenerationStatus.Completed, coordinator.state.value.status)
-            assertTrue(coordinator.state.value.isHomeModalVisible)
+            assertEquals(QuizCreateStatus.Completed, store.state.value.status)
             assertEquals(100, viewModel.uiState.value.progressPercent)
             assertEquals(QuizCreateEvent.NavigateHome, event.await())
-            coordinator.cancel()
+            store.cancel()
         }
 
     /** 실패 상태를 전달하면 홈 실패 모달과 홈 이동 이벤트로 연결된다. */
     @Test
-    fun onIntent_generationFailure_opensHomeFailureModal() =
+    fun onIntent_createFailure_opensHomeFailureModal() =
         runTest(dispatcher) {
-            val coordinator = createCoordinator(this)
-            val viewModel = createReadyViewModel(coordinator)
+            val store = createStore(backgroundScope)
+            val viewModel = createReadyViewModel(store)
             val event = backgroundScope.async { viewModel.events.first() }
             runCurrent()
 
-            viewModel.onIntent(QuizCreateIntent.StartGeneration)
-            viewModel.onIntent(QuizCreateIntent.GenerationFailed)
+            viewModel.onIntent(QuizCreateIntent.StartCreate)
+            runCurrent()
+            viewModel.onIntent(QuizCreateIntent.CreateFailed)
             runCurrent()
 
-            assertEquals(QuizGenerationStatus.Failed, coordinator.state.value.status)
-            assertTrue(coordinator.state.value.isHomeModalVisible)
+            assertEquals(QuizCreateStatus.Failed, store.state.value.status)
             assertEquals(QuizCreateEvent.NavigateHome, event.await())
-            coordinator.cancel()
+            store.cancel()
+        }
+
+    /** 리마인드 안내를 연 뒤 진행률이 갱신되어도 안내가 닫히지 않는다. */
+    @Test
+    fun onIntent_waitAtHomeWithProgressUpdate_keepsReminderPrompt() =
+        runTest(dispatcher) {
+            var nowMillis = 1_000L
+            val store = createStore(scope = backgroundScope, nowMillis = { nowMillis })
+            val viewModel = createReadyViewModel(store)
+
+            viewModel.onIntent(QuizCreateIntent.StartCreate)
+            runCurrent()
+            viewModel.onIntent(QuizCreateIntent.WaitAtHome)
+            nowMillis += 5_000L
+            advanceTimeBy(1_000L)
+            runCurrent()
+
+            assertEquals(2, viewModel.uiState.value.progressPercent)
+            assertTrue(viewModel.uiState.value.showReminderPrompt)
+            store.cancel()
+        }
+
+    /** 버튼 없이 시트를 내리면 안내만 닫고 생성 화면에 머무른다. */
+    @Test
+    fun onIntent_closeReminder_hidesPromptWithoutNavigation() =
+        runTest(dispatcher) {
+            val store = createStore(backgroundScope)
+            val viewModel = createReadyViewModel(store)
+            val events = mutableListOf<QuizCreateEvent>()
+            backgroundScope.launch { viewModel.events.toList(events) }
+            runCurrent()
+
+            viewModel.onIntent(QuizCreateIntent.StartCreate)
+            runCurrent()
+            viewModel.onIntent(QuizCreateIntent.WaitAtHome)
+            viewModel.onIntent(QuizCreateIntent.CloseReminder)
+            runCurrent()
+
+            assertFalse(viewModel.uiState.value.showReminderPrompt)
+            assertEquals(QuizCreateStage.Create, viewModel.uiState.value.stage)
+            assertTrue(events.isEmpty())
+            store.cancel()
+        }
+
+    /** 리마인드 안내가 열린 채로 생성이 끝나면 안내를 닫고 홈으로 이동한다. */
+    @Test
+    fun startCreate_completesWhileReminderOpen_closesPromptAndNavigatesHome() =
+        runTest(dispatcher) {
+            var nowMillis = 1_000L
+            val store = createStore(scope = backgroundScope, nowMillis = { nowMillis })
+            val viewModel = createReadyViewModel(store)
+            val event = backgroundScope.async { viewModel.events.first() }
+            runCurrent()
+
+            viewModel.onIntent(QuizCreateIntent.StartCreate)
+            runCurrent()
+            viewModel.onIntent(QuizCreateIntent.WaitAtHome)
+            store.complete("project-127")
+            nowMillis += 1_000L
+            advanceTimeBy(1_000L)
+            runCurrent()
+
+            assertFalse(viewModel.uiState.value.showReminderPrompt)
+            assertEquals(QuizCreateEvent.NavigateHome, event.await())
+            store.cancel()
+        }
+
+    /** 선택한 이해도를 서버 난이도로 변환하고 반환된 프로젝트 ID로 생성을 시작한다. */
+    @Test
+    fun startCreate_registrationSucceeds_usesApiProjectId() =
+        runTest(dispatcher) {
+            val repository = RecordingProjectRepository()
+            val store = createStore(backgroundScope)
+            val viewModel = createReadyViewModel(store = store, projectRepository = repository)
+
+            viewModel.onIntent(QuizCreateIntent.StartCreate)
+            runCurrent()
+
+            assertEquals(REPOSITORY_URL, repository.githubRepoUrl)
+            assertEquals(ProjectQuizLevel.L1, repository.quizLevel)
+            assertEquals("project-127", viewModel.uiState.value.projectId)
+            assertEquals("project-127", store.state.value.projectId)
+            assertEquals(QuizCreateStage.Create, viewModel.uiState.value.stage)
+            store.cancel()
+        }
+
+    /** 프로젝트 등록이 실패하면 진행 세션을 시작하지 않고 시작 버튼을 다시 활성화한다. */
+    @Test
+    fun startCreate_registrationFails_staysReadyForRetry() =
+        runTest(dispatcher) {
+            val repository = RecordingProjectRepository(result = Result.failure(IllegalStateException("등록 실패")))
+            val store = createStore(backgroundScope)
+            val viewModel = createReadyViewModel(store = store, projectRepository = repository)
+
+            viewModel.onIntent(QuizCreateIntent.StartCreate)
+            runCurrent()
+
+            assertEquals(QuizCreateStage.Ready, viewModel.uiState.value.stage)
+            assertFalse(viewModel.uiState.value.isRegistering)
+            assertEquals(QuizCreateStatus.Idle, store.state.value.status)
+            store.cancel()
         }
 
     /**
-     * 테스트용 프로젝트 식별자와 코디네이터로 ViewModel을 생성한다.
+     * 테스트용 프로젝트 식별자와 Store로 ViewModel을 생성한다.
      *
-     * @param coordinator 생성 진행 상태를 제공할 테스트 코디네이터
+     * @param store 생성 진행 상태를 제공할 테스트 Store
+     * @param projectRepository 프로젝트 등록 결과를 제어할 테스트 저장소
      * @return 초기 이해도 선택 단계의 ViewModel
      */
-    private fun createViewModel(coordinator: QuizGenerationCoordinator = createCoordinator(TestScope(dispatcher))) =
-        QuizCreateViewModel(projectId = "project-127", coordinator = coordinator)
+    private fun createViewModel(
+        store: QuizCreateStore = createStore(TestScope(dispatcher)),
+        projectRepository: ProjectRepository = RecordingProjectRepository(),
+    ) = QuizCreateViewModel(
+        repositoryUrl = REPOSITORY_URL,
+        registerProject = RegisterProjectUseCase(projectRepository),
+        createStore = store,
+    )
 
     /**
      * 필수 선택을 완료해 준비 단계까지 이동한 ViewModel을 생성한다.
      *
-     * @param coordinator 생성 진행 상태를 제공할 테스트 코디네이터
+     * @param store 생성 진행 상태를 제공할 테스트 Store
+     * @param projectRepository 프로젝트 등록 결과를 제어할 테스트 저장소
      * @return 생성 시작 인텐트를 받을 수 있는 준비 단계 ViewModel
      */
-    private fun createReadyViewModel(coordinator: QuizGenerationCoordinator): QuizCreateViewModel =
-        createViewModel(coordinator).apply {
+    private fun createReadyViewModel(
+        store: QuizCreateStore,
+        projectRepository: ProjectRepository = RecordingProjectRepository(),
+    ): QuizCreateViewModel =
+        createViewModel(store, projectRepository).apply {
             onIntent(QuizCreateIntent.SelectKnowledge(QuizKnowledgeLevel.Concepts))
-            onIntent(QuizCreateIntent.NextClick)
-            onIntent(QuizCreateIntent.ToggleTopic(QuizCreateTopic.ProjectStructure))
             onIntent(QuizCreateIntent.NextClick)
         }
 
     /**
-     * 시간과 코루틴 실행을 제어할 수 있는 테스트 코디네이터를 생성한다.
+     * 시간과 코루틴 실행을 제어할 수 있는 테스트 Store를 생성한다.
      *
      * @param scope 진행 상태 갱신 작업을 실행할 테스트 스코프
      * @param nowMillis 테스트에서 사용할 현재 시각 공급자
-     * @return 3분으로 고정된 테스트용 생성 코디네이터
+     * @return 3분으로 고정된 테스트용 생성 Store
      */
-    private fun createCoordinator(
-        scope: TestScope,
+    private fun createStore(
+        scope: CoroutineScope,
         nowMillis: () -> Long = { 1_000L },
-    ): QuizGenerationCoordinator =
-        QuizGenerationCoordinator(
+    ): QuizCreateStore =
+        QuizCreateStore(
             nowMillis = nowMillis,
             scope = scope,
             durationMillisProvider = { 180_000L },
         )
+
+    private companion object {
+        /** 테스트에서 서버 프로젝트로 등록할 GitHub 저장소 URL이다. */
+        const val REPOSITORY_URL = "https://github.com/Nexters/Git-It-KMP"
+    }
+}
+
+/**
+ * 프로젝트 등록 요청을 기록하고 준비 상태 프로젝트를 반환한다.
+ *
+ * @property result 테스트에서 반환할 등록 결과
+ */
+private class RecordingProjectRepository(
+    private val result: Result<ProjectRegistration> =
+        Result.success(ProjectRegistration("project-127", ProjectGenerationStatus.Ready)),
+) : ProjectRepository {
+    /** 마지막으로 전달된 GitHub 저장소 URL이다. */
+    var githubRepoUrl: String? = null
+
+    /** 마지막으로 전달된 문제 학습 깊이다. */
+    var quizLevel: ProjectQuizLevel? = null
+
+    override suspend fun registerProject(
+        githubRepoUrl: String,
+        quizLevel: ProjectQuizLevel,
+    ): Result<ProjectRegistration> {
+        this.githubRepoUrl = githubRepoUrl
+        this.quizLevel = quizLevel
+        return result
+    }
 }

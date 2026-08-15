@@ -1,6 +1,6 @@
-package com.nexters.hytime.gitit.feature.quiz.create.generation
+package com.nexters.hytime.gitit.feature.quiz.create.session
 
-import com.nexters.hytime.gitit.feature.quiz.create.QuizGenerationStep
+import com.nexters.hytime.gitit.feature.quiz.create.QuizCreateStep
 import kotlin.random.Random
 
 /**
@@ -8,7 +8,7 @@ import kotlin.random.Random
  *
  * 실제 생성 요청의 성공 여부와 무관하게 3~5분 동안 단계별 진행 상태를 자연스럽게 보여주기 위한 UI 전용 실행기다.
  */
-internal object LocalQuizGenerator {
+internal object QuizCreateTimeline {
     /** 새 생성 세션에 사용할 3~5분 사이의 전체 시간을 반환한다. */
     fun randomDurationMillis(): Long = Random.nextLong(MIN_DURATION_MILLIS, MAX_DURATION_MILLIS + 1)
 
@@ -25,10 +25,10 @@ internal object LocalQuizGenerator {
  *
  * @return Figma 진행 화면에 표시할 단계와 0..98 진행률
  */
-internal fun quizGenerationProgressSnapshot(
+internal fun quizCreateProgressSnapshot(
     elapsedMillis: Long,
     totalDurationMillis: Long,
-): QuizGenerationProgressSnapshot {
+): QuizCreateProgressSnapshot {
     require(totalDurationMillis > 0) { "전체 생성 시간은 0보다 커야 합니다." }
 
     val progressPercent =
@@ -37,14 +37,14 @@ internal fun quizGenerationProgressSnapshot(
             .coerceAtMost(WAITING_PROGRESS_PERCENT)
     val step =
         when {
-            progressPercent < PROJECT_INFO_END_PERCENT -> QuizGenerationStep.ProjectInfo
-            progressPercent < CODE_STRUCTURE_END_PERCENT -> QuizGenerationStep.CodeStructure
-            progressPercent < LEARNING_CONCEPTS_END_PERCENT -> QuizGenerationStep.LearningConcepts
-            progressPercent < QUESTIONS_END_PERCENT -> QuizGenerationStep.Questions
-            else -> QuizGenerationStep.Validation
+            progressPercent < PROJECT_INFO_END_PERCENT -> QuizCreateStep.ProjectInfo
+            progressPercent < CODE_STRUCTURE_END_PERCENT -> QuizCreateStep.CodeStructure
+            progressPercent < LEARNING_CONCEPTS_END_PERCENT -> QuizCreateStep.LearningConcepts
+            progressPercent < QUESTIONS_END_PERCENT -> QuizCreateStep.Questions
+            else -> QuizCreateStep.Validation
         }
 
-    return QuizGenerationProgressSnapshot(step = step, progressPercent = progressPercent)
+    return QuizCreateProgressSnapshot(step = step, progressPercent = progressPercent)
 }
 
 /**
@@ -53,8 +53,8 @@ internal fun quizGenerationProgressSnapshot(
  * @property step 현재 표시할 생성 단계
  * @property progressPercent 전체 타임라인 진행률
  */
-internal data class QuizGenerationProgressSnapshot(
-    val step: QuizGenerationStep,
+internal data class QuizCreateProgressSnapshot(
+    val step: QuizCreateStep,
     val progressPercent: Int,
 )
 

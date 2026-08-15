@@ -50,10 +50,11 @@ actual fun AppNavHost() {
                     IntermediateSplashScreen(onFinished = { navigateToMainRoute(AppRoute.Home) })
                 }
                 entry<AppRoute.Home> {
-                    QuizGenerationHomeHost(
+                    QuizCreateHomeHost(
                         onNavigateToProject = { projectId -> backStack.add(AppRoute.ProjectDetail(projectId)) },
-                    ) {
+                    ) { isQuizCreating ->
                         HomeRoute(
+                            isQuizCreating = isQuizCreating,
                             onNavigateToProjectLoad = { backStack.add(AppRoute.ProjectLoad) },
                             onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                             onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
@@ -110,13 +111,13 @@ actual fun AppNavHost() {
                     ProjectLoadRoute(
                         onBackClick = { backStack.removeLastOrNull() },
                         onRepositoryConfirmed = { repository ->
-                            backStack.add(AppRoute.QuizCreate("${repository.ownerName}/${repository.name}"))
+                            backStack.add(AppRoute.QuizCreate("https://github.com/${repository.ownerName}/${repository.name}"))
                         },
                     )
                 }
                 entry<AppRoute.QuizCreate> { route ->
                     QuizCreateRoute(
-                        projectId = route.projectId,
+                        repositoryUrl = route.repositoryUrl,
                         onBackClick = { backStack.removeLastOrNull() },
                         onNavigateHome = { navigateToMainRoute(AppRoute.Home) },
                         onRequestNotificationPermission = notificationPermissionState::requestPermission,

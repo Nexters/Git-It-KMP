@@ -1,5 +1,10 @@
 package com.nexters.hytime.gitit.feature.home
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,9 +30,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -41,6 +48,7 @@ import androidx.compose.ui.zIndex
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonSize
+import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
 import com.nexters.hytime.gitit.designsystem.card.GitItLearningCard
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
@@ -54,12 +62,14 @@ import kotlin.math.absoluteValue
  * Figma 홈 화면을 프로젝트 유무에 맞춰 표시한다.
  *
  * @param uiState 화면에 표시할 홈 UI 상태
+ * @param isQuizCreating 문제 생성 중 버튼을 비활성 로딩 상태로 표시할지 여부
  * @param onIntent 사용자 입력을 ViewModel로 올리는 콜백
  * @param modifier 홈 화면의 크기와 배치를 지정할 수식자
  */
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
+    isQuizCreating: Boolean = false,
     onIntent: (HomeIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -84,7 +94,10 @@ fun HomeScreen(
             Spacer(Modifier.height(18.dp))
             HomeTitle()
             Spacer(Modifier.height(22.dp))
-            ProjectImport(onClick = { onIntent(HomeIntent.LoadProjectClick) })
+            ProjectImport(
+                isQuizCreating = isQuizCreating,
+                onClick = { onIntent(HomeIntent.LoadProjectClick) },
+            )
             Spacer(Modifier.height(40.dp))
             LearningSection(uiState = uiState, onIntent = onIntent)
         }
@@ -160,10 +173,14 @@ private fun HomeTitle() {
 /**
  * 프로젝트 불러오기 안내와 진입 버튼을 표시한다.
  *
+ * @param isQuizCreating 문제 생성 중 버튼을 로딩 상태로 표시할지 여부
  * @param onClick 프로젝트 불러오기 화면으로 이동할 동작
  */
 @Composable
-private fun ProjectImport(onClick: () -> Unit) {
+private fun ProjectImport(
+    isQuizCreating: Boolean,
+    onClick: () -> Unit,
+) {
     Box(
         modifier =
             Modifier
@@ -187,15 +204,50 @@ private fun ProjectImport(onClick: () -> Unit) {
             )
         }
         GitItButton(
-            text = "지금 불러오기",
+            text = if (isQuizCreating) "문제 생성 중" else "지금 불러오기",
             onClick = onClick,
             size = GitItButtonSize.Small,
+            state = if (isQuizCreating) GitItButtonState.Disabled else GitItButtonState.Default,
+            leadingIcon = if (isQuizCreating) ({ QuizCreateLoadingIndicator() }) else null,
             modifier =
                 Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 12.dp, bottom = 12.dp)
-                    .width(104.dp),
+                    .then(if (isQuizCreating) Modifier else Modifier.width(104.dp)),
         )
+    }
+}
+
+/** Figma의 생성 중 버튼에 16dp 회전 로딩 링을 표시한다. */
+@Composable
+private fun QuizCreateLoadingIndicator() {
+    val transition = rememberInfiniteTransition(label = "home-quiz-create-loading")
+    val rotation by
+        transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(animation = tween(durationMillis = 900, easing = LinearEasing)),
+            label = "home-quiz-create-loading-rotation",
+        )
+    val color = GitItTheme.colors.blue100
+
+    Canvas(modifier = Modifier.size(16.dp)) {
+        rotate(rotation) {
+            drawCircle(
+                brush =
+                    Brush.sweepGradient(
+                        colorStops =
+                            arrayOf(
+                                0f to color,
+                                0.68f to color,
+                                0.82f to color.copy(alpha = 0.28f),
+                                0.94f to color,
+                                1f to color,
+                            ),
+                    ),
+                style = Stroke(width = 4.dp.toPx()),
+            )
+        }
     }
 }
 
@@ -416,6 +468,18 @@ internal fun learningCardAngle(
 private fun EmptyHomeScreenPreview() {
     GitItTheme {
         HomeScreen(uiState = HomeUiState(), onIntent = {})
+    }
+}
+
+@Preview(name = "홈 - 문제 생성 중")
+@Composable
+private fun CreatingHomeScreenPreview() {
+    GitItTheme {
+        HomeScreen(
+            uiState = HomeUiState(),
+            isQuizCreating = true,
+            onIntent = {},
+        )
     }
 }
 

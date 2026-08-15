@@ -57,11 +57,11 @@ sealed interface AppRoute : NavKey {
     /**
      * 선택한 저장소의 문제 생성 조건을 설정하고 생성 진행 상태를 표시한다.
      *
-     * @property projectId 문제를 생성할 프로젝트 식별자
+     * @property repositoryUrl 프로젝트로 등록할 GitHub 저장소 URL
      */
     @Serializable
     data class QuizCreate(
-        val projectId: String,
+        val repositoryUrl: String,
     ) : AppRoute
 
     /**

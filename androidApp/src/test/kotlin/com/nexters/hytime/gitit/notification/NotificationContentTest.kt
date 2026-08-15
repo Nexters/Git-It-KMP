@@ -8,12 +8,12 @@ import kotlin.test.assertNull
 class NotificationContentTest {
     /** 서버가 정의한 세 상태를 프로젝트 식별자와 함께 생성 결과로 변환하는지 검증한다. */
     @Test
-    fun toQuizGenerationResult_지원상태이면_생성결과를반환한다() {
+    fun toQuizCreateResult_지원상태이면_생성결과를반환한다() {
         val expectedStatuses =
             mapOf(
-                "success" to QuizGenerationResultStatus.Success,
-                "failed" to QuizGenerationResultStatus.Failed,
-                "rejected" to QuizGenerationResultStatus.Rejected,
+                "success" to QuizCreateResultStatus.Success,
+                "failed" to QuizCreateResultStatus.Failed,
+                "rejected" to QuizCreateResultStatus.Rejected,
             )
 
         expectedStatuses.forEach { (payloadStatus, expectedStatus) ->
@@ -21,15 +21,15 @@ class NotificationContentTest {
                 mapOf(
                     "projectId" to " project-127 ",
                     "status" to payloadStatus,
-                ).toQuizGenerationResult()
+                ).toQuizCreateResult()
 
-            assertEquals(QuizGenerationResult("project-127", expectedStatus), result)
+            assertEquals(QuizCreateResult("project-127", expectedStatus), result)
         }
     }
 
     /** 프로젝트 식별자가 없거나 지원하지 않는 상태이면 생성 결과로 처리하지 않는지 검증한다. */
     @Test
-    fun toQuizGenerationResult_필수값이잘못되면_null을반환한다() {
+    fun toQuizCreateResult_필수값이잘못되면_null을반환한다() {
         val invalidPayloads =
             listOf(
                 emptyMap(),
@@ -39,7 +39,7 @@ class NotificationContentTest {
                 mapOf("projectId" to "project-127", "status" to "completed"),
             )
 
-        invalidPayloads.forEach { payload -> assertNull(payload.toQuizGenerationResult(), payload.toString()) }
+        invalidPayloads.forEach { payload -> assertNull(payload.toQuizCreateResult(), payload.toString()) }
     }
 
     /** 제목과 본문이 있으면 주변 공백을 제거한 알림 내용을 반환하는지 검증한다. */

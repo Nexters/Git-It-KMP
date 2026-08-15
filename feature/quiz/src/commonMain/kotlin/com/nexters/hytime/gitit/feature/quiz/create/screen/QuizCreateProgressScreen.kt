@@ -34,12 +34,12 @@ import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonStyle
-import com.nexters.hytime.gitit.feature.quiz.create.QuizGenerationStep
+import com.nexters.hytime.gitit.feature.quiz.create.QuizCreateStep
 import com.nexters.hytime.gitit.feature.quiz.create.component.QuizCreateImagePlaceholder
 import git_it_kmp.feature.quiz.generated.resources.Res
-import git_it_kmp.feature.quiz.generated.resources.ic_quiz_generation_check
-import git_it_kmp.feature.quiz.generated.resources.quiz_create_generating_description
-import git_it_kmp.feature.quiz.generated.resources.quiz_create_generating_title
+import git_it_kmp.feature.quiz.generated.resources.ic_quiz_create_check
+import git_it_kmp.feature.quiz.generated.resources.quiz_create_progress_description
+import git_it_kmp.feature.quiz.generated.resources.quiz_create_progress_title
 import git_it_kmp.feature.quiz.generated.resources.quiz_create_step_code_structure
 import git_it_kmp.feature.quiz.generated.resources.quiz_create_step_learning_concepts
 import git_it_kmp.feature.quiz.generated.resources.quiz_create_step_project_info
@@ -57,8 +57,8 @@ import org.jetbrains.compose.resources.stringResource
  * @param onWaitAtHomeClick 홈에서 기다리기 콜백
  */
 @Composable
-internal fun QuizCreateGeneratingScreen(
-    step: QuizGenerationStep,
+internal fun QuizCreateProgressScreen(
+    step: QuizCreateStep,
     onWaitAtHomeClick: () -> Unit,
 ) {
     Box(
@@ -82,21 +82,21 @@ internal fun QuizCreateGeneratingScreen(
             )
             Spacer(Modifier.height(44.dp))
             Text(
-                text = stringResource(Res.string.quiz_create_generating_title),
+                text = stringResource(Res.string.quiz_create_progress_title),
                 color = GitItTheme.colors.grey100,
                 style = GitItTheme.typography.title1,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                text = stringResource(Res.string.quiz_create_generating_description),
+                text = stringResource(Res.string.quiz_create_progress_description),
                 color = GitItTheme.colors.grey400,
                 style = GitItTheme.typography.body2,
             )
             Spacer(Modifier.height(48.dp))
             Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(19.dp)) {
-                QuizGenerationStep.entries.forEach { item ->
-                    GenerationStepRow(
+                QuizCreateStep.entries.forEach { item ->
+                    CreateStepRow(
                         label = stringResource(item.titleResource()),
                         isCompleted = item.ordinal < step.ordinal,
                         isCurrent = item == step,
@@ -125,7 +125,7 @@ internal fun QuizCreateGeneratingScreen(
  * @param isCurrent 지금 처리 중인 단계인지 여부
  */
 @Composable
-private fun GenerationStepRow(
+private fun CreateStepRow(
     label: String,
     isCompleted: Boolean,
     isCurrent: Boolean,
@@ -136,10 +136,10 @@ private fun GenerationStepRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (isCurrent) {
-            QuizGenerationLoadingIndicator()
+            QuizCreateLoadingIndicator()
         } else if (isCompleted) {
             Image(
-                painter = painterResource(Res.drawable.ic_quiz_generation_check),
+                painter = painterResource(Res.drawable.ic_quiz_create_check),
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
             )
@@ -157,8 +157,8 @@ private fun GenerationStepRow(
 
 /** Figma의 어두운 꼬리가 회전하는 24dp 생성 로딩 링을 표시한다. */
 @Composable
-private fun QuizGenerationLoadingIndicator() {
-    val transition = rememberInfiniteTransition(label = "quiz-generation-loading")
+private fun QuizCreateLoadingIndicator() {
+    val transition = rememberInfiniteTransition(label = "quiz-create-loading")
     val rotation by
         transition.animateFloat(
             initialValue = 0f,
@@ -167,7 +167,7 @@ private fun QuizGenerationLoadingIndicator() {
                 infiniteRepeatable(
                     animation = tween(durationMillis = 900, easing = LinearEasing),
                 ),
-            label = "quiz-generation-loading-rotation",
+            label = "quiz-create-loading-rotation",
         )
     val color = GitItTheme.colors.blue100
 
@@ -196,21 +196,21 @@ private fun QuizGenerationLoadingIndicator() {
  *
  * @return 현재 생성 단계에 대응하는 문자열 리소스
  */
-private fun QuizGenerationStep.titleResource(): StringResource =
+private fun QuizCreateStep.titleResource(): StringResource =
     when (this) {
-        QuizGenerationStep.ProjectInfo -> Res.string.quiz_create_step_project_info
-        QuizGenerationStep.CodeStructure -> Res.string.quiz_create_step_code_structure
-        QuizGenerationStep.LearningConcepts -> Res.string.quiz_create_step_learning_concepts
-        QuizGenerationStep.Questions -> Res.string.quiz_create_step_questions
-        QuizGenerationStep.Validation -> Res.string.quiz_create_step_validation
+        QuizCreateStep.ProjectInfo -> Res.string.quiz_create_step_project_info
+        QuizCreateStep.CodeStructure -> Res.string.quiz_create_step_code_structure
+        QuizCreateStep.LearningConcepts -> Res.string.quiz_create_step_learning_concepts
+        QuizCreateStep.Questions -> Res.string.quiz_create_step_questions
+        QuizCreateStep.Validation -> Res.string.quiz_create_step_validation
     }
 
 @Preview(widthDp = 360, heightDp = 800)
 @Composable
-private fun QuizCreateGeneratingPreview() {
+private fun QuizCreateProgressPreview() {
     GitItTheme {
-        QuizCreateGeneratingScreen(
-            step = QuizGenerationStep.LearningConcepts,
+        QuizCreateProgressScreen(
+            step = QuizCreateStep.LearningConcepts,
             onWaitAtHomeClick = {},
         )
     }

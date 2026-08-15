@@ -15,7 +15,7 @@ import com.nexters.hytime.gitit.R
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.repository.AccountRepository
-import com.nexters.hytime.gitit.feature.quiz.create.generation.QuizGenerationCoordinator
+import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStore
 import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,11 +34,11 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
     /** API 호출 가능 여부를 확인할 로그인 세션 저장소다. */
     private val sessionStorage by inject<LoginSessionStorage>()
 
-    /** 문제 생성 완료·실패 신호를 앱 범위 생성 세션에 반영하는 코디네이터다. */
-    private val quizGenerationCoordinator by inject<QuizGenerationCoordinator>()
+    /** 문제 생성 완료·실패 신호를 앱 범위 생성 세션에 반영하는 Store다. */
+    private val quizCreateStore by inject<QuizCreateStore>()
 
-    /** 서비스 콜백 이후에도 기기 등록 요청을 완료하는 코루틴 범위다. */
-    private val registrationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    /** 서비스 콜백 이후에도 기기 등록과 생성 결과 반영을 완료하는 코루틴 범위다. */
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**
      * data payload의 문제 생성 결과를 반영하고, 제목과 본문이 있으면 학습 알림을 게시한다.
@@ -47,23 +47,24 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
      */
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         val data = remoteMessage.data
-        val hasGenerationFields = QUIZ_GENERATION_PROJECT_ID_KEY in data || QUIZ_GENERATION_STATUS_KEY in data
-        val generationResult = data.toQuizGenerationResult()
-        when (generationResult?.status) {
-            QuizGenerationResultStatus.Success -> quizGenerationCoordinator.complete(generationResult.projectId)
-            QuizGenerationResultStatus.Failed,
-            QuizGenerationResultStatus.Rejected,
-            -> quizGenerationCoordinator.fail(generationResult.projectId)
-            null -> {
-                if (hasGenerationFields) {
-                    logger.w { "FCM 문제 생성 결과 payload의 projectId 또는 status가 올바르지 않습니다." }
+        val hasCreateFields = QUIZ_CREATE_PROJECT_ID_KEY in data || QUIZ_CREATE_STATUS_KEY in data
+        val createResult = data.toQuizCreateResult()
+        if (createResult != null) {
+            serviceScope.launch {
+                when (createResult.status) {
+                    QuizCreateResultStatus.Success -> quizCreateStore.complete(createResult.projectId)
+                    QuizCreateResultStatus.Failed,
+                    QuizCreateResultStatus.Rejected,
+                    -> quizCreateStore.fail(createResult.projectId)
                 }
             }
+        } else if (hasCreateFields) {
+            logger.w { "FCM 문제 생성 결과 payload의 projectId 또는 status가 올바르지 않습니다." }
         }
 
         val content = data.toNotificationContent()
         if (content == null) {
-            if (!hasGenerationFields) {
+            if (!hasCreateFields) {
                 logger.w { "FCM data payload에 title 또는 body가 없습니다." }
             }
             return
@@ -77,7 +78,7 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
      * @param installationId Firebase가 앱 인스턴스에 발급한 식별자
      */
     override fun onRegistered(installationId: String) {
-        registrationScope.launch { registerDevice(installationId) }
+        serviceScope.launch { registerDevice(installationId) }
     }
 
     /**
@@ -169,7 +170,7 @@ internal data class NotificationContent(
 )
 
 /** 서버가 FCM data payload로 전달하는 문제 생성 결과 상태다. */
-internal enum class QuizGenerationResultStatus {
+internal enum class QuizCreateResultStatus {
     /** 문제 생성이 정상적으로 끝났다. */
     Success,
 
@@ -186,9 +187,9 @@ internal enum class QuizGenerationResultStatus {
  * @property projectId 결과를 반영할 프로젝트 식별자
  * @property status 서버가 전달한 생성 처리 상태
  */
-internal data class QuizGenerationResult(
+internal data class QuizCreateResult(
     val projectId: String,
-    val status: QuizGenerationResultStatus,
+    val status: QuizCreateResultStatus,
 )
 
 /**
@@ -196,17 +197,17 @@ internal data class QuizGenerationResult(
  *
  * @return 두 필드가 서버 규격에 맞으면 생성 결과, 아니면 `null`
  */
-internal fun Map<String, String>.toQuizGenerationResult(): QuizGenerationResult? {
-    val projectId = get(QUIZ_GENERATION_PROJECT_ID_KEY)?.trim().orEmpty()
+internal fun Map<String, String>.toQuizCreateResult(): QuizCreateResult? {
+    val projectId = get(QUIZ_CREATE_PROJECT_ID_KEY)?.trim().orEmpty()
     if (projectId.isBlank()) return null
     val status =
-        when (get(QUIZ_GENERATION_STATUS_KEY)?.trim()) {
-            "success" -> QuizGenerationResultStatus.Success
-            "failed" -> QuizGenerationResultStatus.Failed
-            "rejected" -> QuizGenerationResultStatus.Rejected
+        when (get(QUIZ_CREATE_STATUS_KEY)?.trim()) {
+            "success" -> QuizCreateResultStatus.Success
+            "failed" -> QuizCreateResultStatus.Failed
+            "rejected" -> QuizCreateResultStatus.Rejected
             else -> return null
         }
-    return QuizGenerationResult(projectId = projectId, status = status)
+    return QuizCreateResult(projectId = projectId, status = status)
 }
 
 /**
@@ -247,7 +248,7 @@ internal fun createAndroidDeviceInfo(
 }
 
 /** FCM data payload에서 문제 생성 프로젝트를 식별하는 키다. */
-private const val QUIZ_GENERATION_PROJECT_ID_KEY = "projectId"
+private const val QUIZ_CREATE_PROJECT_ID_KEY = "projectId"
 
 /** FCM data payload에서 문제 생성 결과 상태를 식별하는 키다. */
-private const val QUIZ_GENERATION_STATUS_KEY = "status"
+private const val QUIZ_CREATE_STATUS_KEY = "status"

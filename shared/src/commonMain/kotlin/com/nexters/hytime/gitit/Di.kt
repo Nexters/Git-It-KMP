@@ -4,11 +4,14 @@ import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.domain.repository.AccountRepository
 import com.nexters.hytime.gitit.domain.repository.GitHubRepositoryRepository
+import com.nexters.hytime.gitit.domain.repository.ProjectRepository
 import com.nexters.hytime.gitit.domain.usecase.LoadGitHubRepositoryUseCase
+import com.nexters.hytime.gitit.domain.usecase.RegisterProjectUseCase
 import com.nexters.hytime.gitit.domain.usecase.SignInUseCase
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailViewModel
 import com.nexters.hytime.gitit.feature.quiz.create.QuizCreateViewModel
-import com.nexters.hytime.gitit.feature.quiz.create.generation.QuizGenerationCoordinator
+import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateRetryHandler
+import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStore
 import com.nexters.hytime.gitit.feature.quiz.load.ProjectLoadViewModel
 import com.nexters.hytime.gitit.logging.loggingModule
 import org.koin.core.module.Module
@@ -32,10 +35,18 @@ val appModule: Module =
             )
         }
         single { LoadGitHubRepositoryUseCase(repository = get<GitHubRepositoryRepository>()) }
+        single { RegisterProjectUseCase(repository = get<ProjectRepository>()) }
         viewModel { params -> ProjectDetailViewModel(projectId = params.get<String>()) }
         viewModel { ProjectLoadViewModel(loadGitHubRepository = get()) }
-        single { QuizGenerationCoordinator() }
-        viewModel { params -> QuizCreateViewModel(projectId = params.get<String>(), coordinator = get()) }
+        single { QuizCreateStore() }
+        single { QuizCreateRetryHandler(registerProject = get(), createStore = get()) }
+        viewModel { params ->
+            QuizCreateViewModel(
+                repositoryUrl = params.get<String>(),
+                registerProject = get(),
+                createStore = get(),
+            )
+        }
     }
 
 /**

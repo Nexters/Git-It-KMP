@@ -36,16 +36,18 @@ import org.jetbrains.compose.resources.stringResource
  * 홈에서 기다리기 전에 리마인드 알림 선택지를 표시한다.
  *
  * @param onEnableClick 리마인드 알림 설정 콜백
- * @param onDismissClick 알림 안내 닫기 콜백
+ * @param onDismissClick 다시 보지 않기를 선택한 콜백
+ * @param onCloseRequest 버튼 선택 없이 시트를 내려 닫으려는 콜백
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun QuizCreateReminderSheet(
     onEnableClick: () -> Unit,
     onDismissClick: () -> Unit,
+    onCloseRequest: () -> Unit,
 ) {
     ModalBottomSheet(
-        onDismissRequest = onDismissClick,
+        onDismissRequest = onCloseRequest,
         modifier = Modifier.fillMaxWidth(),
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
@@ -67,7 +69,7 @@ internal fun QuizCreateReminderSheet(
  *
  * @param modifier 시트 내부 콘텐츠의 크기와 배치를 지정하는 수식자
  * @param onEnableClick 리마인드 알림 설정 콜백
- * @param onDismissClick 알림 안내 닫기 콜백
+ * @param onDismissClick 다시 보지 않기를 선택한 콜백
  */
 @Composable
 private fun QuizCreateReminderSheetContent(
