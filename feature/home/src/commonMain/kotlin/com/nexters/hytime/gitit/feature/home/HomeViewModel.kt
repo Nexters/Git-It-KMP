@@ -35,7 +35,7 @@ class HomeViewModel : ViewModel() {
         when (intent) {
             HomeIntent.Refresh -> Unit
             HomeIntent.HomeTabClick -> Unit
-            HomeIntent.LoadProjectClick -> emit(HomeSideEffect.NavigateToQuestionCreate)
+            HomeIntent.LoadProjectClick -> emit(HomeSideEffect.NavigateToProjectLoad)
             HomeIntent.ViewAllProjectsClick -> emit(HomeSideEffect.NavigateToProjectList)
             is HomeIntent.LearningCardClick -> Unit
             is HomeIntent.LearningPlayClick -> emit(HomeSideEffect.NavigateToQuiz(intent.projectId))

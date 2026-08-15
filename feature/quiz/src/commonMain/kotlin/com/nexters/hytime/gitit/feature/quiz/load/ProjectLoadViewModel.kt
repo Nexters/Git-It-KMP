@@ -1,4 +1,4 @@
-package com.nexters.hytime.gitit.feature.questioncreate
+package com.nexters.hytime.gitit.feature.quiz.load
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,35 +16,35 @@ import kotlinx.coroutines.launch
  *
  * @property loadGitHubRepository 저장소 링크를 검증하고 조회하는 UseCase
  */
-class QuestionCreateViewModel(
+class ProjectLoadViewModel(
     private val loadGitHubRepository: LoadGitHubRepositoryUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(QuestionCreateUiState())
+    private val _uiState = MutableStateFlow(ProjectLoadUiState())
 
     /** 화면이 구독할 읽기 전용 상태다. */
-    val uiState: StateFlow<QuestionCreateUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<ProjectLoadUiState> = _uiState.asStateFlow()
 
-    private val _events = MutableSharedFlow<QuestionCreateEvent>(extraBufferCapacity = 1)
+    private val _events = MutableSharedFlow<ProjectLoadEvent>(extraBufferCapacity = 1)
 
     /** 화면 밖에서 한 번만 처리할 이벤트 스트림이다. */
-    val events: SharedFlow<QuestionCreateEvent> = _events.asSharedFlow()
+    val events: SharedFlow<ProjectLoadEvent> = _events.asSharedFlow()
 
     /**
      * 화면의 모든 사용자 의도를 처리한다.
      *
      * @param intent 사용자가 발생시킨 의도
      */
-    fun onIntent(intent: QuestionCreateIntent) {
+    fun onIntent(intent: ProjectLoadIntent) {
         when (intent) {
-            is QuestionCreateIntent.RepositoryUrlChanged -> setState { copy(repositoryUrl = intent.value, error = null) }
-            QuestionCreateIntent.ClearRepositoryUrl -> setState { copy(repositoryUrl = "", error = null) }
-            QuestionCreateIntent.LoadRepository -> loadRepository()
-            QuestionCreateIntent.BackClick -> {
-                if (uiState.value.repository == null) emit(QuestionCreateEvent.NavigateBack) else showInput()
+            is ProjectLoadIntent.RepositoryUrlChanged -> setState { copy(repositoryUrl = intent.value, error = null) }
+            ProjectLoadIntent.ClearRepositoryUrl -> setState { copy(repositoryUrl = "", error = null) }
+            ProjectLoadIntent.LoadRepository -> loadRepository()
+            ProjectLoadIntent.BackClick -> {
+                if (uiState.value.repository == null) emit(ProjectLoadEvent.NavigateBack) else showInput()
             }
-            QuestionCreateIntent.RejectRepository -> showInput()
-            QuestionCreateIntent.ConfirmRepository -> {
-                uiState.value.repository?.let { emit(QuestionCreateEvent.RepositoryConfirmed(it)) }
+            ProjectLoadIntent.RejectRepository -> showInput()
+            ProjectLoadIntent.ConfirmRepository -> {
+                uiState.value.repository?.let { emit(ProjectLoadEvent.RepositoryConfirmed(it)) }
             }
         }
     }
@@ -61,12 +61,7 @@ class QuestionCreateViewModel(
                     setState {
                         copy(
                             isLoading = false,
-                            error =
-                                if (throwable is IllegalArgumentException) {
-                                    QuestionCreateError.InvalidUrl
-                                } else {
-                                    QuestionCreateError.LoadFailed
-                                },
+                            error = if (throwable is IllegalArgumentException) ProjectLoadError.InvalidUrl else null,
                         )
                     }
                 }
@@ -77,11 +72,11 @@ class QuestionCreateViewModel(
         setState { copy(repository = null, error = null) }
     }
 
-    private fun setState(reducer: QuestionCreateUiState.() -> QuestionCreateUiState) {
+    private fun setState(reducer: ProjectLoadUiState.() -> ProjectLoadUiState) {
         _uiState.value = _uiState.value.reducer()
     }
 
-    private fun emit(event: QuestionCreateEvent) {
+    private fun emit(event: ProjectLoadEvent) {
         viewModelScope.launch { _events.emit(event) }
     }
 }

@@ -1,4 +1,4 @@
-package com.nexters.hytime.gitit.feature.questioncreate
+package com.nexters.hytime.gitit.feature.quiz.load
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
@@ -42,25 +42,24 @@ import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
 import com.nexters.hytime.gitit.domain.model.GitHubRepository
 import git_it_kmp.core.designsystem.generated.resources.ic_clear_circle
-import git_it_kmp.feature.questioncreate.generated.resources.Res
-import git_it_kmp.feature.questioncreate.generated.resources.ic_chevron_right
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_avatar_description
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_clear
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_confirm_title
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_help_step_1
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_help_step_2
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_help_step_3
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_help_step_4
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_help_step_5
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_help_title
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_help_toggle
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_invalid_url
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_link_label
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_link_placeholder
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_load_failed
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_next
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_reject
-import git_it_kmp.feature.questioncreate.generated.resources.question_create_title
+import git_it_kmp.feature.quiz.generated.resources.Res
+import git_it_kmp.feature.quiz.generated.resources.ic_chevron_right
+import git_it_kmp.feature.quiz.generated.resources.project_load_avatar_description
+import git_it_kmp.feature.quiz.generated.resources.project_load_clear
+import git_it_kmp.feature.quiz.generated.resources.project_load_confirm_title
+import git_it_kmp.feature.quiz.generated.resources.project_load_help_step_1
+import git_it_kmp.feature.quiz.generated.resources.project_load_help_step_2
+import git_it_kmp.feature.quiz.generated.resources.project_load_help_step_3
+import git_it_kmp.feature.quiz.generated.resources.project_load_help_step_4
+import git_it_kmp.feature.quiz.generated.resources.project_load_help_step_5
+import git_it_kmp.feature.quiz.generated.resources.project_load_help_title
+import git_it_kmp.feature.quiz.generated.resources.project_load_help_toggle
+import git_it_kmp.feature.quiz.generated.resources.project_load_invalid_url
+import git_it_kmp.feature.quiz.generated.resources.project_load_link_label
+import git_it_kmp.feature.quiz.generated.resources.project_load_link_placeholder
+import git_it_kmp.feature.quiz.generated.resources.project_load_next
+import git_it_kmp.feature.quiz.generated.resources.project_load_reject
+import git_it_kmp.feature.quiz.generated.resources.project_load_title
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import git_it_kmp.core.designsystem.generated.resources.Res as DesignSystemRes
@@ -73,9 +72,9 @@ import git_it_kmp.core.designsystem.generated.resources.Res as DesignSystemRes
  * @param modifier 화면의 크기와 배치를 지정할 수식자
  */
 @Composable
-fun QuestionCreateScreen(
-    uiState: QuestionCreateUiState,
-    onIntent: (QuestionCreateIntent) -> Unit,
+fun ProjectLoadScreen(
+    uiState: ProjectLoadUiState,
+    onIntent: (ProjectLoadIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -105,19 +104,19 @@ fun QuestionCreateScreen(
  */
 @Composable
 private fun RepositoryInputContent(
-    uiState: QuestionCreateUiState,
-    onIntent: (QuestionCreateIntent) -> Unit,
+    uiState: ProjectLoadUiState,
+    onIntent: (ProjectLoadIntent) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         GitItTopBar(
             type = GitItTopBarType.Default,
-            onBackClick = { onIntent(QuestionCreateIntent.BackClick) },
+            onBackClick = { onIntent(ProjectLoadIntent.BackClick) },
             modifier = Modifier.padding(top = 8.dp),
         )
         Spacer(Modifier.height(8.dp))
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             Text(
-                text = stringResource(Res.string.question_create_title),
+                text = stringResource(Res.string.project_load_title),
                 color = GitItTheme.colors.grey100,
                 style = GitItTheme.typography.subtitle2,
             )
@@ -126,18 +125,18 @@ private fun RepositoryInputContent(
                 value = uiState.repositoryUrl,
                 error = uiState.error,
                 enabled = !uiState.isLoading,
-                onValueChange = { onIntent(QuestionCreateIntent.RepositoryUrlChanged(it)) },
-                onClear = { onIntent(QuestionCreateIntent.ClearRepositoryUrl) },
+                onValueChange = { onIntent(ProjectLoadIntent.RepositoryUrlChanged(it)) },
+                onClear = { onIntent(ProjectLoadIntent.ClearRepositoryUrl) },
             )
             Spacer(Modifier.height(if (uiState.error == null) 32.dp else 10.dp))
             RepositoryLoadHelp()
         }
         Spacer(Modifier.weight(1f))
-        QuestionCreateButton(
-            text = stringResource(Res.string.question_create_next),
+        ProjectLoadButton(
+            text = stringResource(Res.string.project_load_next),
             enabled = uiState.repositoryUrl.isNotBlank() && !uiState.isLoading,
             primary = true,
-            onClick = { onIntent(QuestionCreateIntent.LoadRepository) },
+            onClick = { onIntent(ProjectLoadIntent.LoadRepository) },
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -158,7 +157,7 @@ private fun RepositoryInputContent(
 @Composable
 private fun RepositoryUrlField(
     value: String,
-    error: QuestionCreateError?,
+    error: ProjectLoadError?,
     enabled: Boolean,
     onValueChange: (String) -> Unit,
     onClear: () -> Unit,
@@ -171,7 +170,7 @@ private fun RepositoryUrlField(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(Res.string.question_create_link_label),
+                text = stringResource(Res.string.project_load_link_label),
                 color = accentColor,
                 style = GitItTheme.typography.body2,
                 modifier = Modifier.width(31.dp),
@@ -189,7 +188,7 @@ private fun RepositoryUrlField(
                     Box {
                         if (value.isEmpty()) {
                             Text(
-                                text = stringResource(Res.string.question_create_link_placeholder),
+                                text = stringResource(Res.string.project_load_link_placeholder),
                                 color = GitItTheme.colors.white30,
                                 style = GitItTheme.typography.body1,
                                 maxLines = 1,
@@ -201,7 +200,7 @@ private fun RepositoryUrlField(
                 },
             )
             if (value.isNotEmpty()) {
-                val clearDescription = stringResource(Res.string.question_create_clear)
+                val clearDescription = stringResource(Res.string.project_load_clear)
                 Image(
                     painter = painterResource(DesignSystemRes.drawable.ic_clear_circle),
                     contentDescription = clearDescription,
@@ -214,16 +213,9 @@ private fun RepositoryUrlField(
             }
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(accentColor))
-        error?.let {
+        if (error != null) {
             Text(
-                text =
-                    stringResource(
-                        if (it == QuestionCreateError.InvalidUrl) {
-                            Res.string.question_create_invalid_url
-                        } else {
-                            Res.string.question_create_load_failed
-                        },
-                    ),
+                text = stringResource(Res.string.project_load_invalid_url),
                 color = GitItTheme.colors.error,
                 style = GitItTheme.typography.caption1,
                 modifier = Modifier.padding(start = 47.dp, top = 4.dp, end = 16.dp),
@@ -238,11 +230,11 @@ private fun RepositoryLoadHelp() {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val steps =
         listOf(
-            Res.string.question_create_help_step_1,
-            Res.string.question_create_help_step_2,
-            Res.string.question_create_help_step_3,
-            Res.string.question_create_help_step_4,
-            Res.string.question_create_help_step_5,
+            Res.string.project_load_help_step_1,
+            Res.string.project_load_help_step_2,
+            Res.string.project_load_help_step_3,
+            Res.string.project_load_help_step_4,
+            Res.string.project_load_help_step_5,
         )
 
     Column(
@@ -263,14 +255,14 @@ private fun RepositoryLoadHelp() {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(Res.string.question_create_help_title),
+                text = stringResource(Res.string.project_load_help_title),
                 color = GitItTheme.colors.blue100,
                 style = GitItTheme.typography.body2,
                 modifier = Modifier.weight(1f),
             )
             Image(
                 painter = painterResource(Res.drawable.ic_chevron_right),
-                contentDescription = stringResource(Res.string.question_create_help_toggle),
+                contentDescription = stringResource(Res.string.project_load_help_toggle),
                 modifier = Modifier.size(16.dp).padding(5.dp).rotate(if (expanded) -90f else 90f),
             )
         }
@@ -328,12 +320,12 @@ private fun HelpStep(
 @Composable
 private fun RepositoryConfirmationContent(
     repository: GitHubRepository,
-    onIntent: (QuestionCreateIntent) -> Unit,
+    onIntent: (ProjectLoadIntent) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         GitItTopBar(
             type = GitItTopBarType.Default,
-            onBackClick = { onIntent(QuestionCreateIntent.BackClick) },
+            onBackClick = { onIntent(ProjectLoadIntent.BackClick) },
             modifier = Modifier.padding(top = 8.dp),
         )
         Column(
@@ -342,7 +334,7 @@ private fun RepositoryConfirmationContent(
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = stringResource(Res.string.question_create_confirm_title),
+                text = stringResource(Res.string.project_load_confirm_title),
                 color = GitItTheme.colors.grey100,
                 style = GitItTheme.typography.subtitle1,
                 textAlign = TextAlign.Center,
@@ -354,18 +346,18 @@ private fun RepositoryConfirmationContent(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            QuestionCreateButton(
-                text = stringResource(Res.string.question_create_next),
+            ProjectLoadButton(
+                text = stringResource(Res.string.project_load_next),
                 enabled = true,
                 primary = true,
-                onClick = { onIntent(QuestionCreateIntent.ConfirmRepository) },
+                onClick = { onIntent(ProjectLoadIntent.ConfirmRepository) },
                 modifier = Modifier.fillMaxWidth(),
             )
-            QuestionCreateButton(
-                text = stringResource(Res.string.question_create_reject),
+            ProjectLoadButton(
+                text = stringResource(Res.string.project_load_reject),
                 enabled = true,
                 primary = false,
-                onClick = { onIntent(QuestionCreateIntent.RejectRepository) },
+                onClick = { onIntent(ProjectLoadIntent.RejectRepository) },
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -382,7 +374,7 @@ private fun RepositorySummary(repository: GitHubRepository) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         AsyncImage(
             model = repository.ownerAvatarUrl,
-            contentDescription = stringResource(Res.string.question_create_avatar_description),
+            contentDescription = stringResource(Res.string.project_load_avatar_description),
             contentScale = ContentScale.Crop,
             modifier =
                 Modifier
@@ -420,7 +412,7 @@ private fun RepositorySummary(repository: GitHubRepository) {
  * @param modifier 버튼 외부 배치 수식자
  */
 @Composable
-private fun QuestionCreateButton(
+private fun ProjectLoadButton(
     text: String,
     enabled: Boolean,
     primary: Boolean,
@@ -450,19 +442,19 @@ private fun QuestionCreateButton(
 
 @Preview
 @Composable
-private fun QuestionCreateInputPreview() {
+private fun ProjectLoadInputPreview() {
     GitItTheme {
-        QuestionCreateScreen(uiState = QuestionCreateUiState(), onIntent = {})
+        ProjectLoadScreen(uiState = ProjectLoadUiState(), onIntent = {})
     }
 }
 
 @Preview
 @Composable
-private fun QuestionCreateConfirmationPreview() {
+private fun ProjectLoadConfirmationPreview() {
     GitItTheme {
-        QuestionCreateScreen(
+        ProjectLoadScreen(
             uiState =
-                QuestionCreateUiState(
+                ProjectLoadUiState(
                     repository =
                         GitHubRepository(
                             name = "react",

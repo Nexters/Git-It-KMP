@@ -10,8 +10,8 @@ import com.nexters.hytime.gitit.feature.my.SettingsScreen
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
-import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
 import com.nexters.hytime.gitit.feature.quiz.create.QuizCreateRoute
+import com.nexters.hytime.gitit.feature.quiz.load.ProjectLoadRoute
 import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizRoute
 import com.nexters.hytime.gitit.permission.rememberNotificationPermissionState
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
@@ -47,7 +47,7 @@ actual fun AppNavHost() {
                 onNavigateToProject = { projectId -> backStack.add(AppRoute.ProjectDetail(projectId)) },
             ) {
                 HomeRoute(
-                    onNavigateToQuestionCreate = { backStack.add(AppRoute.QuestionCreate) },
+                    onNavigateToProjectLoad = { backStack.add(AppRoute.ProjectLoad) },
                     onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                     onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                     onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
@@ -98,8 +98,8 @@ actual fun AppNavHost() {
                 onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
             )
         }
-        AppRoute.QuestionCreate -> {
-            QuestionCreateRoute(
+        AppRoute.ProjectLoad -> {
+            ProjectLoadRoute(
                 onBackClick = { backStack.removeLastOrNull() },
                 onRepositoryConfirmed = { repository ->
                     backStack.add(AppRoute.QuizCreate("${repository.ownerName}/${repository.name}"))

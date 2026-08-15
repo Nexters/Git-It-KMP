@@ -1,4 +1,4 @@
-package com.nexters.hytime.gitit.feature.questioncreate
+package com.nexters.hytime.gitit.feature.quiz.load
 
 import com.nexters.hytime.gitit.domain.model.GitHubRepository
 import com.nexters.hytime.gitit.domain.repository.GitHubRepositoryRepository
@@ -19,9 +19,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-/** [QuestionCreateViewModel]의 입력, 조회, 확인 상태 전환을 검증한다. */
+/** [ProjectLoadViewModel]의 입력, 조회, 확인 상태 전환을 검증한다. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class QuestionCreateViewModelTest {
+class ProjectLoadViewModelTest {
     private val dispatcher = StandardTestDispatcher()
 
     /** ViewModel의 Main dispatcher를 테스트 dispatcher로 교체한다. */
@@ -41,12 +41,12 @@ class QuestionCreateViewModelTest {
     fun loadRepository_invalidUrlShowsFormatError() =
         runTest(dispatcher) {
             val viewModel = viewModel(Result.success(repository))
-            viewModel.onIntent(QuestionCreateIntent.RepositoryUrlChanged("https://example.com/repo"))
+            viewModel.onIntent(ProjectLoadIntent.RepositoryUrlChanged("https://example.com/repo"))
 
-            viewModel.onIntent(QuestionCreateIntent.LoadRepository)
+            viewModel.onIntent(ProjectLoadIntent.LoadRepository)
             dispatcher.scheduler.advanceUntilIdle()
 
-            assertEquals(QuestionCreateError.InvalidUrl, viewModel.uiState.value.error)
+            assertEquals(ProjectLoadError.InvalidUrl, viewModel.uiState.value.error)
             assertFalse(viewModel.uiState.value.isLoading)
         }
 
@@ -55,26 +55,27 @@ class QuestionCreateViewModelTest {
     fun loadRepository_successShowsRepositoryConfirmation() =
         runTest(dispatcher) {
             val viewModel = viewModel(Result.success(repository))
-            viewModel.onIntent(QuestionCreateIntent.RepositoryUrlChanged("https://github.com/facebook/react"))
+            viewModel.onIntent(ProjectLoadIntent.RepositoryUrlChanged("https://github.com/facebook/react"))
 
-            viewModel.onIntent(QuestionCreateIntent.LoadRepository)
+            viewModel.onIntent(ProjectLoadIntent.LoadRepository)
             dispatcher.scheduler.advanceUntilIdle()
 
             assertEquals(repository, viewModel.uiState.value.repository)
             assertNull(viewModel.uiState.value.error)
         }
 
-    /** API 실패 시 조회 오류를 표시하는지 검증한다. */
+    /** 디자인에 없는 오류를 노출하지 않고 API 실패 후 입력 화면을 다시 조작할 수 있다. */
     @Test
-    fun loadRepository_apiFailureShowsLoadError() =
+    fun loadRepository_apiFailureReturnsToEditableInput() =
         runTest(dispatcher) {
             val viewModel = viewModel(Result.failure(IllegalStateException("network")))
-            viewModel.onIntent(QuestionCreateIntent.RepositoryUrlChanged("https://github.com/facebook/react"))
+            viewModel.onIntent(ProjectLoadIntent.RepositoryUrlChanged("https://github.com/facebook/react"))
 
-            viewModel.onIntent(QuestionCreateIntent.LoadRepository)
+            viewModel.onIntent(ProjectLoadIntent.LoadRepository)
             dispatcher.scheduler.advanceUntilIdle()
 
-            assertEquals(QuestionCreateError.LoadFailed, viewModel.uiState.value.error)
+            assertNull(viewModel.uiState.value.error)
+            assertFalse(viewModel.uiState.value.isLoading)
         }
 
     /** 조회 중 재요청을 무시하는지 검증한다. */
@@ -83,7 +84,7 @@ class QuestionCreateViewModelTest {
         runTest(dispatcher) {
             var calls = 0
             val viewModel =
-                QuestionCreateViewModel(
+                ProjectLoadViewModel(
                     LoadGitHubRepositoryUseCase(
                         repository { _, _ ->
                             calls += 1
@@ -91,10 +92,10 @@ class QuestionCreateViewModelTest {
                         },
                     ),
                 )
-            viewModel.onIntent(QuestionCreateIntent.RepositoryUrlChanged("https://github.com/facebook/react"))
+            viewModel.onIntent(ProjectLoadIntent.RepositoryUrlChanged("https://github.com/facebook/react"))
 
-            viewModel.onIntent(QuestionCreateIntent.LoadRepository)
-            viewModel.onIntent(QuestionCreateIntent.LoadRepository)
+            viewModel.onIntent(ProjectLoadIntent.LoadRepository)
+            viewModel.onIntent(ProjectLoadIntent.LoadRepository)
             dispatcher.scheduler.advanceUntilIdle()
 
             assertEquals(1, calls)
@@ -106,11 +107,11 @@ class QuestionCreateViewModelTest {
         runTest(dispatcher) {
             val viewModel = viewModel(Result.success(repository))
             val url = "https://github.com/facebook/react"
-            viewModel.onIntent(QuestionCreateIntent.RepositoryUrlChanged(url))
-            viewModel.onIntent(QuestionCreateIntent.LoadRepository)
+            viewModel.onIntent(ProjectLoadIntent.RepositoryUrlChanged(url))
+            viewModel.onIntent(ProjectLoadIntent.LoadRepository)
             dispatcher.scheduler.advanceUntilIdle()
 
-            viewModel.onIntent(QuestionCreateIntent.RejectRepository)
+            viewModel.onIntent(ProjectLoadIntent.RejectRepository)
 
             assertEquals(url, viewModel.uiState.value.repositoryUrl)
             assertNull(viewModel.uiState.value.repository)
@@ -121,20 +122,20 @@ class QuestionCreateViewModelTest {
     fun confirmRepository_emitsConfirmedRepository() =
         runTest(dispatcher) {
             val viewModel = viewModel(Result.success(repository))
-            viewModel.onIntent(QuestionCreateIntent.RepositoryUrlChanged("https://github.com/facebook/react"))
-            viewModel.onIntent(QuestionCreateIntent.LoadRepository)
+            viewModel.onIntent(ProjectLoadIntent.RepositoryUrlChanged("https://github.com/facebook/react"))
+            viewModel.onIntent(ProjectLoadIntent.LoadRepository)
             dispatcher.scheduler.advanceUntilIdle()
             val event = async { viewModel.events.first() }
 
-            viewModel.onIntent(QuestionCreateIntent.ConfirmRepository)
+            viewModel.onIntent(ProjectLoadIntent.ConfirmRepository)
             dispatcher.scheduler.advanceUntilIdle()
 
-            assertTrue(event.await() is QuestionCreateEvent.RepositoryConfirmed)
-            assertEquals(repository, (event.await() as QuestionCreateEvent.RepositoryConfirmed).repository)
+            assertTrue(event.await() is ProjectLoadEvent.RepositoryConfirmed)
+            assertEquals(repository, (event.await() as ProjectLoadEvent.RepositoryConfirmed).repository)
         }
 
-    private fun viewModel(result: Result<GitHubRepository>): QuestionCreateViewModel =
-        QuestionCreateViewModel(LoadGitHubRepositoryUseCase(repository { _, _ -> result }))
+    private fun viewModel(result: Result<GitHubRepository>): ProjectLoadViewModel =
+        ProjectLoadViewModel(LoadGitHubRepositoryUseCase(repository { _, _ -> result }))
 
     private fun repository(block: suspend (String, String) -> Result<GitHubRepository>): GitHubRepositoryRepository =
         object : GitHubRepositoryRepository {

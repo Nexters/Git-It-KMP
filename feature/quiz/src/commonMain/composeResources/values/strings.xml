@@ -63,4 +63,21 @@
   <string name="quiz_create_home_generating">세트를 생성중입니다...</string>
   <string name="quiz_create_home_cancel">취소</string>
   <string name="quiz_create_close">닫기</string>
+  <string name="project_load_back">뒤로가기</string>
+  <string name="project_load_title">GitHub 레포지토리\n링크를 붙여넣어 주세요</string>
+  <string name="project_load_link_label">링크</string>
+  <string name="project_load_link_placeholder">https://github.com</string>
+  <string name="project_load_clear">입력 지우기</string>
+  <string name="project_load_help_title">불러오기 방법</string>
+  <string name="project_load_help_toggle">불러오기 방법 펼치기 또는 접기</string>
+  <string name="project_load_help_step_1">학습하고싶은 레포지토리를 발견하셨나요?</string>
+  <string name="project_load_help_step_2">GitHub 리포지토리 페이지로 이동합니다.</string>
+  <string name="project_load_help_step_3">우측 상단의 [Code] 버튼을 클릭합니다.</string>
+  <string name="project_load_help_step_4">HTTPS 탭에서 주소 옆 복사 아이콘을 누릅니다.</string>
+  <string name="project_load_help_step_5">복사한 주소를 위에 입력해주세요.</string>
+  <string name="project_load_next">다음</string>
+  <string name="project_load_invalid_url">올바른 GitHub 레포지토리 링크를 입력해 주세요.</string>
+  <string name="project_load_confirm_title">이 레포지토리가 맞으면\n학습 설정을 진행할게요</string>
+  <string name="project_load_avatar_description">저장소 소유자 아바타</string>
+  <string name="project_load_reject">이 레포지토리가 아니에요</string>
 </resources>

@@ -52,7 +52,7 @@ sealed interface AppRoute : NavKey {
      * 질문 생성을 시작할 GitHub 저장소를 입력하고 확인하는 화면이다.
      */
     @Serializable
-    data object QuestionCreate : AppRoute
+    data object ProjectLoad : AppRoute
 
     /**
      * 선택한 저장소의 문제 생성 조건을 설정하고 생성 진행 상태를 표시한다.
