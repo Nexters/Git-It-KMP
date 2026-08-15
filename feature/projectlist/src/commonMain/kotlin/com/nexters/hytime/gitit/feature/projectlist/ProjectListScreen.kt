@@ -72,6 +72,8 @@ import git_it_kmp.feature.projectlist.generated.resources.project_delete_cancel
 import git_it_kmp.feature.projectlist.generated.resources.project_delete_confirm
 import git_it_kmp.feature.projectlist.generated.resources.project_delete_sheet_description
 import git_it_kmp.feature.projectlist.generated.resources.project_delete_sheet_title
+import git_it_kmp.feature.projectlist.generated.resources.project_list_empty_description
+import git_it_kmp.feature.projectlist.generated.resources.project_list_empty_title
 import git_it_kmp.feature.projectlist.generated.resources.project_list_title
 import git_it_kmp.feature.projectlist.generated.resources.project_menu_button_description
 import git_it_kmp.feature.projectlist.generated.resources.project_play_button_description
@@ -125,6 +127,15 @@ fun ProjectListScreen(
                     onDeleteClick = { onIntent(ProjectListIntent.DeleteProjectClick(project.id)) },
                 )
             }
+        }
+
+        if (uiState.projects.isEmpty()) {
+            ProjectListEmptyState(
+                modifier =
+                    Modifier
+                        .align(Alignment.Center)
+                        .padding(horizontal = 20.dp),
+            )
         }
 
         Column(
@@ -239,6 +250,33 @@ private val TOP_BLUR_HEIGHT = 103.dp
 
 /** Figma 프로젝트 삭제 화면의 상단 dim 영역 높이. */
 private val DELETE_MODE_TOP_BLUR_HEIGHT = 151.dp
+
+/**
+ * 등록된 프로젝트가 없을 때 안내 문구를 표시한다.
+ *
+ * @param modifier 외부 배치와 추가 수식자
+ */
+@Composable
+private fun ProjectListEmptyState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(Res.string.project_list_empty_title),
+            color = GitItTheme.colors.grey200,
+            style = GitItTheme.typography.subtitle1,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(Res.string.project_list_empty_description),
+            color = GitItTheme.colors.grey400,
+            style = GitItTheme.typography.body2,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
 
 /**
  * 프로젝트 카드 한 개를 렌더링한다.
