@@ -29,7 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -86,6 +90,30 @@ fun ProjectDetailScreen(
                 .fillMaxSize()
                 .background(GitItTheme.colors.grey700),
     ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(179.dp)
+                    .drawWithCache {
+                        val center = Offset(size.width * 0.71f, -size.height * 0.08f)
+                        val brush =
+                            Brush.radialGradient(
+                                0f to Color(0xFF56718A),
+                                0.5f to Color(0xFF485469),
+                                1f to Color(0xFF3B3749),
+                                center = center,
+                                radius = size.width * 0.73f,
+                            )
+
+                        onDrawBehind {
+                            scale(scaleX = 2f, scaleY = 1f, pivot = center) {
+                                drawRect(brush = brush)
+                            }
+                        }
+                    },
+        )
+
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
             ProjectDetailTopBar(
                 onBackClick = onBackClick,
