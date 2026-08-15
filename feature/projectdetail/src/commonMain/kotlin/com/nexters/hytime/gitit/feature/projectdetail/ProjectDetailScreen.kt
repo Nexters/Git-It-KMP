@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,10 +21,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,11 +33,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassDropdownMenu
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassDropdownMenuItem
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonSize
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonVariant
+import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
+import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
+import com.skydoves.cloudy.Sky
 import git_it_kmp.core.designsystem.generated.resources.Res
 import git_it_kmp.core.designsystem.generated.resources.ic_menu
 import git_it_kmp.core.designsystem.generated.resources.ic_play_circle
@@ -73,6 +79,9 @@ fun ProjectDetailScreen(
     onReviewStartClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val sky = rememberGitItMainNavSky()
+    val dismissMenuInteractionSource = remember { MutableInteractionSource() }
+
     Box(
         modifier =
             modifier
@@ -88,7 +97,7 @@ fun ProjectDetailScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+                modifier = Modifier.fillMaxSize().gitItMainNavSky(sky).padding(horizontal = 20.dp),
                 contentPadding = PaddingValues(bottom = 24.dp),
             ) {
                 item {
@@ -118,13 +127,29 @@ fun ProjectDetailScreen(
             }
         }
 
-        ProjectDetailMoreMenu(
-            expanded = uiState.showMoreMenu,
-            onDismiss = onDismissMoreMenu,
-            onSavedQuestionsClick = onSavedQuestionsClick,
-            onQuestionSolvingShortcutClick = onQuestionSolvingShortcutClick,
-            onDeleteProjectClick = onDeleteProjectClick,
-        )
+        if (uiState.showMoreMenu) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = dismissMenuInteractionSource,
+                            indication = null,
+                            onClick = onDismissMoreMenu,
+                        ),
+            )
+            ProjectDetailMoreMenu(
+                onSavedQuestionsClick = onSavedQuestionsClick,
+                onQuestionSolvingShortcutClick = onQuestionSolvingShortcutClick,
+                onDeleteProjectClick = onDeleteProjectClick,
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 102.dp, end = 20.dp)
+                        .width(160.dp),
+                sky = sky,
+            )
+        }
     }
 }
 
@@ -426,56 +451,31 @@ private fun ReviewCard(onReviewStartClick: () -> Unit) {
 /**
  * 더보기 드롭다운 메뉴.
  *
- * @param expanded 메뉴 노출 여부
- * @param onDismiss 닫기 콜백
  * @param onSavedQuestionsClick 저장한 문제 콜백
  * @param onQuestionSolvingShortcutClick 문제풀이 바로가기 콜백
  * @param onDeleteProjectClick 삭제 콜백
+ * @param modifier 메뉴의 크기와 화면 내 배치를 지정할 수식자
+ * @param sky 뒤쪽 콘텐츠를 흐림 배경으로 읽을 Cloudy 상태
  */
 @Composable
 private fun ProjectDetailMoreMenu(
-    expanded: Boolean,
-    onDismiss: () -> Unit,
     onSavedQuestionsClick: () -> Unit,
     onQuestionSolvingShortcutClick: () -> Unit,
     onDeleteProjectClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    sky: Sky? = null,
 ) {
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismiss,
-        modifier = Modifier.background(GitItTheme.colors.grey600),
+    GitItLiquidGlassDropdownMenu(
+        modifier = modifier,
+        sky = sky,
     ) {
-        MoreMenuItem(text = "저장한 문제", onClick = onSavedQuestionsClick)
-        MoreMenuItem(text = "문제풀이 바로가기", onClick = onQuestionSolvingShortcutClick)
-        MoreMenuItem(
+        GitItLiquidGlassDropdownMenuItem(text = "저장한 문제", onClick = onSavedQuestionsClick)
+        GitItLiquidGlassDropdownMenuItem(text = "GitHub에서 보기", onClick = onQuestionSolvingShortcutClick)
+        GitItLiquidGlassDropdownMenuItem(
             text = "삭제하기",
-            color = GitItTheme.colors.grey300,
+            color = GitItTheme.colors.error,
             onClick = onDeleteProjectClick,
         )
-    }
-}
-
-/**
- * 더보기 메뉴의 개별 항목.
- *
- * @param text 항목 텍스트
- * @param color 텍스트 색상
- * @param onClick 클릭 콜백
- */
-@Composable
-private fun MoreMenuItem(
-    text: String,
-    color: Color = GitItTheme.colors.grey100,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-    ) {
-        Text(text = text, color = color, style = GitItTheme.typography.body3)
     }
 }
 
