@@ -4,9 +4,11 @@ package com.nexters.hytime.gitit.feature.projectlist
  * 프로젝트 리스트 화면의 단일 UI 상태다.
  *
  * @property projects 사용자가 참여 중인 프로젝트 목록
+ * @property pendingDeleteProjectId 삭제 확인 모달에 표시할 프로젝트 식별자. 모달이 닫혀 있으면 null
  */
 data class ProjectListUiState(
     val projects: List<ProjectListItem> = emptyList(),
+    val pendingDeleteProjectId: String? = null,
 )
 
 /**
@@ -51,13 +53,19 @@ sealed interface ProjectListIntent {
     data object DeleteModeBackClick : ProjectListIntent
 
     /**
-     * 삭제 화면에서 프로젝트의 마이너스 버튼 선택.
+     * 삭제 화면에서 프로젝트의 마이너스 버튼 선택으로 확인 모달을 표시한다.
      *
      * @property projectId 삭제할 프로젝트 식별자
      */
     data class DeleteProjectClick(
         val projectId: String,
     ) : ProjectListIntent
+
+    /** 삭제 확인 모달에서 삭제 선택. */
+    data object ConfirmDeleteClick : ProjectListIntent
+
+    /** 삭제 확인 모달에서 취소 또는 바깥 영역 선택. */
+    data object DismissDeleteClick : ProjectListIntent
 
     /**
      * 문제풀이 버튼 선택.
