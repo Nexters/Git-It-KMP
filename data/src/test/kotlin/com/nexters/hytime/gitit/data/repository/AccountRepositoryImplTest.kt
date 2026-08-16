@@ -173,6 +173,18 @@ class AccountRepositoryImplTest {
         assertEquals("", networkClient.requestedPath)
     }
 
+    /** 개발 분야 변경이 전용 경로로 요청하는지 검증한다. */
+    @Test
+    fun updatePosition_성공하면_개발분야경로로요청한다() {
+        val networkClient = LoginFakeNetworkClient("""{"success":true}""")
+
+        val result = runBlocking { AccountRepositoryImpl(networkClient).updatePosition(Position.BACKEND) }
+
+        assertEquals(Unit, result.getOrThrow())
+        assertEquals("/api/v1/members/me/position", networkClient.requestedPath)
+        assertEquals("""{"position":"BACKEND"}""", networkClient.requestBody)
+    }
+
     private companion object {
         private const val SUCCESS_RESPONSE =
             """{"success":true,"data":{"accessToken":"access-token","refreshToken":"refresh-token","needsCuration":true}}"""

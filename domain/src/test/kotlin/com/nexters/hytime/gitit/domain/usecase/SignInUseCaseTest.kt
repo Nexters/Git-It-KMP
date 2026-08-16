@@ -6,6 +6,7 @@ import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
 import com.nexters.hytime.gitit.domain.model.MemberCuration
 import com.nexters.hytime.gitit.domain.model.MemberProfile
+import com.nexters.hytime.gitit.domain.model.Position
 import com.nexters.hytime.gitit.domain.repository.AccountRepository
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
@@ -49,6 +50,8 @@ private class FakeAccountRepository(
     override suspend fun getMemberProfile(): Result<MemberProfile> = error("호출되면 안 됩니다.")
 
     override suspend fun curateMember(curation: MemberCuration): Result<Unit> = error("호출되면 안 됩니다.")
+
+    override suspend fun updatePosition(position: Position): Result<Unit> = error("호출되면 안 됩니다.")
 }
 
 /** 테스트 중 메모리에만 세션을 보관한다. */

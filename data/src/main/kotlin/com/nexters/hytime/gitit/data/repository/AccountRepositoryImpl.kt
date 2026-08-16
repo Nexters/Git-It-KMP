@@ -5,12 +5,14 @@ import com.nexters.hytime.gitit.data.dto.DeviceInfoRequest
 import com.nexters.hytime.gitit.data.dto.EmptyApiResponse
 import com.nexters.hytime.gitit.data.dto.LoginApiResponse
 import com.nexters.hytime.gitit.data.dto.MemberProfileApiResponse
+import com.nexters.hytime.gitit.data.dto.PositionRequest
 import com.nexters.hytime.gitit.data.dto.SignInWithGoogleRequest
 import com.nexters.hytime.gitit.data.mapping.toDomain
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
 import com.nexters.hytime.gitit.domain.model.MemberCuration
 import com.nexters.hytime.gitit.domain.model.MemberProfile
+import com.nexters.hytime.gitit.domain.model.Position
 import com.nexters.hytime.gitit.domain.repository.AccountRepository
 import com.nexters.hytime.gitit.domain.util.runCatchingResult
 import com.nexters.hytime.gitit.network.api.NetworkClient
@@ -85,6 +87,15 @@ class AccountRepositoryImpl(
                 ).requireSuccess("회원 큐레이션 등록 응답이 올바르지 않습니다.")
         }
 
+    override suspend fun updatePosition(position: Position): Result<Unit> =
+        runCatchingResult {
+            networkClient
+                .post<PositionRequest, EmptyApiResponse>(
+                    PATH_POSITION,
+                    PositionRequest(position.name),
+                ).requireSuccess("개발 분야 변경 응답이 올바르지 않습니다.")
+        }
+
     /**
      * 본문 없는 성공 응답을 검증한다.
      *
@@ -102,5 +113,6 @@ class AccountRepositoryImpl(
         private const val PATH_MEMBER_PROFILE = "/api/v1/members/me"
         private const val PATH_REGISTER_DEVICE = "/api/v1/members/me/device"
         private const val PATH_CURATION = "/api/v1/members/me/curation"
+        private const val PATH_POSITION = "/api/v1/members/me/position"
     }
 }

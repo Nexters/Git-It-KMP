@@ -4,6 +4,7 @@ import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
 import com.nexters.hytime.gitit.domain.model.MemberCuration
 import com.nexters.hytime.gitit.domain.model.MemberProfile
+import com.nexters.hytime.gitit.domain.model.Position
 
 /**
  * 로그인한 사용자의 인증과 회원 정보를 다루는 도메인 리포지토리 계약이다.
@@ -45,4 +46,12 @@ interface AccountRepository {
      * @return 저장 결과. 성공 시 [Unit], 실패 시 예외를 담는다
      */
     suspend fun curateMember(curation: MemberCuration): Result<Unit>
+
+    /**
+     * 개발 분야만 변경한다. 개발 수준에는 영향을 주지 않는다.
+     *
+     * @param position 새로 선택한 개발 분야
+     * @return 변경 결과. 성공 시 [Unit], 실패 시 예외를 담는다
+     */
+    suspend fun updatePosition(position: Position): Result<Unit>
 }
