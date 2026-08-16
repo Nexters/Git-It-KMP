@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.collectLatest
 /**
  * 프로젝트 리스트 화면의 진입점(Route)이다.
  *
- * @param onBackClick 이전 화면으로 이동하는 콜백. null이면 뒤로가기 버튼을 표시하지 않는다
+ * @param isDeleteMode 프로젝트 삭제 목적지인지 여부
+ * @param onNavigateToProjectDelete 프로젝트 삭제 화면으로 이동하는 콜백
+ * @param onBackClick 현재 화면을 닫는 콜백
  * @param onNavigateToHome 홈 화면으로 이동하는 콜백
  * @param onNavigateToMy 마이 화면으로 이동하는 콜백
  * @param onNavigateToBookmark 저장한 문제 화면으로 이동하는 콜백
@@ -18,7 +20,9 @@ import kotlinx.coroutines.flow.collectLatest
  */
 @Composable
 fun ProjectListRoute(
-    onBackClick: (() -> Unit)?,
+    isDeleteMode: Boolean = false,
+    onNavigateToProjectDelete: () -> Unit,
+    onBackClick: () -> Unit,
     onNavigateToHome: () -> Unit,
     onNavigateToMy: () -> Unit,
     onNavigateToBookmark: () -> Unit,
@@ -30,7 +34,8 @@ fun ProjectListRoute(
     LaunchedEffect(Unit) {
         viewModel.sideEffects.collectLatest { sideEffect ->
             when (sideEffect) {
-                ProjectListSideEffect.NavigateBack -> onBackClick?.invoke()
+                ProjectListSideEffect.NavigateToProjectDelete -> onNavigateToProjectDelete()
+                ProjectListSideEffect.NavigateBack -> onBackClick()
                 ProjectListSideEffect.NavigateToHome -> onNavigateToHome()
                 ProjectListSideEffect.NavigateToMy -> onNavigateToMy()
                 ProjectListSideEffect.NavigateToBookmark -> onNavigateToBookmark()
@@ -41,7 +46,7 @@ fun ProjectListRoute(
 
     ProjectListScreen(
         uiState = uiState,
+        isDeleteMode = isDeleteMode,
         onIntent = viewModel::onIntent,
-        showBackButton = onBackClick != null,
     )
 }

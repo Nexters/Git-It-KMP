@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 /**
  * 프로젝트 리스트 화면의 상태와 사용자 의도를 관리한다.
@@ -33,13 +34,36 @@ class ProjectListViewModel : ViewModel() {
      */
     fun onIntent(intent: ProjectListIntent) {
         when (intent) {
-            ProjectListIntent.BackClick -> emit(ProjectListSideEffect.NavigateBack)
             ProjectListIntent.HomeTabClick -> emit(ProjectListSideEffect.NavigateToHome)
             ProjectListIntent.ProjectTabClick -> Unit
             ProjectListIntent.SavedTabClick -> emit(ProjectListSideEffect.NavigateToBookmark)
             ProjectListIntent.MyTabClick -> emit(ProjectListSideEffect.NavigateToMy)
+            ProjectListIntent.DeleteMenuClick -> emit(ProjectListSideEffect.NavigateToProjectDelete)
+            ProjectListIntent.DeleteModeBackClick -> emit(ProjectListSideEffect.NavigateBack)
+            is ProjectListIntent.DeleteProjectClick -> {
+                setState { copy(pendingDeleteProjectId = intent.projectId) }
+            }
+            ProjectListIntent.ConfirmDeleteClick ->
+                _uiState.value.pendingDeleteProjectId?.let { projectId ->
+                    setState {
+                        copy(
+                            projects = projects.filterNot { it.id == projectId },
+                            pendingDeleteProjectId = null,
+                        )
+                    }
+                }
+            ProjectListIntent.DismissDeleteClick -> setState { copy(pendingDeleteProjectId = null) }
             is ProjectListIntent.PlayProjectClick -> emit(ProjectListSideEffect.NavigateToQuiz(intent.projectId))
         }
+    }
+
+    /**
+     * 현재 화면 상태를 원자적으로 갱신한다.
+     *
+     * @param reducer 이전 상태를 새 상태로 변환하는 함수
+     */
+    private fun setState(reducer: ProjectListUiState.() -> ProjectListUiState) {
+        _uiState.update(reducer)
     }
 
     private fun emit(sideEffect: ProjectListSideEffect) {
@@ -57,8 +81,6 @@ private val dummyProjects =
             setLabel = "Set 1",
             recentSetTitle = "Compose 핵심 개념",
             progress = 65,
-            footerText = "설정",
-            showPlayButton = true,
         ),
         ProjectListItem(
             id = "now-in-android-2",
