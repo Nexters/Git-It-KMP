@@ -6,53 +6,18 @@ import com.nexters.hytime.gitit.domain.model.CareerLevel
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.MemberCuration
 import com.nexters.hytime.gitit.domain.model.Position
-import com.nexters.hytime.gitit.network.api.NetworkClient
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-/** [AccountRepositoryImpl]의 인증·회원 API 계약과 응답 매핑을 검증한다. */
-class AccountRepositoryImplTest {
-    /** 실제 명세의 경로와 필드명으로 요청하고 로그인 세션을 반환하는지 검증한다. */
-    @Test
-    fun signInWithGoogle_successUsesOpenApiContractAndMapsSession() {
-        val networkClient = LoginFakeNetworkClient(SUCCESS_RESPONSE)
-
-        val session = runBlocking { AccountRepositoryImpl(networkClient).signInWithGoogle("google-token") }.getOrThrow()
-
-        assertEquals("/api/v1/auth/login/google", networkClient.requestedPath)
-        assertEquals("""{"idToken":"google-token"}""", networkClient.requestBody)
-        assertEquals(false, networkClient.requestedAuthenticated)
-        assertEquals("access-token", session.accessToken)
-        assertEquals("refresh-token", session.refreshToken)
-        assertEquals(true, session.needsCuration)
-    }
-
-    /** 실패 응답, 누락 데이터, 빈 토큰을 로그인 실패로 처리하는지 검증한다. */
-    @Test
-    fun signInWithGoogle_invalidResponseReturnsFailure() {
-        val invalidResponses =
-            listOf(
-                """{"success":false,"data":{"accessToken":"access-token","refreshToken":"refresh-token","needsCuration":false}}""",
-                """{"success":true,"data":null}""",
-                """{"success":true,"data":{"accessToken":"","refreshToken":"refresh-token","needsCuration":false}}""",
-                """{"success":true,"data":{"accessToken":"access-token","refreshToken":" ","needsCuration":false}}""",
-            )
-
-        invalidResponses.forEach { response ->
-            val result = runBlocking { AccountRepositoryImpl(LoginFakeNetworkClient(response)).signInWithGoogle("token") }
-            assertTrue(result.isFailure, response)
-        }
-    }
-
+/** [MemberRepositoryImpl]의 회원 API 계약과 응답 매핑을 검증한다. */
+class MemberRepositoryImplTest {
     /** 기기 정보 등록 API에 인증된 요청과 OpenAPI 필드명을 사용하는지 검증한다. */
     @Test
     fun registerDevice_알림이활성화되면_fid를전송한다() {
-        val networkClient = LoginFakeNetworkClient("""{"success":true}""")
+        val networkClient = FakeNetworkClient()
         val deviceInfo =
             DeviceInfo(
                 deviceId = "firebase-installation-id",
@@ -62,7 +27,7 @@ class AccountRepositoryImplTest {
                 deviceToken = "firebase-installation-id",
             )
 
-        val result = runBlocking { AccountRepositoryImpl(networkClient).registerDevice(deviceInfo) }
+        val result = runBlocking { MemberRepositoryImpl(networkClient).registerDevice(deviceInfo) }
 
         assertEquals(Unit, result.getOrThrow())
         assertEquals("/api/v1/members/me/device", networkClient.requestedPath)
@@ -76,7 +41,7 @@ class AccountRepositoryImplTest {
     /** 알림이 비활성화되면 deviceToken을 생략하고 성공하지 않은 응답을 실패로 변환하는지 검증한다. */
     @Test
     fun registerDevice_알림이비활성화되고응답이실패면_토큰없이실패를반환한다() {
-        val networkClient = LoginFakeNetworkClient("""{"success":false,"message":"등록 실패"}""")
+        val networkClient = FakeNetworkClient("""{"success":false,"message":"등록 실패"}""")
         val deviceInfo =
             DeviceInfo(
                 deviceId = "firebase-installation-id",
@@ -86,7 +51,7 @@ class AccountRepositoryImplTest {
                 deviceToken = null,
             )
 
-        val result = runBlocking { AccountRepositoryImpl(networkClient).registerDevice(deviceInfo) }
+        val result = runBlocking { MemberRepositoryImpl(networkClient).registerDevice(deviceInfo) }
 
         assertTrue(result.isFailure)
         assertEquals(
@@ -98,10 +63,11 @@ class AccountRepositoryImplTest {
     /** 프로필 조회가 인증된 GET을 보내고 응답을 도메인 모델로 매핑하는지 검증한다. */
     @Test
     fun getMemberProfile_성공하면_인증된GET으로조회하고도메인모델로매핑한다() {
-        val networkClient = LoginFakeNetworkClient(PROFILE_RESPONSE)
+        val networkClient = FakeNetworkClient(PROFILE_RESPONSE)
 
-        val profile = runBlocking { AccountRepositoryImpl(networkClient).getMemberProfile() }.getOrThrow()
+        val profile = runBlocking { MemberRepositoryImpl(networkClient).getMemberProfile() }.getOrThrow()
 
+        assertEquals("GET", networkClient.requestedMethod)
         assertEquals("/api/v1/members/me", networkClient.requestedPath)
         assertEquals(true, networkClient.requestedAuthenticated)
         assertEquals("김이박", profile.name)
@@ -119,12 +85,12 @@ class AccountRepositoryImplTest {
     @Test
     fun getMemberProfile_모르는열거형이면_null로매핑한다() {
         val networkClient =
-            LoginFakeNetworkClient(
+            FakeNetworkClient(
                 """{"success":true,"data":{"name":null,"email":null,"position":"DEVOPS","careerLevel":null,""" +
                     """"thisWeekSolvedCount":0,"thisMonthSolvedCount":0,"streakDays":0,"weeklyChart":[]}}""",
             )
 
-        val profile = runBlocking { AccountRepositoryImpl(networkClient).getMemberProfile() }.getOrThrow()
+        val profile = runBlocking { MemberRepositoryImpl(networkClient).getMemberProfile() }.getOrThrow()
 
         assertNull(profile.name)
         assertNull(profile.position)
@@ -142,7 +108,7 @@ class AccountRepositoryImplTest {
             )
 
         invalidResponses.forEach { response ->
-            val result = runBlocking { AccountRepositoryImpl(LoginFakeNetworkClient(response)).getMemberProfile() }
+            val result = runBlocking { MemberRepositoryImpl(FakeNetworkClient(response)).getMemberProfile() }
             assertTrue(result.isFailure, response)
         }
     }
@@ -150,10 +116,10 @@ class AccountRepositoryImplTest {
     /** 큐레이션 등록이 열거형 이름을 그대로 전송하는지 검증한다. */
     @Test
     fun curateMember_성공하면_열거형이름으로요청한다() {
-        val networkClient = LoginFakeNetworkClient("""{"success":true}""")
+        val networkClient = FakeNetworkClient()
         val curation = MemberCuration(name = "김이박", position = Position.ANDROID, careerLevel = CareerLevel.JUNIOR)
 
-        val result = runBlocking { AccountRepositoryImpl(networkClient).curateMember(curation) }
+        val result = runBlocking { MemberRepositoryImpl(networkClient).curateMember(curation) }
 
         assertEquals(Unit, result.getOrThrow())
         assertEquals("/api/v1/members/me/curation", networkClient.requestedPath)
@@ -164,21 +130,21 @@ class AccountRepositoryImplTest {
     /** 이름이 비어 있으면 요청을 보내지 않고 실패로 처리하는지 검증한다. */
     @Test
     fun curateMember_이름이비어있으면_요청하지않고실패한다() {
-        val networkClient = LoginFakeNetworkClient("""{"success":true}""")
+        val networkClient = FakeNetworkClient()
         val curation = MemberCuration(name = " ", position = Position.BACKEND, careerLevel = CareerLevel.ENTRY)
 
-        val result = runBlocking { AccountRepositoryImpl(networkClient).curateMember(curation) }
+        val result = runBlocking { MemberRepositoryImpl(networkClient).curateMember(curation) }
 
         assertTrue(result.isFailure)
-        assertEquals("", networkClient.requestedPath)
+        assertEquals("", networkClient.requestedMethod)
     }
 
     /** 개발 분야 변경이 전용 경로로 요청하는지 검증한다. */
     @Test
     fun updatePosition_성공하면_개발분야경로로요청한다() {
-        val networkClient = LoginFakeNetworkClient("""{"success":true}""")
+        val networkClient = FakeNetworkClient()
 
-        val result = runBlocking { AccountRepositoryImpl(networkClient).updatePosition(Position.BACKEND) }
+        val result = runBlocking { MemberRepositoryImpl(networkClient).updatePosition(Position.BACKEND) }
 
         assertEquals(Unit, result.getOrThrow())
         assertEquals("/api/v1/members/me/position", networkClient.requestedPath)
@@ -188,9 +154,9 @@ class AccountRepositoryImplTest {
     /** 개발 수준 변경이 전용 경로로 요청하는지 검증한다. */
     @Test
     fun updateCareerLevel_성공하면_개발수준경로로요청한다() {
-        val networkClient = LoginFakeNetworkClient("""{"success":true}""")
+        val networkClient = FakeNetworkClient()
 
-        val result = runBlocking { AccountRepositoryImpl(networkClient).updateCareerLevel(CareerLevel.SENIOR) }
+        val result = runBlocking { MemberRepositoryImpl(networkClient).updateCareerLevel(CareerLevel.SENIOR) }
 
         assertEquals(Unit, result.getOrThrow())
         assertEquals("/api/v1/members/me/career-level", networkClient.requestedPath)
@@ -203,75 +169,18 @@ class AccountRepositoryImplTest {
         val failureResponse = """{"success":false,"code":"MEMBER-001","message":"회원을 찾을 수 없습니다"}"""
 
         val positionResult =
-            runBlocking { AccountRepositoryImpl(LoginFakeNetworkClient(failureResponse)).updatePosition(Position.IOS) }
+            runBlocking { MemberRepositoryImpl(FakeNetworkClient(failureResponse)).updatePosition(Position.IOS) }
         val careerLevelResult =
-            runBlocking { AccountRepositoryImpl(LoginFakeNetworkClient(failureResponse)).updateCareerLevel(CareerLevel.MIDDLE) }
+            runBlocking { MemberRepositoryImpl(FakeNetworkClient(failureResponse)).updateCareerLevel(CareerLevel.MIDDLE) }
 
         assertTrue(positionResult.isFailure)
         assertTrue(careerLevelResult.isFailure)
     }
 
     private companion object {
-        private const val SUCCESS_RESPONSE =
-            """{"success":true,"data":{"accessToken":"access-token","refreshToken":"refresh-token","needsCuration":true}}"""
-
         private const val PROFILE_RESPONSE =
             """{"success":true,"data":{"name":"김이박","email":"gitit@example.com","position":"ANDROID","careerLevel":"JUNIOR",""" +
                 """"thisWeekSolvedCount":3,"thisMonthSolvedCount":12,"streakDays":2,""" +
                 """"weeklyChart":[{"dayLabel":"월","count":1},{"dayLabel":"화","count":2}]}}"""
     }
-}
-
-/** 테스트 응답을 역직렬화하며 마지막 요청을 기록한다. */
-private class LoginFakeNetworkClient(
-    private val responseBody: String,
-) : NetworkClient {
-    /** 마지막으로 요청한 API 경로다. */
-    var requestedPath: String = ""
-
-    /** 마지막으로 직렬화한 요청 본문이다. */
-    var requestBody: String = ""
-
-    /** 마지막 요청에 액세스 토큰 인증이 설정됐는지 여부다. */
-    var requestedAuthenticated: Boolean = true
-
-    override suspend fun <Res : Any> get(
-        path: String,
-        queryParameters: Map<String, String>,
-        authenticated: Boolean,
-        responseSerializer: KSerializer<Res>,
-    ): Res {
-        requestedPath = path
-        requestedAuthenticated = authenticated
-        return Json.decodeFromString(responseSerializer, responseBody)
-    }
-
-    override suspend fun <Res : Any> getAbsolute(
-        url: String,
-        headers: Map<String, String>,
-        authenticated: Boolean,
-        responseSerializer: KSerializer<Res>,
-    ): Res = error("호출되면 안 됩니다.")
-
-    override suspend fun <Req : Any, Res : Any> post(
-        path: String,
-        body: Req,
-        authenticated: Boolean,
-        requestSerializer: KSerializer<Req>,
-        responseSerializer: KSerializer<Res>,
-    ): Res {
-        requestedPath = path
-        requestBody = Json.encodeToString(requestSerializer, body)
-        requestedAuthenticated = authenticated
-        return Json.decodeFromString(
-            responseSerializer,
-            responseBody,
-        )
-    }
-
-    override suspend fun <Res : Any> delete(
-        path: String,
-        authenticated: Boolean,
-        responseSerializer: KSerializer<Res>,
-    ): Res = error("호출되면 안 됩니다.")
 }

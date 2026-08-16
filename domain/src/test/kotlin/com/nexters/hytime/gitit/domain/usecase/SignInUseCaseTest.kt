@@ -2,13 +2,8 @@ package com.nexters.hytime.gitit.domain.usecase
 
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
-import com.nexters.hytime.gitit.domain.model.CareerLevel
-import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
-import com.nexters.hytime.gitit.domain.model.MemberCuration
-import com.nexters.hytime.gitit.domain.model.MemberProfile
-import com.nexters.hytime.gitit.domain.model.Position
-import com.nexters.hytime.gitit.domain.repository.AccountRepository
+import com.nexters.hytime.gitit.domain.repository.AuthRepository
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,7 +21,7 @@ class SignInUseCaseTest {
                     object : AuthTokenProvider {
                         override suspend fun obtainToken(): String = "google-token"
                     },
-                accountRepository = FakeAccountRepository(session),
+                authRepository = FakeAuthRepository(session),
                 sessionStorage = storage,
             )
 
@@ -40,21 +35,11 @@ class SignInUseCaseTest {
     }
 }
 
-/** 로그인만 성공으로 응답하고 나머지 회원 API는 호출되지 않는지 확인한다. */
-private class FakeAccountRepository(
+/** 로그인 성공 세션을 그대로 돌려주는 테스트용 리포지토리다. */
+private class FakeAuthRepository(
     private val session: LoginSession,
-) : AccountRepository {
+) : AuthRepository {
     override suspend fun signInWithGoogle(idToken: String): Result<LoginSession> = Result.success(session)
-
-    override suspend fun registerDevice(deviceInfo: DeviceInfo): Result<Unit> = Result.success(Unit)
-
-    override suspend fun getMemberProfile(): Result<MemberProfile> = error("호출되면 안 됩니다.")
-
-    override suspend fun curateMember(curation: MemberCuration): Result<Unit> = error("호출되면 안 됩니다.")
-
-    override suspend fun updatePosition(position: Position): Result<Unit> = error("호출되면 안 됩니다.")
-
-    override suspend fun updateCareerLevel(careerLevel: CareerLevel): Result<Unit> = error("호출되면 안 됩니다.")
 }
 
 /** 테스트 중 메모리에만 세션을 보관한다. */

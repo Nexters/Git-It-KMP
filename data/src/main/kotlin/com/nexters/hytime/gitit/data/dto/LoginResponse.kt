@@ -3,20 +3,6 @@ package com.nexters.hytime.gitit.data.dto
 import kotlinx.serialization.Serializable
 
 /**
- * 공통 API 응답
- *
- * @property success 요청 성공 여부
- * @property data 성공 시 반환되는 로그인 데이터
- * @property message 실패 원인을 설명하는 서버 메시지
- */
-@Serializable
-internal data class LoginApiResponse(
-    val success: Boolean,
-    val data: LoginResponse? = null,
-    val message: String? = null,
-)
-
-/**
  * 백엔드가 Google 로그인 성공 시 반환하는 토큰 정보다.
  *
  * @property accessToken 인증 API에 사용할 토큰

@@ -3,22 +3,6 @@ package com.nexters.hytime.gitit.data.dto
 import kotlinx.serialization.Serializable
 
 /**
- * 회원 프로필 조회 API 응답이다.
- *
- * @property success 요청 성공 여부
- * @property data 성공 시 반환되는 프로필 데이터
- * @property code 실패 원인을 구분하는 서버 오류 코드
- * @property message 사용자에게 노출하지 않는 서버 오류 설명
- */
-@Serializable
-internal data class MemberProfileApiResponse(
-    val success: Boolean,
-    val data: MemberProfileResponse? = null,
-    val code: String? = null,
-    val message: String? = null,
-)
-
-/**
  * 마이 화면에 필요한 프로필과 학습 현황이다.
  *
  * 개발 분야와 개발 수준은 서버가 값을 추가해도 역직렬화가 깨지지 않도록 문자열로 받고,
