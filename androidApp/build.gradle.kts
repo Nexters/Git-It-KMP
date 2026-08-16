@@ -53,6 +53,15 @@ android {
         buildConfig = true
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = localProperty("release.storeFile").takeIf(String::isNotEmpty)?.let(rootProject::file)
+            storePassword = localProperty("release.storePassword")
+            keyAlias = localProperty("release.keyAlias")
+            keyPassword = localProperty("release.keyPassword")
+        }
+    }
+
     defaultConfig {
         applicationId = "com.nexters.hytime.gitit"
         versionCode = 1
@@ -70,7 +79,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }
