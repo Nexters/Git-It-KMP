@@ -64,6 +64,8 @@ fun GitItLiquidGlassDropdownMenu(
             shape = DROPDOWN_MENU_SHAPE,
             blurRadius = DROPDOWN_MENU_BLUR_RADIUS,
             tint = Color.Transparent,
+            refraction = 0.5f,
+            curve = 1.2f,
         ) {
             menuContent()
         }

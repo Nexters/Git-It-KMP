@@ -42,6 +42,10 @@ sealed interface AppRoute : NavKey {
     @Serializable
     data object Settings : AppRoute
 
+    /** 계정 삭제 전 주의사항을 안내하는 화면이다. */
+    @Serializable
+    data object AccountDelete : AppRoute
+
     /**
      * 사용자가 불러온 프로젝트 목록 화면이다.
      */

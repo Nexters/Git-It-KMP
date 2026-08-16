@@ -72,6 +72,8 @@ import git_it_kmp.feature.projectlist.generated.resources.project_delete_cancel
 import git_it_kmp.feature.projectlist.generated.resources.project_delete_confirm
 import git_it_kmp.feature.projectlist.generated.resources.project_delete_sheet_description
 import git_it_kmp.feature.projectlist.generated.resources.project_delete_sheet_title
+import git_it_kmp.feature.projectlist.generated.resources.project_list_empty_description
+import git_it_kmp.feature.projectlist.generated.resources.project_list_empty_title
 import git_it_kmp.feature.projectlist.generated.resources.project_list_title
 import git_it_kmp.feature.projectlist.generated.resources.project_menu_button_description
 import git_it_kmp.feature.projectlist.generated.resources.project_play_button_description
@@ -121,10 +123,20 @@ fun ProjectListScreen(
                 ProjectCard(
                     item = project,
                     isDeleteMode = isDeleteMode,
+                    onClick = { onIntent(ProjectListIntent.ProjectClick(project.id)) },
                     onPlayClick = { onIntent(ProjectListIntent.PlayProjectClick(project.id)) },
                     onDeleteClick = { onIntent(ProjectListIntent.DeleteProjectClick(project.id)) },
                 )
             }
+        }
+
+        if (uiState.projects.isEmpty()) {
+            ProjectListEmptyState(
+                modifier =
+                    Modifier
+                        .align(Alignment.Center)
+                        .padding(horizontal = 20.dp),
+            )
         }
 
         Column(
@@ -241,10 +253,38 @@ private val TOP_BLUR_HEIGHT = 103.dp
 private val DELETE_MODE_TOP_BLUR_HEIGHT = 151.dp
 
 /**
+ * 등록된 프로젝트가 없을 때 안내 문구를 표시한다.
+ *
+ * @param modifier 외부 배치와 추가 수식자
+ */
+@Composable
+private fun ProjectListEmptyState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(Res.string.project_list_empty_title),
+            color = GitItTheme.colors.grey200,
+            style = GitItTheme.typography.subtitle1,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(Res.string.project_list_empty_description),
+            color = GitItTheme.colors.grey400,
+            style = GitItTheme.typography.body2,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+/**
  * 프로젝트 카드 한 개를 렌더링한다.
  *
  * @param item 카드에 표시할 프로젝트 정보
  * @param isDeleteMode 진행 정보 대신 삭제 버튼을 표시하는지 여부
+ * @param onClick 프로젝트 상세 화면 이동을 요청하는 콜백
  * @param onPlayClick 문제풀이 버튼 클릭 콜백
  * @param onDeleteClick 프로젝트 삭제 버튼 클릭 콜백
  * @param modifier 카드의 외부 배치와 추가 수식자
@@ -253,6 +293,7 @@ private val DELETE_MODE_TOP_BLUR_HEIGHT = 151.dp
 private fun ProjectCard(
     item: ProjectListItem,
     isDeleteMode: Boolean,
+    onClick: () -> Unit,
     onPlayClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -264,6 +305,7 @@ private fun ProjectCard(
                 .wrapContentHeight()
                 .clip(RoundedCornerShape(12.dp))
                 .background(GitItTheme.colors.grey600)
+                .then(if (isDeleteMode) Modifier else Modifier.clickable(role = Role.Button, onClick = onClick))
                 .padding(start = 18.dp, top = 16.dp, end = 18.dp, bottom = if (isDeleteMode) 18.dp else 16.dp),
     ) {
         Row(verticalAlignment = Alignment.Top) {

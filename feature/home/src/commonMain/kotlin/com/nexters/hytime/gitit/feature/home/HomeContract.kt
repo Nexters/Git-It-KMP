@@ -92,6 +92,15 @@ sealed interface HomeSideEffect {
     data object NavigateToBookmark : HomeSideEffect
 
     /**
+     * 프로젝트 상세 화면으로 이동한다.
+     *
+     * @property projectId 상세 정보를 표시할 프로젝트 식별자
+     */
+    data class NavigateToProjectDetail(
+        val projectId: String,
+    ) : HomeSideEffect
+
+    /**
      * 문제 풀이 화면으로 이동한다.
      *
      * @property projectId 문제를 불러올 프로젝트 식별자

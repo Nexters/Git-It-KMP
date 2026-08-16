@@ -15,6 +15,7 @@ import org.koin.core.parameter.parametersOf
  *
  * @param projectId 네비게이션 인자로 전달된 프로젝트 식별자
  * @param onBackClick 뒤로가기 이벤트 콜백
+ * @param onNavigateToHome 홈 화면으로 이동하는 콜백
  * @param onNavigateToSavedQuestions 저장한 문제 화면으로 이동하는 콜백
  * @param onNavigateToLearningSet 선택한 학습 세트의 문제 풀이 화면으로 이동하는 콜백
  * @param onNavigateToQuiz 현재 프로젝트의 문제 풀이 화면으로 이동하는 콜백
@@ -23,6 +24,7 @@ import org.koin.core.parameter.parametersOf
 fun ProjectDetailRoute(
     projectId: String,
     onBackClick: () -> Unit,
+    onNavigateToHome: () -> Unit,
     onNavigateToSavedQuestions: () -> Unit,
     onNavigateToLearningSet: (String, String) -> Unit,
     onNavigateToQuiz: (String) -> Unit,
@@ -37,6 +39,7 @@ fun ProjectDetailRoute(
         viewModel.events.collectLatest { event ->
             when (event) {
                 ProjectDetailEvent.NavigateBack -> onBackClick()
+                ProjectDetailEvent.NavigateToHome -> onNavigateToHome()
                 ProjectDetailEvent.NavigateToSavedQuestions -> onNavigateToSavedQuestions()
                 is ProjectDetailEvent.NavigateToQuiz -> onNavigateToQuiz(event.projectId)
                 is ProjectDetailEvent.NavigateToLearningSet -> onNavigateToLearningSet(projectId, event.setId)
@@ -51,9 +54,7 @@ fun ProjectDetailRoute(
         onDismissMoreMenu = viewModel::onDismissMoreMenu,
         onSavedQuestionsClick = viewModel::onSavedQuestionsClick,
         onQuestionSolvingClick = viewModel::onQuestionSolvingClick,
-        onQuestionSolvingShortcutClick = viewModel::onQuestionSolvingShortcutClick,
         onDeleteProjectClick = viewModel::onDeleteProjectClick,
         onLearningSetClick = viewModel::onLearningSetClick,
-        onReviewStartClick = viewModel::onReviewStartClick,
     )
 }

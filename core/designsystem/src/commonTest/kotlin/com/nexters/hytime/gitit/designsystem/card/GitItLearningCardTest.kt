@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.designsystem.card
 
+import com.nexters.hytime.gitit.designsystem.defaultGitItColors
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -12,5 +13,24 @@ class GitItLearningCardTest {
         assertEquals(0.5f, normalizedProgress(0.5f))
         assertEquals(1f, normalizedProgress(1.1f))
         assertEquals(0f, normalizedProgress(Float.NaN))
+    }
+
+    /** 카드 배경색별 내부 요소가 Figma 색상 조합으로 매핑되는지 검증한다. */
+    @Test
+    fun resolveLearningCardColors_backgroundColors_returnsFigmaColors() {
+        val colors = defaultGitItColors
+
+        assertEquals(
+            LearningCardColors(colors.grey200, colors.purple200, colors.purple400, colors.purple400, colors.grey100),
+            resolveLearningCardColors(colors.purple300, colors),
+        )
+        assertEquals(
+            LearningCardColors(colors.grey500, colors.grey200, colors.blue200, colors.blue200, colors.grey500),
+            resolveLearningCardColors(colors.blue100, colors),
+        )
+        assertEquals(
+            LearningCardColors(colors.grey400, colors.purple300, colors.blue400, colors.blue400, colors.grey100),
+            resolveLearningCardColors(colors.blue500, colors),
+        )
     }
 }

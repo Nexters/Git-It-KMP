@@ -5,6 +5,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.nexters.hytime.gitit.feature.bookmark.BookmarkRoute
 import com.nexters.hytime.gitit.feature.home.HomeRoute
+import com.nexters.hytime.gitit.feature.my.AccountDeleteRoute
 import com.nexters.hytime.gitit.feature.my.MyRoute
 import com.nexters.hytime.gitit.feature.my.SettingsScreen
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
@@ -45,6 +46,7 @@ actual fun AppNavHost() {
                 onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                onNavigateToProjectDetail = { projectId -> backStack.add(AppRoute.ProjectDetail(projectId)) },
                 onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
             )
         }
@@ -52,6 +54,12 @@ actual fun AppNavHost() {
             SettingsScreen(
                 onBackClick = { backStack.removeLastOrNull() },
                 onPolicyClick = { uriHandler.openUri(POLICY_URL) },
+                onDeleteAccountClick = { backStack.add(AppRoute.AccountDelete) },
+            )
+        AppRoute.AccountDelete ->
+            AccountDeleteRoute(
+                onBackClick = { backStack.removeLastOrNull() },
+                onDeleteAccountClick = {},
             )
         AppRoute.Bookmark -> {
             BookmarkRoute(
@@ -75,6 +83,7 @@ actual fun AppNavHost() {
                 onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                onNavigateToProjectDetail = { projectId -> backStack.add(AppRoute.ProjectDetail(projectId)) },
                 onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
             )
         }
@@ -86,6 +95,7 @@ actual fun AppNavHost() {
                 onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                 onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                 onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                onNavigateToProjectDetail = {},
                 onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
             )
         }
@@ -93,6 +103,7 @@ actual fun AppNavHost() {
             ProjectDetailRoute(
                 projectId = route.projectId,
                 onBackClick = { backStack.removeLastOrNull() },
+                onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                 onNavigateToSavedQuestions = {},
                 onNavigateToLearningSet = { projectId, setId -> backStack.add(AppRoute.Quiz(projectId, setId)) },
                 onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },

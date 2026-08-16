@@ -7,16 +7,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nexters.hytime.gitit.designsystem.GitItColors
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import git_it_kmp.core.designsystem.generated.resources.Res
 import git_it_kmp.core.designsystem.generated.resources.ic_play_learning
@@ -60,20 +62,23 @@ fun GitItLearningCard(
     backgroundColor: Color = GitItTheme.colors.purple300,
     playContentDescription: String = "재생",
 ) {
-    Box(
+    val cardColors = resolveLearningCardColors(backgroundColor, GitItTheme.colors)
+
+    Column(
         modifier =
             modifier
                 .size(width = 154.dp, height = 192.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(backgroundColor)
-                .clickable(role = Role.Button, onClick = onCardClick),
+                .clickable(role = Role.Button, onClick = onCardClick)
+                .padding(top = 16.dp, bottom = 18.dp),
     ) {
         Row(
             modifier =
                 Modifier
-                    .offset(x = 13.dp, y = 17.dp)
-                    .width(132.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    .fillMaxWidth()
+                    .padding(start = 14.dp, end = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top,
         ) {
             Column(
@@ -89,7 +94,7 @@ fun GitItLearningCard(
                 )
                 Text(
                     text = technologies,
-                    color = GitItTheme.colors.grey200,
+                    color = cardColors.technologiesColor,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     style = GitItTheme.typography.caption2,
@@ -102,59 +107,95 @@ fun GitItLearningCard(
             )
         }
 
-        Column(
+        Box(
             modifier =
                 Modifier
-                    .offset(x = 13.dp, y = 119.dp)
-                    .width(128.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+                    .padding(start = 14.dp, end = 14.dp, top = 12.dp)
+                    .fillMaxWidth()
+                    .height(5.dp)
+                    .clip(RoundedCornerShape(99.dp))
+                    .background(cardColors.trackColor),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Box(
-                    modifier =
-                        Modifier
-                            .height(19.dp)
-                            .clip(RoundedCornerShape(99.dp))
-                            .background(GitItTheme.colors.purple400)
-                            .padding(horizontal = 5.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = setLabel,
-                        color = GitItTheme.colors.grey100,
-                        maxLines = 1,
-                        style = GitItTheme.typography.caption2,
-                    )
-                }
-                Text(
-                    text = description,
-                    modifier = Modifier.fillMaxWidth(),
-                    color = GitItTheme.colors.grey100,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = GitItTheme.typography.caption1,
-                )
-            }
-
             Box(
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .height(5.dp)
+                        .fillMaxWidth(normalizedProgress(progress))
+                        .fillMaxHeight()
+                        .background(cardColors.indicatorColor),
+            )
+        }
+
+        Spacer(Modifier.weight(1f))
+
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .height(19.dp)
                         .clip(RoundedCornerShape(99.dp))
-                        .background(GitItTheme.colors.purple200),
+                        .background(cardColors.badgeColor)
+                        .padding(horizontal = 5.dp),
+                contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth(normalizedProgress(progress))
-                            .fillMaxHeight()
-                            .background(GitItTheme.colors.purple400),
+                Text(
+                    text = setLabel,
+                    color = GitItTheme.colors.grey100,
+                    maxLines = 1,
+                    style = GitItTheme.typography.caption2,
                 )
             }
+            Text(
+                text = description,
+                modifier = Modifier.fillMaxWidth(),
+                color = cardColors.descriptionColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = GitItTheme.typography.caption1,
+            )
         }
     }
 }
+
+/**
+ * 학습 카드 배경에 대응하는 내부 요소 색상을 묶는다.
+ *
+ * @property technologiesColor 기술 목록의 글자색
+ * @property trackColor 진행되지 않은 영역의 색상
+ * @property indicatorColor 진행된 영역의 색상
+ * @property badgeColor 세트 배지의 배경색
+ * @property descriptionColor 학습 세트 설명의 글자색
+ */
+@Immutable
+internal data class LearningCardColors(
+    val technologiesColor: Color,
+    val trackColor: Color,
+    val indicatorColor: Color,
+    val badgeColor: Color,
+    val descriptionColor: Color,
+)
+
+/**
+ * Figma의 학습 카드 배경별 내부 요소 색상을 원시 색상 토큰에 매핑한다.
+ *
+ * @param backgroundColor 카드에 적용된 배경색
+ * @param colors 매핑에 사용할 Git-it 원시 색상 토큰
+ * @return 배경색에 대응하는 내부 요소 색상
+ */
+internal fun resolveLearningCardColors(
+    backgroundColor: Color,
+    colors: GitItColors,
+): LearningCardColors =
+    when (backgroundColor) {
+        colors.blue100 -> LearningCardColors(colors.grey500, colors.grey200, colors.blue200, colors.blue200, colors.grey500)
+        colors.blue500 -> LearningCardColors(colors.grey400, colors.purple300, colors.blue400, colors.blue400, colors.grey100)
+        else -> LearningCardColors(colors.grey200, colors.purple200, colors.purple400, colors.purple400, colors.grey100)
+    }
 
 /**
  * 재생 아이콘을 독립된 클릭 영역으로 렌더링한다.
