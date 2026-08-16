@@ -291,6 +291,32 @@ class ProjectRepositoryImplTest {
         assertEquals(true, bookmarked)
     }
 
+    /** 북마크 목록 조회가 프로젝트 필터를 쿼리로 보내고 응답을 매핑하는지 검증한다. */
+    @Test
+    fun getBookmarkedQuestions_프로젝트를지정하면_쿼리로필터를보낸다() {
+        val networkClient = FakeNetworkClient(BOOKMARK_LIST_RESPONSE)
+
+        val bookmarks = runBlocking { ProjectRepositoryImpl(networkClient).getBookmarkedQuestions("p1") }.getOrThrow()
+
+        assertEquals("/api/v1/projects/bookmarks", networkClient.requestedPath)
+        assertEquals(mapOf("projectId" to "p1"), networkClient.requestedQueryParameters)
+        assertEquals(1, bookmarks.totalCount)
+        assertEquals(listOf("p1"), bookmarks.availableProjects.map { it.projectId })
+        assertEquals(listOf("q1"), bookmarks.bookmarks.map { it.questionId })
+        assertEquals("Set 1", bookmarks.bookmarks.first().setLabel)
+        assertEquals(1, bookmarks.bookmarks.first().problemNumber)
+    }
+
+    /** 프로젝트를 지정하지 않으면 쿼리 없이 전체를 조회하는지 검증한다. */
+    @Test
+    fun getBookmarkedQuestions_프로젝트를생략하면_쿼리없이조회한다() {
+        val networkClient = FakeNetworkClient(BOOKMARK_LIST_RESPONSE)
+
+        runBlocking { ProjectRepositoryImpl(networkClient).getBookmarkedQuestions() }.getOrThrow()
+
+        assertTrue(networkClient.requestedQueryParameters.isEmpty())
+    }
+
     private companion object {
         /** 테스트 요청에 사용하는 GitHub 저장소 URL이다. */
         const val REPOSITORY_URL = "https://github.com/Nexters/Git-it-Server"
@@ -324,5 +350,10 @@ class ProjectRepositoryImplTest {
             """{"success":true,"data":{"questionId":"q2","explanation":"해설입니다","rubric":{""" +
                 """"criteria":[{"text":"파일명을 들었는가","points":3}],"keyPoints":["라우터"],""" +
                 """"fullMarkExample":"만점 예시","partialExample":"부분 예시","zeroExample":"0점 예시"}}}"""
+
+        private const val BOOKMARK_LIST_RESPONSE =
+            """{"success":true,"data":{"totalCount":1,"availableProjects":[{"projectId":"p1","projectName":"react"}],""" +
+                """"bookmarks":[{"projectId":"p1","projectName":"react","setLabel":"Set 1","problemNumber":1,""" +
+                """"questionId":"q1","question":"문제1"}]}}"""
     }
 }

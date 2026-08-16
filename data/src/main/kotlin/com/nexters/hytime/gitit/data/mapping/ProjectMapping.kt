@@ -1,5 +1,8 @@
 package com.nexters.hytime.gitit.data.mapping
 
+import com.nexters.hytime.gitit.data.dto.AvailableProjectResponse
+import com.nexters.hytime.gitit.data.dto.BookmarkedQuestionListResponse
+import com.nexters.hytime.gitit.data.dto.BookmarkedQuestionResponse
 import com.nexters.hytime.gitit.data.dto.LearningSetResponse
 import com.nexters.hytime.gitit.data.dto.MyAnswerResponse
 import com.nexters.hytime.gitit.data.dto.ProjectDetailResponse
@@ -12,6 +15,9 @@ import com.nexters.hytime.gitit.data.dto.SetResponse
 import com.nexters.hytime.gitit.data.dto.SourceResponse
 import com.nexters.hytime.gitit.data.dto.SubmitChoiceAnswerResponse
 import com.nexters.hytime.gitit.data.dto.SubmitEssayAnswerResponse
+import com.nexters.hytime.gitit.domain.model.AvailableProject
+import com.nexters.hytime.gitit.domain.model.BookmarkedQuestion
+import com.nexters.hytime.gitit.domain.model.BookmarkedQuestions
 import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
 import com.nexters.hytime.gitit.domain.model.EssayAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
@@ -193,4 +199,42 @@ internal fun RubricCriterionResponse.toDomain(): RubricCriterion =
     RubricCriterion(
         text = text,
         points = points,
+    )
+
+/**
+ * 북마크 목록 응답을 도메인 모델로 변환한다.
+ *
+ * @return 저장한 문제 화면이 사용할 북마크 목록
+ */
+internal fun BookmarkedQuestionListResponse.toDomain(): BookmarkedQuestions =
+    BookmarkedQuestions(
+        totalCount = totalCount,
+        availableProjects = availableProjects.map(AvailableProjectResponse::toDomain),
+        bookmarks = bookmarks.map(BookmarkedQuestionResponse::toDomain),
+    )
+
+/**
+ * 북마크 필터 프로젝트 응답을 도메인 모델로 변환한다.
+ *
+ * @return 필터에 노출할 프로젝트
+ */
+internal fun AvailableProjectResponse.toDomain(): AvailableProject =
+    AvailableProject(
+        projectId = projectId,
+        projectName = projectName,
+    )
+
+/**
+ * 북마크한 문제 응답을 도메인 모델로 변환한다.
+ *
+ * @return 북마크한 문제
+ */
+internal fun BookmarkedQuestionResponse.toDomain(): BookmarkedQuestion =
+    BookmarkedQuestion(
+        projectId = projectId,
+        projectName = projectName,
+        setLabel = setLabel,
+        problemNumber = problemNumber,
+        questionId = questionId,
+        question = question,
     )

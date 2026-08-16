@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.domain.repository
 
+import com.nexters.hytime.gitit.domain.model.BookmarkedQuestions
 import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
 import com.nexters.hytime.gitit.domain.model.EssayAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
@@ -107,6 +108,14 @@ interface ProjectRepository {
         questionId: String,
         bookmarked: Boolean,
     ): Result<Boolean>
+
+    /**
+     * 북마크한 문제 목록을 조회한다.
+     *
+     * @param projectId 특정 프로젝트로 좁힐 때 사용할 식별자. `null`이면 전체를 조회한다
+     * @return 조회 결과. 성공 시 북마크 목록, 실패 시 예외를 담는다
+     */
+    suspend fun getBookmarkedQuestions(projectId: String? = null): Result<BookmarkedQuestions>
 
     companion object {
         /** 서버 기본값과 같은 첫 페이지 번호다. */

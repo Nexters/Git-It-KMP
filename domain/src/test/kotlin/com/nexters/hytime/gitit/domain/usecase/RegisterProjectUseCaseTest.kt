@@ -2,6 +2,7 @@
 
 package com.nexters.hytime.gitit.domain.usecase
 
+import com.nexters.hytime.gitit.domain.model.BookmarkedQuestions
 import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
 import com.nexters.hytime.gitit.domain.model.EssayAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
@@ -100,4 +101,6 @@ private class RecordingProjectRepository : ProjectRepository {
         questionId: String,
         bookmarked: Boolean,
     ): Result<Boolean> = error("호출되면 안 됩니다.")
+
+    override suspend fun getBookmarkedQuestions(projectId: String?): Result<BookmarkedQuestions> = error("호출되면 안 됩니다.")
 }

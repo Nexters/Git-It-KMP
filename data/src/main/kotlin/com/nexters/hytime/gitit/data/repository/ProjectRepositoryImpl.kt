@@ -3,6 +3,7 @@ package com.nexters.hytime.gitit.data.repository
 import com.nexters.hytime.gitit.data.dto.ApiResponse
 import com.nexters.hytime.gitit.data.dto.BookmarkQuestionRequest
 import com.nexters.hytime.gitit.data.dto.BookmarkQuestionResponse
+import com.nexters.hytime.gitit.data.dto.BookmarkedQuestionListResponse
 import com.nexters.hytime.gitit.data.dto.EmptyApiResponse
 import com.nexters.hytime.gitit.data.dto.LearningSetResponse
 import com.nexters.hytime.gitit.data.dto.ProjectDetailResponse
@@ -14,6 +15,7 @@ import com.nexters.hytime.gitit.data.dto.SubmitChoiceAnswerResponse
 import com.nexters.hytime.gitit.data.dto.SubmitEssayAnswerRequest
 import com.nexters.hytime.gitit.data.dto.SubmitEssayAnswerResponse
 import com.nexters.hytime.gitit.data.mapping.toDomain
+import com.nexters.hytime.gitit.domain.model.BookmarkedQuestions
 import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
 import com.nexters.hytime.gitit.domain.model.EssayAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
@@ -145,6 +147,16 @@ class ProjectRepositoryImpl(
                     BookmarkQuestionRequest(bookmarked),
                 ).requireData("문제 북마크 응답이 올바르지 않습니다.")
                 .isBookmarked
+        }
+
+    override suspend fun getBookmarkedQuestions(projectId: String?): Result<BookmarkedQuestions> =
+        runCatchingResult {
+            networkClient
+                .get<ApiResponse<BookmarkedQuestionListResponse>>(
+                    "$PATH_PROJECTS/bookmarks",
+                    queryParameters = projectId?.let { mapOf("projectId" to it) } ?: emptyMap(),
+                ).requireData("북마크 목록 조회 응답이 올바르지 않습니다.")
+                .toDomain()
         }
 
     /**
