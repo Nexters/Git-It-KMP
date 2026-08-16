@@ -16,6 +16,7 @@ import com.nexters.hytime.gitit.logging.AppLogger
 import com.nexters.hytime.gitit.logging.gitItLogger
 import com.nexters.hytime.gitit.logging.initLogger
 import com.nexters.hytime.gitit.network.di.networkModule
+import com.nexters.hytime.gitit.notification.createLearningNotificationChannel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -26,6 +27,7 @@ class GitItApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         initLogger(BuildConfig.DEBUG)
+        createLearningNotificationChannel()
         val networkLogger = gitItLogger(tag = "🌐 Network")
         val registrationLogger = gitItLogger(tag = "FCM")
         val requestRegistration = { requestFirebaseRegistration(registrationLogger) }
