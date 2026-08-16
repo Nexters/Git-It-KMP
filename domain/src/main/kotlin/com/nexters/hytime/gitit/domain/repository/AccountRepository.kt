@@ -2,13 +2,16 @@ package com.nexters.hytime.gitit.domain.repository
 
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
+import com.nexters.hytime.gitit.domain.model.MemberProfile
 
 /**
- * 계정 인증과 관련된 도메인 리포지토리 계약이다.
+ * 로그인한 사용자의 인증과 회원 정보를 다루는 도메인 리포지토리 계약이다.
  *
- * 구현체는 `data` 모듈에 위치하며, Google ID Token을 백엔드로 전송해
- * 검증된 세션을 얻는 책임을 진다. `domain`은 인증 수단(Google)이나
+ * 구현체는 `data` 모듈에 위치하며, ID Token을 백엔드로 전송해 검증된 세션을 얻고
+ * 현재 회원의 프로필과 설정을 읽고 쓰는 책임을 진다. `domain`은 인증 수단(Google)이나
  * 네트워크 구조(Ktor, DTO)를 알지 않는다.
+ *
+ * 회원 정보 관련 함수는 현재 로그인 세션을 대상으로 하므로 회원 식별자를 받지 않는다.
  */
 interface AccountRepository {
     /**
@@ -26,4 +29,11 @@ interface AccountRepository {
      * @return 등록 결과. 성공 시 [Unit], 실패 시 예외를 담는다
      */
     suspend fun registerDevice(deviceInfo: DeviceInfo): Result<Unit>
+
+    /**
+     * 현재 회원의 프로필과 학습 현황을 조회한다.
+     *
+     * @return 조회 결과. 성공 시 프로필, 실패 시 예외를 담는다
+     */
+    suspend fun getMemberProfile(): Result<MemberProfile>
 }

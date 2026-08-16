@@ -4,6 +4,7 @@ import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
+import com.nexters.hytime.gitit.domain.model.MemberProfile
 import com.nexters.hytime.gitit.domain.repository.AccountRepository
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
@@ -22,12 +23,7 @@ class SignInUseCaseTest {
                     object : AuthTokenProvider {
                         override suspend fun obtainToken(): String = "google-token"
                     },
-                accountRepository =
-                    object : AccountRepository {
-                        override suspend fun signInWithGoogle(idToken: String): Result<LoginSession> = Result.success(session)
-
-                        override suspend fun registerDevice(deviceInfo: DeviceInfo): Result<Unit> = Result.success(Unit)
-                    },
+                accountRepository = FakeAccountRepository(session),
                 sessionStorage = storage,
             )
 
@@ -39,6 +35,17 @@ class SignInUseCaseTest {
         assertEquals(Unit, result.getOrThrow())
         assertEquals(session, storedSession)
     }
+}
+
+/** 로그인만 성공으로 응답하고 나머지 회원 API는 호출되지 않는지 확인한다. */
+private class FakeAccountRepository(
+    private val session: LoginSession,
+) : AccountRepository {
+    override suspend fun signInWithGoogle(idToken: String): Result<LoginSession> = Result.success(session)
+
+    override suspend fun registerDevice(deviceInfo: DeviceInfo): Result<Unit> = Result.success(Unit)
+
+    override suspend fun getMemberProfile(): Result<MemberProfile> = error("호출되면 안 됩니다.")
 }
 
 /** 테스트 중 메모리에만 세션을 보관한다. */
