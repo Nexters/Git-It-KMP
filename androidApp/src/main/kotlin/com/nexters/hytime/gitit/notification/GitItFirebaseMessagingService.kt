@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.SystemClock
@@ -89,7 +90,7 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     /**
-     * 학습 알림 채널을 준비하고 사용자가 누르면 앱을 여는 알림을 게시한다.
+     * 사용자가 누르면 앱을 여는 알림을 게시한다.
      *
      * @param content 표시할 제목과 본문
      * @param messageId 같은 FCM 메시지의 알림을 식별하는 값
@@ -99,16 +100,6 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
         messageId: String?,
     ) {
         val notificationManager = getSystemService(NotificationManager::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationManager.createNotificationChannel(
-                NotificationChannel(
-                    NOTIFICATION_CHANNEL_ID,
-                    getString(R.string.notification_channel_learning),
-                    NotificationManager.IMPORTANCE_DEFAULT,
-                ),
-            )
-        }
-
         val openAppIntent = Intent(this, MainActivity::class.java)
         val pendingIntent =
             PendingIntent.getActivity(
@@ -138,12 +129,21 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private companion object {
-        /** 학습 알림 설정을 유지하는 Android 채널 식별자다. */
-        private const val NOTIFICATION_CHANNEL_ID = "learning"
-
         /** 앱을 여는 PendingIntent를 갱신할 때 사용하는 요청 코드다. */
         private const val OPEN_APP_REQUEST_CODE = 1
     }
+}
+
+/** Android 8.0 이상에서 포그라운드와 백그라운드 FCM이 공유할 학습 알림 채널을 생성한다. */
+internal fun Context.createLearningNotificationChannel() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+    getSystemService(NotificationManager::class.java).createNotificationChannel(
+        NotificationChannel(
+            NOTIFICATION_CHANNEL_ID,
+            getString(R.string.notification_channel_learning),
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ),
+    )
 }
 
 /**
@@ -181,6 +181,9 @@ internal fun createNotificationContent(
     val normalizedBody = body?.trim().orEmpty()
     return if (normalizedTitle.isBlank() || normalizedBody.isBlank()) null else NotificationContent(normalizedTitle, normalizedBody)
 }
+
+/** 포그라운드와 백그라운드 FCM 알림이 공유하는 Android 채널 식별자다. */
+private const val NOTIFICATION_CHANNEL_ID = "learning"
 
 /**
  * Firebase Installation ID와 현재 앱 환경을 서버 기기 정보로 변환한다.
