@@ -50,6 +50,7 @@ import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonStyle
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassContainer
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassDropdownMenu
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassDropdownMenuItem
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
@@ -180,6 +181,7 @@ fun ProjectDetailScreen(
             ProjectDetailTopBar(
                 onBackClick = onBackClick,
                 onMoreClick = onMoreMenuClick,
+                sky = sky,
             )
         }
 
@@ -227,23 +229,33 @@ fun ProjectDetailScreen(
  *
  * @param onBackClick 뒤로가기 콜백
  * @param onMoreClick 더보기 버튼 클릭 콜백
+ * @param sky 두 버튼 뒤쪽 콘텐츠를 굴절시킬 Cloudy 상태
  */
 @Composable
 private fun ProjectDetailTopBar(
     onBackClick: () -> Unit,
     onMoreClick: () -> Unit,
+    sky: Sky? = null,
 ) {
     GitItTopBar(
         type = GitItTopBarType.Default,
         modifier = Modifier.padding(top = 8.dp),
+        sky = sky,
         onBackClick = onBackClick,
         actions = {
-            GitItLiquidGlassIconButton(
-                onClick = onMoreClick,
-                size = GitItLiquidGlassIconButtonSize.Md,
-                variant = GitItLiquidGlassIconButtonVariant.Secondary,
-            ) {
-                MenuIcon()
+            val moreButton: @Composable () -> Unit = {
+                GitItLiquidGlassIconButton(
+                    onClick = onMoreClick,
+                    size = GitItLiquidGlassIconButtonSize.Md,
+                    variant = GitItLiquidGlassIconButtonVariant.Secondary,
+                ) {
+                    MenuIcon()
+                }
+            }
+            if (sky == null) {
+                moreButton()
+            } else {
+                GitItLiquidGlassContainer(sky = sky) { moreButton() }
             }
         },
     )
