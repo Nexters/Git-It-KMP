@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.domain.repository
 
+import com.nexters.hytime.gitit.domain.model.ProjectDetail
 import com.nexters.hytime.gitit.domain.model.ProjectPage
 import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
 import com.nexters.hytime.gitit.domain.model.ProjectRegistration
@@ -33,6 +34,14 @@ interface ProjectRepository {
         page: Int = DEFAULT_PAGE,
         size: Int = DEFAULT_PAGE_SIZE,
     ): Result<ProjectPage>
+
+    /**
+     * 프로젝트 상세 정보를 조회한다.
+     *
+     * @param projectId 조회할 프로젝트 식별자
+     * @return 조회 결과. 성공 시 프로젝트 상세, 실패 시 예외를 담는다
+     */
+    suspend fun getProjectDetail(projectId: String): Result<ProjectDetail>
 
     companion object {
         /** 서버 기본값과 같은 첫 페이지 번호다. */

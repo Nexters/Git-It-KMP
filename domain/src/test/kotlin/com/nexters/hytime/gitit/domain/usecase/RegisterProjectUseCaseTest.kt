@@ -2,6 +2,7 @@
 
 package com.nexters.hytime.gitit.domain.usecase
 
+import com.nexters.hytime.gitit.domain.model.ProjectDetail
 import com.nexters.hytime.gitit.domain.model.ProjectGenerationStatus
 import com.nexters.hytime.gitit.domain.model.ProjectPage
 import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
@@ -69,4 +70,6 @@ private class RecordingProjectRepository : ProjectRepository {
         page: Int,
         size: Int,
     ): Result<ProjectPage> = error("호출되면 안 됩니다.")
+
+    override suspend fun getProjectDetail(projectId: String): Result<ProjectDetail> = error("호출되면 안 됩니다.")
 }

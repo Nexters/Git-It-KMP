@@ -1,10 +1,12 @@
 package com.nexters.hytime.gitit.data.repository
 
 import com.nexters.hytime.gitit.data.dto.ApiResponse
+import com.nexters.hytime.gitit.data.dto.ProjectDetailResponse
 import com.nexters.hytime.gitit.data.dto.ProjectListResponse
 import com.nexters.hytime.gitit.data.dto.RegisterProjectRequest
 import com.nexters.hytime.gitit.data.dto.RegisterProjectResponse
 import com.nexters.hytime.gitit.data.mapping.toDomain
+import com.nexters.hytime.gitit.domain.model.ProjectDetail
 import com.nexters.hytime.gitit.domain.model.ProjectPage
 import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
 import com.nexters.hytime.gitit.domain.model.ProjectRegistration
@@ -52,6 +54,25 @@ class ProjectRepositoryImpl(
                 ).requireData("프로젝트 목록 조회 응답이 올바르지 않습니다.")
                 .toDomain()
         }
+
+    override suspend fun getProjectDetail(projectId: String): Result<ProjectDetail> =
+        runCatchingResult {
+            requireProjectId(projectId)
+            networkClient
+                .get<ApiResponse<ProjectDetailResponse>>("$PATH_PROJECTS/$projectId")
+                .requireData("프로젝트 상세 조회 응답이 올바르지 않습니다.")
+                .toDomain()
+        }
+
+    /**
+     * 프로젝트 식별자가 경로에 넣을 수 있는 값인지 확인한다.
+     *
+     * @param projectId 검사할 프로젝트 식별자
+     * @throws IllegalArgumentException 값이 비어 있는 경우
+     */
+    private fun requireProjectId(projectId: String) {
+        require(projectId.isNotBlank()) { "프로젝트 식별자가 비어 있습니다." }
+    }
 
     private companion object {
         private const val PATH_PROJECTS = "/api/v1/projects"

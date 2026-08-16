@@ -127,6 +127,23 @@ class ProjectRepositoryImplTest {
         assertEquals("", zeroSize.requestedMethod)
     }
 
+    /** 상세 조회가 프로젝트 경로로 요청하고 세트까지 매핑하는지 검증한다. */
+    @Test
+    fun getProjectDetail_성공하면_프로젝트경로로조회하고세트를매핑한다() {
+        val networkClient = FakeNetworkClient(PROJECT_DETAIL_RESPONSE)
+
+        val detail = runBlocking { ProjectRepositoryImpl(networkClient).getProjectDetail("p1") }.getOrThrow()
+
+        assertEquals("GET", networkClient.requestedMethod)
+        assertEquals("/api/v1/projects/p1", networkClient.requestedPath)
+        assertEquals("https://github.com/facebook/react", detail.repositoryUrl)
+        assertEquals(1000, detail.starCount)
+        assertEquals(60, detail.overallProgressPercent)
+        assertEquals(listOf("s1"), detail.sets.map { it.setId })
+        assertEquals(5, detail.sets.first().problemCount)
+        assertEquals(3, detail.sets.first().completedCount)
+    }
+
     private companion object {
         /** 테스트 요청에 사용하는 GitHub 저장소 URL이다. */
         const val REPOSITORY_URL = "https://github.com/Nexters/Git-it-Server"
@@ -140,5 +157,11 @@ class ProjectRepositoryImplTest {
                 """"repositoryImageUrl":"https://example.com/a.png","techStack":["TypeScript","JavaScript"],""" +
                 """"currentSetLabel":"Set 1","currentSetTitle":"라우팅","nextProblemId":"q1","overallProgressPercent":40}],""" +
                 """"hasNext":true}}"""
+
+        private const val PROJECT_DETAIL_RESPONSE =
+            """{"success":true,"data":{"projectId":"p1","repositoryUrl":"https://github.com/facebook/react",""" +
+                """"repositoryName":"react","repositoryImageUrl":"https://example.com/a.png","starCount":1000,""" +
+                """"techStack":["TypeScript"],"overallProgressPercent":60,"nextProblemId":"q1",""" +
+                """"sets":[{"setId":"s1","label":"Set 1","title":"라우팅","problemCount":5,"completedCount":3}]}}"""
     }
 }
