@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.domain.repository
 
+import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
 import com.nexters.hytime.gitit.domain.model.ProjectPage
@@ -63,6 +64,20 @@ interface ProjectRepository {
         projectId: String,
         setId: String,
     ): Result<LearningSet>
+
+    /**
+     * 4지선다 문제의 답을 제출한다. 다시 제출하면 이전 답을 덮어쓴다.
+     *
+     * @param projectId 문제가 속한 프로젝트 식별자
+     * @param questionId 답을 낼 문제 식별자
+     * @param selectedIndex 고른 선택지 번호. 문제의 선택지 순서를 따르는 0부터 시작하는 번호다
+     * @return 제출 결과. 성공 시 정답 여부와 해설, 실패 시 예외를 담는다
+     */
+    suspend fun submitChoiceAnswer(
+        projectId: String,
+        questionId: String,
+        selectedIndex: Int,
+    ): Result<ChoiceAnswerResult>
 
     companion object {
         /** 서버 기본값과 같은 첫 페이지 번호다. */

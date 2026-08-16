@@ -224,6 +224,24 @@ class ProjectRepositoryImplTest {
         assertNull(learningSet.questions.first().format)
     }
 
+    /** 4지선다 제출이 전용 경로로 선택지 번호를 보내고 채점 결과를 매핑하는지 검증한다. */
+    @Test
+    fun submitChoiceAnswer_성공하면_선택지번호를보내고결과를매핑한다() {
+        val networkClient =
+            FakeNetworkClient(
+                """{"success":true,"data":{"questionId":"q1","correct":false,"answerIndex":2,"explanation":"두 번째가 맞습니다"}}""",
+            )
+
+        val result = runBlocking { ProjectRepositoryImpl(networkClient).submitChoiceAnswer("p1", "q1", 1) }.getOrThrow()
+
+        assertEquals("POST", networkClient.requestedMethod)
+        assertEquals("/api/v1/projects/p1/questions/q1/answers/choice", networkClient.requestedPath)
+        assertEquals("""{"selectedIndex":1}""", networkClient.requestBody)
+        assertEquals(false, result.correct)
+        assertEquals(2, result.answerIndex)
+        assertEquals("두 번째가 맞습니다", result.explanation)
+    }
+
     private companion object {
         /** 테스트 요청에 사용하는 GitHub 저장소 URL이다. */
         const val REPOSITORY_URL = "https://github.com/Nexters/Git-it-Server"

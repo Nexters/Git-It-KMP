@@ -8,6 +8,8 @@ import com.nexters.hytime.gitit.data.dto.ProjectListResponse
 import com.nexters.hytime.gitit.data.dto.QuestionResponse
 import com.nexters.hytime.gitit.data.dto.SetResponse
 import com.nexters.hytime.gitit.data.dto.SourceResponse
+import com.nexters.hytime.gitit.data.dto.SubmitChoiceAnswerResponse
+import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.LearningSetSummary
 import com.nexters.hytime.gitit.domain.model.MyAnswer
@@ -135,4 +137,17 @@ internal fun MyAnswerResponse.toDomain(): MyAnswer =
         text = text,
         correct = correct,
         answeredAt = answeredAt,
+    )
+
+/**
+ * 4지선다 제출 응답을 도메인 모델로 변환한다.
+ *
+ * @return 정답 여부와 해설
+ */
+internal fun SubmitChoiceAnswerResponse.toDomain(): ChoiceAnswerResult =
+    ChoiceAnswerResult(
+        questionId = questionId,
+        correct = correct,
+        answerIndex = answerIndex,
+        explanation = explanation,
     )

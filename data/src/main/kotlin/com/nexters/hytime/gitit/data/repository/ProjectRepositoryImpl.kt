@@ -7,7 +7,10 @@ import com.nexters.hytime.gitit.data.dto.ProjectDetailResponse
 import com.nexters.hytime.gitit.data.dto.ProjectListResponse
 import com.nexters.hytime.gitit.data.dto.RegisterProjectRequest
 import com.nexters.hytime.gitit.data.dto.RegisterProjectResponse
+import com.nexters.hytime.gitit.data.dto.SubmitChoiceAnswerRequest
+import com.nexters.hytime.gitit.data.dto.SubmitChoiceAnswerResponse
 import com.nexters.hytime.gitit.data.mapping.toDomain
+import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
 import com.nexters.hytime.gitit.domain.model.ProjectPage
@@ -89,6 +92,22 @@ class ProjectRepositoryImpl(
                 .toDomain()
         }
 
+    override suspend fun submitChoiceAnswer(
+        projectId: String,
+        questionId: String,
+        selectedIndex: Int,
+    ): Result<ChoiceAnswerResult> =
+        runCatchingResult {
+            requireQuestion(projectId, questionId)
+            require(selectedIndex >= 0) { "선택지 번호는 0 이상이어야 합니다." }
+            networkClient
+                .post<SubmitChoiceAnswerRequest, ApiResponse<SubmitChoiceAnswerResponse>>(
+                    "${questionPath(projectId, questionId)}/answers/choice",
+                    SubmitChoiceAnswerRequest(selectedIndex),
+                ).requireData("4지선다 답변 제출 응답이 올바르지 않습니다.")
+                .toDomain()
+        }
+
     /**
      * 프로젝트 식별자가 경로에 넣을 수 있는 값인지 확인한다.
      *
@@ -98,6 +117,33 @@ class ProjectRepositoryImpl(
     private fun requireProjectId(projectId: String) {
         require(projectId.isNotBlank()) { "프로젝트 식별자가 비어 있습니다." }
     }
+
+    /**
+     * 문제 관련 요청에 필요한 식별자가 모두 채워졌는지 확인한다.
+     *
+     * @param projectId 문제가 속한 프로젝트 식별자
+     * @param questionId 문제 식별자
+     * @throws IllegalArgumentException 둘 중 하나라도 비어 있는 경우
+     */
+    private fun requireQuestion(
+        projectId: String,
+        questionId: String,
+    ) {
+        requireProjectId(projectId)
+        require(questionId.isNotBlank()) { "문제 식별자가 비어 있습니다." }
+    }
+
+    /**
+     * 문제 하나를 가리키는 요청 경로를 만든다.
+     *
+     * @param projectId 문제가 속한 프로젝트 식별자
+     * @param questionId 문제 식별자
+     * @return 답변 제출·북마크 경로의 공통 앞부분
+     */
+    private fun questionPath(
+        projectId: String,
+        questionId: String,
+    ): String = "$PATH_PROJECTS/$projectId/questions/$questionId"
 
     private companion object {
         private const val PATH_PROJECTS = "/api/v1/projects"

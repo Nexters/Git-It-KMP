@@ -2,6 +2,7 @@
 
 package com.nexters.hytime.gitit.domain.usecase
 
+import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
 import com.nexters.hytime.gitit.domain.model.ProjectGenerationStatus
@@ -80,4 +81,10 @@ private class RecordingProjectRepository : ProjectRepository {
         projectId: String,
         setId: String,
     ): Result<LearningSet> = error("호출되면 안 됩니다.")
+
+    override suspend fun submitChoiceAnswer(
+        projectId: String,
+        questionId: String,
+        selectedIndex: Int,
+    ): Result<ChoiceAnswerResult> = error("호출되면 안 됩니다.")
 }
