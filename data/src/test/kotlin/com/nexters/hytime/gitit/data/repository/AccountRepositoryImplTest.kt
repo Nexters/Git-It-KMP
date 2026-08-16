@@ -237,6 +237,7 @@ private class LoginFakeNetworkClient(
 
     override suspend fun <Res : Any> get(
         path: String,
+        queryParameters: Map<String, String>,
         authenticated: Boolean,
         responseSerializer: KSerializer<Res>,
     ): Res {
@@ -267,4 +268,10 @@ private class LoginFakeNetworkClient(
             responseBody,
         )
     }
+
+    override suspend fun <Res : Any> delete(
+        path: String,
+        authenticated: Boolean,
+        responseSerializer: KSerializer<Res>,
+    ): Res = error("호출되면 안 됩니다.")
 }

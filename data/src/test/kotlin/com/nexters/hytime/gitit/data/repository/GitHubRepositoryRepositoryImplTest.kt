@@ -34,6 +34,7 @@ private class FakeNetworkClient : NetworkClient {
 
     override suspend fun <Res : Any> get(
         path: String,
+        queryParameters: Map<String, String>,
         authenticated: Boolean,
         responseSerializer: KSerializer<Res>,
     ): Res = error("호출되면 안 됩니다.")
@@ -57,6 +58,12 @@ private class FakeNetworkClient : NetworkClient {
         body: Req,
         authenticated: Boolean,
         requestSerializer: KSerializer<Req>,
+        responseSerializer: KSerializer<Res>,
+    ): Res = error("호출되면 안 됩니다.")
+
+    override suspend fun <Res : Any> delete(
+        path: String,
+        authenticated: Boolean,
         responseSerializer: KSerializer<Res>,
     ): Res = error("호출되면 안 됩니다.")
 }

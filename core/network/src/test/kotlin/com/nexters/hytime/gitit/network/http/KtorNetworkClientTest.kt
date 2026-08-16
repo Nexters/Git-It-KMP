@@ -2,6 +2,7 @@ package com.nexters.hytime.gitit.network.http
 
 import com.nexters.hytime.gitit.network.api.NetworkClient
 import com.nexters.hytime.gitit.network.api.NetworkException
+import com.nexters.hytime.gitit.network.api.delete
 import com.nexters.hytime.gitit.network.api.get
 import com.nexters.hytime.gitit.network.api.getAbsolute
 import com.nexters.hytime.gitit.network.api.post
@@ -196,6 +197,81 @@ class KtorNetworkClientTest {
 
         assertEquals(listOf("https://example.com/api/v1/members/me", "https://example.com/api/v1/public"), requestedUrls)
         assertEquals(listOf("Bearer access-token", null), authorizationHeaders)
+    }
+
+    /** 쿼리 파라미터를 URL에 붙이고 값에 든 특수 문자를 인코딩하는지 검증한다. */
+    @Test
+    fun get_queryParametersAreAppendedAndEncoded() {
+        var requestedUrl = ""
+        val httpClient =
+            HttpClient(
+                MockEngine { request ->
+                    requestedUrl = request.url.toString()
+                    respond(
+                        content = """{"result":"ok"}""",
+                        headers = headers { append("Content-Type", "application/json") },
+                    )
+                },
+            ) {
+                configureGitItHttpClient(NetworkLogger { })
+            }
+
+        runBlocking {
+            KtorNetworkClient(
+                client = httpClient,
+                json = json,
+                baseUrl = "https://example.com",
+                accessTokenProvider = { null },
+            ).get<TestResponse>("/api/v1/projects", mapOf("page" to "0", "projectId" to "a b&c"))
+        }
+
+        // 공백은 폼 인코딩 관례대로 +로 나간다. 서버가 쿼리 파라미터를 읽을 때 다시 공백으로 되돌린다.
+        assertEquals("https://example.com/api/v1/projects?page=0&projectId=a+b%26c", requestedUrl)
+    }
+
+    /** DELETE가 baseUrl 뒤에 경로를 붙이고 액세스 토큰을 전달하는지 검증한다. */
+    @Test
+    fun delete_sendsDeleteMethodWithAccessToken() {
+        var requestedMethod = ""
+        var requestedUrl = ""
+        var requestedAuthorization: String? = null
+        val httpClient =
+            HttpClient(
+                MockEngine { request ->
+                    requestedMethod = request.method.value
+                    requestedUrl = request.url.toString()
+                    requestedAuthorization = request.headers[HttpHeaders.Authorization]
+                    respond(
+                        content = """{"result":"ok"}""",
+                        headers = headers { append("Content-Type", "application/json") },
+                    )
+                },
+            ) {
+                configureGitItHttpClient(NetworkLogger { })
+            }
+
+        runBlocking {
+            KtorNetworkClient(
+                client = httpClient,
+                json = json,
+                baseUrl = "https://example.com",
+                accessTokenProvider = { "access-token" },
+            ).delete<TestResponse>("/api/v1/projects/p1")
+        }
+
+        assertEquals("DELETE", requestedMethod)
+        assertEquals("https://example.com/api/v1/projects/p1", requestedUrl)
+        assertEquals("Bearer access-token", requestedAuthorization)
+    }
+
+    /** DELETE 실패 상태를 네트워크 예외로 변환하는지 검증한다. */
+    @Test
+    fun delete_non2xxThrowsNetworkException() {
+        runBlocking {
+            assertFailsWith<NetworkException> {
+                client(status = HttpStatusCode.NotFound).delete<TestResponse>("/api/v1/projects/p1")
+            }
+        }
     }
 
     /** GET 실패 상태를 네트워크 예외로 변환하는지 검증한다. */
