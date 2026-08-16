@@ -4,10 +4,12 @@ package com.nexters.hytime.gitit.data.repository
 
 import com.nexters.hytime.gitit.domain.model.ProjectGenerationStatus
 import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
+import com.nexters.hytime.gitit.domain.model.QuestionFormat
 import com.nexters.hytime.gitit.domain.repository.ProjectRepository
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /** [ProjectRepositoryImpl]의 프로젝트 API 계약과 응답 매핑을 검증한다. */
@@ -182,6 +184,46 @@ class ProjectRepositoryImplTest {
         assertEquals("", deleteClient.requestedMethod)
     }
 
+    /** 학습 세트 조회가 중첩 경로로 요청하고 문제와 제출한 답을 매핑하는지 검증한다. */
+    @Test
+    fun getLearningSet_성공하면_중첩경로로조회하고문제를매핑한다() {
+        val networkClient = FakeNetworkClient(LEARNING_SET_RESPONSE)
+
+        val learningSet = runBlocking { ProjectRepositoryImpl(networkClient).getLearningSet("p1", "s1") }.getOrThrow()
+
+        assertEquals("/api/v1/projects/p1/sets/s1", networkClient.requestedPath)
+        assertEquals(ProjectQuizLevel.L2, learningSet.level)
+        assertEquals("라우팅 흐름 따라가기", learningSet.title)
+        assertEquals(2, learningSet.questions.size)
+
+        val choiceQuestion = learningSet.questions.first()
+        assertEquals(QuestionFormat.MULTIPLE_CHOICE, choiceQuestion.format)
+        assertEquals(listOf("첫째", "둘째"), choiceQuestion.choices)
+        assertEquals("src/index.ts", choiceQuestion.sources.first().file)
+        assertEquals(1, choiceQuestion.myAnswer?.selectedIndex)
+        assertEquals(true, choiceQuestion.myAnswer?.correct)
+        assertEquals("2026-08-16T10:00:00Z", choiceQuestion.myAnswer?.answeredAt)
+
+        val essayQuestion = learningSet.questions.last()
+        assertEquals(QuestionFormat.ESSAY, essayQuestion.format)
+        assertTrue(essayQuestion.choices.isEmpty())
+        assertNull(essayQuestion.myAnswer)
+    }
+
+    /** 모르는 난이도·형식이 오면 null로 떨어뜨리는지 검증한다. */
+    @Test
+    fun getLearningSet_모르는열거형이면_null로매핑한다() {
+        val networkClient =
+            FakeNetworkClient(
+                """{"success":true,"data":{"setId":"s1","level":"L9","questions":[{"questionId":"q1","format":"AUDIO"}]}}""",
+            )
+
+        val learningSet = runBlocking { ProjectRepositoryImpl(networkClient).getLearningSet("p1", "s1") }.getOrThrow()
+
+        assertNull(learningSet.level)
+        assertNull(learningSet.questions.first().format)
+    }
+
     private companion object {
         /** 테스트 요청에 사용하는 GitHub 저장소 URL이다. */
         const val REPOSITORY_URL = "https://github.com/Nexters/Git-it-Server"
@@ -201,5 +243,14 @@ class ProjectRepositoryImplTest {
                 """"repositoryName":"react","repositoryImageUrl":"https://example.com/a.png","starCount":1000,""" +
                 """"techStack":["TypeScript"],"overallProgressPercent":60,"nextProblemId":"q1",""" +
                 """"sets":[{"setId":"s1","label":"Set 1","title":"라우팅","problemCount":5,"completedCount":3}]}}"""
+
+        private const val LEARNING_SET_RESPONSE =
+            """{"success":true,"data":{"setId":"s1","title":"라우팅 흐름 따라가기","description":"설명","orientation":"안내",""" +
+                """"level":"L2","questions":[""" +
+                """{"questionId":"q1","format":"MULTIPLE_CHOICE","text":"문제1","choices":["첫째","둘째"],""" +
+                """"sources":[{"file":"src/index.ts","startLine":1,"endLine":40,"symbol":"Router","summary":null,""" +
+                """"url":"https://github.com/facebook/react/blob/abc/src/index.ts"}],""" +
+                """"myAnswer":{"selectedIndex":1,"text":null,"correct":true,"answeredAt":"2026-08-16T10:00:00Z"}},""" +
+                """{"questionId":"q2","format":"ESSAY","text":"문제2","choices":[],"sources":[],"myAnswer":null}]}}"""
     }
 }

@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.domain.repository
 
+import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
 import com.nexters.hytime.gitit.domain.model.ProjectPage
 import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
@@ -50,6 +51,18 @@ interface ProjectRepository {
      * @return 삭제 결과. 성공 시 [Unit], 실패 시 예외를 담는다
      */
     suspend fun deleteProject(projectId: String): Result<Unit>
+
+    /**
+     * 문제 풀이에 필요한 학습 세트를 조회한다.
+     *
+     * @param projectId 세트가 속한 프로젝트 식별자
+     * @param setId 조회할 학습 세트 식별자
+     * @return 조회 결과. 성공 시 학습 세트, 실패 시 예외를 담는다
+     */
+    suspend fun getLearningSet(
+        projectId: String,
+        setId: String,
+    ): Result<LearningSet>
 
     companion object {
         /** 서버 기본값과 같은 첫 페이지 번호다. */

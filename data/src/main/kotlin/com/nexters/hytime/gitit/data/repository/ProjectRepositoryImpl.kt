@@ -2,11 +2,13 @@ package com.nexters.hytime.gitit.data.repository
 
 import com.nexters.hytime.gitit.data.dto.ApiResponse
 import com.nexters.hytime.gitit.data.dto.EmptyApiResponse
+import com.nexters.hytime.gitit.data.dto.LearningSetResponse
 import com.nexters.hytime.gitit.data.dto.ProjectDetailResponse
 import com.nexters.hytime.gitit.data.dto.ProjectListResponse
 import com.nexters.hytime.gitit.data.dto.RegisterProjectRequest
 import com.nexters.hytime.gitit.data.dto.RegisterProjectResponse
 import com.nexters.hytime.gitit.data.mapping.toDomain
+import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
 import com.nexters.hytime.gitit.domain.model.ProjectPage
 import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
@@ -72,6 +74,19 @@ class ProjectRepositoryImpl(
             networkClient
                 .delete<EmptyApiResponse>("$PATH_PROJECTS/$projectId")
                 .requireSuccess("프로젝트 삭제 응답이 올바르지 않습니다.")
+        }
+
+    override suspend fun getLearningSet(
+        projectId: String,
+        setId: String,
+    ): Result<LearningSet> =
+        runCatchingResult {
+            requireProjectId(projectId)
+            require(setId.isNotBlank()) { "학습 세트 식별자가 비어 있습니다." }
+            networkClient
+                .get<ApiResponse<LearningSetResponse>>("$PATH_PROJECTS/$projectId/sets/$setId")
+                .requireData("학습 세트 조회 응답이 올바르지 않습니다.")
+                .toDomain()
         }
 
     /**

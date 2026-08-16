@@ -1,13 +1,23 @@
 package com.nexters.hytime.gitit.data.mapping
 
+import com.nexters.hytime.gitit.data.dto.LearningSetResponse
+import com.nexters.hytime.gitit.data.dto.MyAnswerResponse
 import com.nexters.hytime.gitit.data.dto.ProjectDetailResponse
 import com.nexters.hytime.gitit.data.dto.ProjectItemResponse
 import com.nexters.hytime.gitit.data.dto.ProjectListResponse
+import com.nexters.hytime.gitit.data.dto.QuestionResponse
 import com.nexters.hytime.gitit.data.dto.SetResponse
+import com.nexters.hytime.gitit.data.dto.SourceResponse
+import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.LearningSetSummary
+import com.nexters.hytime.gitit.domain.model.MyAnswer
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
 import com.nexters.hytime.gitit.domain.model.ProjectPage
+import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
 import com.nexters.hytime.gitit.domain.model.ProjectSummary
+import com.nexters.hytime.gitit.domain.model.Question
+import com.nexters.hytime.gitit.domain.model.QuestionFormat
+import com.nexters.hytime.gitit.domain.model.QuestionSource
 
 /**
  * 프로젝트 목록 응답을 도메인 페이지로 변환한다.
@@ -67,4 +77,62 @@ internal fun SetResponse.toDomain(): LearningSetSummary =
         title = title,
         problemCount = problemCount,
         completedCount = completedCount,
+    )
+
+/**
+ * 학습 세트 응답을 도메인 모델로 변환한다.
+ *
+ * @return 문제 풀이 화면이 사용할 학습 세트
+ */
+internal fun LearningSetResponse.toDomain(): LearningSet =
+    LearningSet(
+        setId = setId,
+        title = title,
+        description = description,
+        orientation = orientation,
+        level = ProjectQuizLevel.entries.firstOrNull { it.name == level },
+        questions = questions.map(QuestionResponse::toDomain),
+    )
+
+/**
+ * 문제 응답을 도메인 모델로 변환한다.
+ *
+ * @return 화면에 표시할 문제
+ */
+internal fun QuestionResponse.toDomain(): Question =
+    Question(
+        questionId = questionId,
+        format = QuestionFormat.entries.firstOrNull { it.name == format },
+        text = text,
+        choices = choices,
+        sources = sources.map(SourceResponse::toDomain),
+        myAnswer = myAnswer?.toDomain(),
+    )
+
+/**
+ * 코드 위치 응답을 도메인 모델로 변환한다.
+ *
+ * @return 문제가 인용한 코드 위치
+ */
+internal fun SourceResponse.toDomain(): QuestionSource =
+    QuestionSource(
+        file = file,
+        startLine = startLine,
+        endLine = endLine,
+        symbol = symbol,
+        summary = summary,
+        url = url,
+    )
+
+/**
+ * 제출한 답 응답을 도메인 모델로 변환한다.
+ *
+ * @return 이미 제출한 답
+ */
+internal fun MyAnswerResponse.toDomain(): MyAnswer =
+    MyAnswer(
+        selectedIndex = selectedIndex,
+        text = text,
+        correct = correct,
+        answeredAt = answeredAt,
     )
