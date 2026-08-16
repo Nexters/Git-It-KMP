@@ -6,10 +6,14 @@ import com.nexters.hytime.gitit.data.dto.ProjectDetailResponse
 import com.nexters.hytime.gitit.data.dto.ProjectItemResponse
 import com.nexters.hytime.gitit.data.dto.ProjectListResponse
 import com.nexters.hytime.gitit.data.dto.QuestionResponse
+import com.nexters.hytime.gitit.data.dto.RubricCriterionResponse
+import com.nexters.hytime.gitit.data.dto.RubricResponse
 import com.nexters.hytime.gitit.data.dto.SetResponse
 import com.nexters.hytime.gitit.data.dto.SourceResponse
 import com.nexters.hytime.gitit.data.dto.SubmitChoiceAnswerResponse
+import com.nexters.hytime.gitit.data.dto.SubmitEssayAnswerResponse
 import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
+import com.nexters.hytime.gitit.domain.model.EssayAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.LearningSetSummary
 import com.nexters.hytime.gitit.domain.model.MyAnswer
@@ -20,6 +24,8 @@ import com.nexters.hytime.gitit.domain.model.ProjectSummary
 import com.nexters.hytime.gitit.domain.model.Question
 import com.nexters.hytime.gitit.domain.model.QuestionFormat
 import com.nexters.hytime.gitit.domain.model.QuestionSource
+import com.nexters.hytime.gitit.domain.model.Rubric
+import com.nexters.hytime.gitit.domain.model.RubricCriterion
 
 /**
  * 프로젝트 목록 응답을 도메인 페이지로 변환한다.
@@ -150,4 +156,41 @@ internal fun SubmitChoiceAnswerResponse.toDomain(): ChoiceAnswerResult =
         correct = correct,
         answerIndex = answerIndex,
         explanation = explanation,
+    )
+
+/**
+ * 서술형 제출 응답을 도메인 모델로 변환한다.
+ *
+ * @return 해설과 자가채점 기준
+ */
+internal fun SubmitEssayAnswerResponse.toDomain(): EssayAnswerResult =
+    EssayAnswerResult(
+        questionId = questionId,
+        explanation = explanation,
+        rubric = rubric.toDomain(),
+    )
+
+/**
+ * 채점 기준 응답을 도메인 모델로 변환한다.
+ *
+ * @return 자가채점 기준
+ */
+internal fun RubricResponse.toDomain(): Rubric =
+    Rubric(
+        criteria = criteria.map(RubricCriterionResponse::toDomain),
+        keyPoints = keyPoints,
+        fullMarkExample = fullMarkExample,
+        partialExample = partialExample,
+        zeroExample = zeroExample,
+    )
+
+/**
+ * 채점 기준 항목 응답을 도메인 모델로 변환한다.
+ *
+ * @return 판단 기준과 배점
+ */
+internal fun RubricCriterionResponse.toDomain(): RubricCriterion =
+    RubricCriterion(
+        text = text,
+        points = points,
     )

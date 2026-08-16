@@ -242,6 +242,43 @@ class ProjectRepositoryImplTest {
         assertEquals("두 번째가 맞습니다", result.explanation)
     }
 
+    /** 서술형 제출이 전용 경로로 답안을 보내고 채점 기준을 매핑하는지 검증한다. */
+    @Test
+    fun submitEssayAnswer_성공하면_답안을보내고채점기준을매핑한다() {
+        val networkClient = FakeNetworkClient(ESSAY_ANSWER_RESPONSE)
+
+        val result =
+            runBlocking { ProjectRepositoryImpl(networkClient).submitEssayAnswer("p1", "q2", "라우터가 한곳에 모여 있습니다") }
+                .getOrThrow()
+
+        assertEquals("/api/v1/projects/p1/questions/q2/answers/essay", networkClient.requestedPath)
+        assertEquals("""{"text":"라우터가 한곳에 모여 있습니다"}""", networkClient.requestBody)
+        assertEquals("해설입니다", result.explanation)
+        assertEquals(listOf("파일명을 들었는가"), result.rubric.criteria.map { it.text })
+        assertEquals(listOf(3), result.rubric.criteria.map { it.points })
+        assertEquals(listOf("라우터"), result.rubric.keyPoints)
+        assertEquals("만점 예시", result.rubric.fullMarkExample)
+    }
+
+    /** 서술형 답안이 비었거나 서버 상한을 넘으면 요청하지 않고 실패로 처리하는지 검증한다. */
+    @Test
+    fun submitEssayAnswer_답안이비었거나상한을넘으면_요청하지않고실패한다() {
+        val blankClient = FakeNetworkClient(ESSAY_ANSWER_RESPONSE)
+        val tooLongClient = FakeNetworkClient(ESSAY_ANSWER_RESPONSE)
+
+        val blankResult = runBlocking { ProjectRepositoryImpl(blankClient).submitEssayAnswer("p1", "q2", " ") }
+        val tooLongResult =
+            runBlocking {
+                ProjectRepositoryImpl(tooLongClient)
+                    .submitEssayAnswer("p1", "q2", "가".repeat(ProjectRepository.MAX_ESSAY_TEXT_LENGTH + 1))
+            }
+
+        assertTrue(blankResult.isFailure)
+        assertTrue(tooLongResult.isFailure)
+        assertEquals("", blankClient.requestedMethod)
+        assertEquals("", tooLongClient.requestedMethod)
+    }
+
     private companion object {
         /** 테스트 요청에 사용하는 GitHub 저장소 URL이다. */
         const val REPOSITORY_URL = "https://github.com/Nexters/Git-it-Server"
@@ -270,5 +307,10 @@ class ProjectRepositoryImplTest {
                 """"url":"https://github.com/facebook/react/blob/abc/src/index.ts"}],""" +
                 """"myAnswer":{"selectedIndex":1,"text":null,"correct":true,"answeredAt":"2026-08-16T10:00:00Z"}},""" +
                 """{"questionId":"q2","format":"ESSAY","text":"문제2","choices":[],"sources":[],"myAnswer":null}]}}"""
+
+        private const val ESSAY_ANSWER_RESPONSE =
+            """{"success":true,"data":{"questionId":"q2","explanation":"해설입니다","rubric":{""" +
+                """"criteria":[{"text":"파일명을 들었는가","points":3}],"keyPoints":["라우터"],""" +
+                """"fullMarkExample":"만점 예시","partialExample":"부분 예시","zeroExample":"0점 예시"}}}"""
     }
 }

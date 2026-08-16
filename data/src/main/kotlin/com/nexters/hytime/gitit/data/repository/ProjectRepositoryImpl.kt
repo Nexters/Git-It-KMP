@@ -9,8 +9,11 @@ import com.nexters.hytime.gitit.data.dto.RegisterProjectRequest
 import com.nexters.hytime.gitit.data.dto.RegisterProjectResponse
 import com.nexters.hytime.gitit.data.dto.SubmitChoiceAnswerRequest
 import com.nexters.hytime.gitit.data.dto.SubmitChoiceAnswerResponse
+import com.nexters.hytime.gitit.data.dto.SubmitEssayAnswerRequest
+import com.nexters.hytime.gitit.data.dto.SubmitEssayAnswerResponse
 import com.nexters.hytime.gitit.data.mapping.toDomain
 import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
+import com.nexters.hytime.gitit.domain.model.EssayAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
 import com.nexters.hytime.gitit.domain.model.ProjectPage
@@ -105,6 +108,25 @@ class ProjectRepositoryImpl(
                     "${questionPath(projectId, questionId)}/answers/choice",
                     SubmitChoiceAnswerRequest(selectedIndex),
                 ).requireData("4지선다 답변 제출 응답이 올바르지 않습니다.")
+                .toDomain()
+        }
+
+    override suspend fun submitEssayAnswer(
+        projectId: String,
+        questionId: String,
+        text: String,
+    ): Result<EssayAnswerResult> =
+        runCatchingResult {
+            requireQuestion(projectId, questionId)
+            require(text.isNotBlank()) { "답안이 비어 있습니다." }
+            require(text.length <= ProjectRepository.MAX_ESSAY_TEXT_LENGTH) {
+                "답안은 ${ProjectRepository.MAX_ESSAY_TEXT_LENGTH}자를 넘을 수 없습니다."
+            }
+            networkClient
+                .post<SubmitEssayAnswerRequest, ApiResponse<SubmitEssayAnswerResponse>>(
+                    "${questionPath(projectId, questionId)}/answers/essay",
+                    SubmitEssayAnswerRequest(text),
+                ).requireData("서술형 답변 제출 응답이 올바르지 않습니다.")
                 .toDomain()
         }
 

@@ -1,6 +1,7 @@
 package com.nexters.hytime.gitit.domain.repository
 
 import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
+import com.nexters.hytime.gitit.domain.model.EssayAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
 import com.nexters.hytime.gitit.domain.model.ProjectPage
@@ -79,11 +80,28 @@ interface ProjectRepository {
         selectedIndex: Int,
     ): Result<ChoiceAnswerResult>
 
+    /**
+     * 서술형 문제의 답을 제출한다. 다시 제출하면 이전 답을 덮어쓴다.
+     *
+     * @param projectId 문제가 속한 프로젝트 식별자
+     * @param questionId 답을 낼 문제 식별자
+     * @param text 서술형 답안. 서버 상한인 [MAX_ESSAY_TEXT_LENGTH]자를 넘을 수 없다
+     * @return 제출 결과. 성공 시 해설과 채점 기준, 실패 시 예외를 담는다
+     */
+    suspend fun submitEssayAnswer(
+        projectId: String,
+        questionId: String,
+        text: String,
+    ): Result<EssayAnswerResult>
+
     companion object {
         /** 서버 기본값과 같은 첫 페이지 번호다. */
         const val DEFAULT_PAGE = 0
 
         /** 서버 기본값과 같은 페이지 크기다. */
         const val DEFAULT_PAGE_SIZE = 10
+
+        /** 서버가 받아주는 서술형 답안의 최대 길이다. */
+        const val MAX_ESSAY_TEXT_LENGTH = 2000
     }
 }
