@@ -108,56 +108,58 @@ fun ProjectDetailScreen(
                 .fillMaxSize()
                 .background(GitItTheme.colors.grey700),
     ) {
-        Box(
+        LazyColumn(
             modifier =
                 Modifier
-                    .fillMaxWidth()
-                    .height(179.dp)
-                    .drawWithCache {
-                        val center = Offset(size.width * 0.71f, -size.height * 0.08f)
-                        val brush =
-                            Brush.radialGradient(
-                                0f to Color(0xFF56718A),
-                                0.5f to Color(0xFF485469),
-                                1f to Color(0xFF3B3749),
-                                center = center,
-                                radius = size.width * 0.73f,
-                            )
+                    .fillMaxSize()
+                    .gitItMainNavSky(sky)
+                    .navigationBarsPadding(),
+            contentPadding = PaddingValues(bottom = 24.dp),
+        ) {
+            item {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(179.dp)
+                                .drawWithCache {
+                                    val center = Offset(size.width * 0.71f, -size.height * 0.08f)
+                                    val brush =
+                                        Brush.radialGradient(
+                                            0f to Color(0xFF56718A),
+                                            0.5f to Color(0xFF485469),
+                                            1f to Color(0xFF3B3749),
+                                            center = center,
+                                            radius = size.width * 0.73f,
+                                        )
 
-                        onDrawBehind {
-                            scale(scaleX = 2f, scaleY = 1f, pivot = center) {
-                                drawRect(brush = brush)
-                            }
-                        }
-                    },
-        )
-
-        Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
-            ProjectDetailTopBar(
-                onBackClick = onBackClick,
-                onMoreClick = onMoreMenuClick,
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            LazyColumn(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .gitItMainNavSky(sky)
-                        .navigationBarsPadding()
-                        .padding(horizontal = 20.dp),
-                contentPadding = PaddingValues(bottom = 24.dp),
-            ) {
-                item {
-                    ProjectHeader(uiState = uiState, onQuestionSolvingClick = onQuestionSolvingClick)
-                    Spacer(Modifier.height(28.dp))
+                                    onDrawBehind {
+                                        scale(scaleX = 2f, scaleY = 1f, pivot = center) {
+                                            drawRect(brush = brush)
+                                        }
+                                    }
+                                },
+                    )
+                    Column(
+                        modifier =
+                            Modifier
+                                .statusBarsPadding()
+                                .padding(top = 82.dp, start = 20.dp, end = 20.dp),
+                    ) {
+                        ProjectHeader(uiState = uiState, onQuestionSolvingClick = onQuestionSolvingClick)
+                        Spacer(Modifier.height(28.dp))
+                    }
                 }
-                item {
+            }
+            item {
+                Box(modifier = Modifier.padding(horizontal = 20.dp)) {
                     ProjectTotalProgress(progress = uiState.totalProgress)
-                    Spacer(Modifier.height(31.dp))
                 }
-                item {
+                Spacer(Modifier.height(31.dp))
+            }
+            item {
+                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                     Text(
                         text = "학습 세트",
                         color = GitItTheme.colors.grey100,
@@ -165,11 +167,20 @@ fun ProjectDetailScreen(
                     )
                     Spacer(Modifier.height(16.dp))
                 }
-                items(uiState.learningSets, key = { it.id }) { set ->
-                    LearningSetCard(item = set, onClick = { onLearningSetClick(set.id) })
-                    Spacer(Modifier.height(12.dp))
-                }
             }
+            items(uiState.learningSets, key = { it.id }) { set ->
+                Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                    LearningSetCard(item = set, onClick = { onLearningSetClick(set.id) })
+                }
+                Spacer(Modifier.height(12.dp))
+            }
+        }
+
+        Box(modifier = Modifier.fillMaxWidth().statusBarsPadding()) {
+            ProjectDetailTopBar(
+                onBackClick = onBackClick,
+                onMoreClick = onMoreMenuClick,
+            )
         }
 
         if (uiState.showMoreMenu) {
