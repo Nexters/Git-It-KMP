@@ -144,6 +144,44 @@ class ProjectRepositoryImplTest {
         assertEquals(3, detail.sets.first().completedCount)
     }
 
+    /** 삭제가 DELETE 메서드로 프로젝트 경로를 호출하는지 검증한다. */
+    @Test
+    fun deleteProject_성공하면_DELETE로요청한다() {
+        val networkClient = FakeNetworkClient()
+
+        val result = runBlocking { ProjectRepositoryImpl(networkClient).deleteProject("p1") }
+
+        assertEquals(Unit, result.getOrThrow())
+        assertEquals("DELETE", networkClient.requestedMethod)
+        assertEquals("/api/v1/projects/p1", networkClient.requestedPath)
+        assertEquals(true, networkClient.requestedAuthenticated)
+    }
+
+    /** 삭제 실패 응답을 실패로 변환하는지 검증한다. */
+    @Test
+    fun deleteProject_응답이실패면_실패를반환한다() {
+        val networkClient = FakeNetworkClient("""{"success":false,"code":"PROJECT-001","message":"프로젝트를 찾을 수 없습니다"}""")
+
+        val result = runBlocking { ProjectRepositoryImpl(networkClient).deleteProject("p1") }
+
+        assertTrue(result.isFailure)
+    }
+
+    /** 식별자가 비어 있으면 요청을 보내지 않고 실패로 처리하는지 검증한다. */
+    @Test
+    fun 프로젝트식별자가비어있으면_요청하지않고실패한다() {
+        val detailClient = FakeNetworkClient(PROJECT_DETAIL_RESPONSE)
+        val deleteClient = FakeNetworkClient()
+
+        val detailResult = runBlocking { ProjectRepositoryImpl(detailClient).getProjectDetail(" ") }
+        val deleteResult = runBlocking { ProjectRepositoryImpl(deleteClient).deleteProject("") }
+
+        assertTrue(detailResult.isFailure)
+        assertTrue(deleteResult.isFailure)
+        assertEquals("", detailClient.requestedMethod)
+        assertEquals("", deleteClient.requestedMethod)
+    }
+
     private companion object {
         /** 테스트 요청에 사용하는 GitHub 저장소 URL이다. */
         const val REPOSITORY_URL = "https://github.com/Nexters/Git-it-Server"

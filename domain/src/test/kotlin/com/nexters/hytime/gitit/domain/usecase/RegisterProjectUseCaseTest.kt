@@ -72,4 +72,6 @@ private class RecordingProjectRepository : ProjectRepository {
     ): Result<ProjectPage> = error("호출되면 안 됩니다.")
 
     override suspend fun getProjectDetail(projectId: String): Result<ProjectDetail> = error("호출되면 안 됩니다.")
+
+    override suspend fun deleteProject(projectId: String): Result<Unit> = error("호출되면 안 됩니다.")
 }

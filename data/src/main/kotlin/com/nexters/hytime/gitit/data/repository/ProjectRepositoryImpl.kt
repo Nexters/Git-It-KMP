@@ -1,6 +1,7 @@
 package com.nexters.hytime.gitit.data.repository
 
 import com.nexters.hytime.gitit.data.dto.ApiResponse
+import com.nexters.hytime.gitit.data.dto.EmptyApiResponse
 import com.nexters.hytime.gitit.data.dto.ProjectDetailResponse
 import com.nexters.hytime.gitit.data.dto.ProjectListResponse
 import com.nexters.hytime.gitit.data.dto.RegisterProjectRequest
@@ -13,6 +14,7 @@ import com.nexters.hytime.gitit.domain.model.ProjectRegistration
 import com.nexters.hytime.gitit.domain.repository.ProjectRepository
 import com.nexters.hytime.gitit.domain.util.runCatchingResult
 import com.nexters.hytime.gitit.network.api.NetworkClient
+import com.nexters.hytime.gitit.network.api.delete
 import com.nexters.hytime.gitit.network.api.get
 import com.nexters.hytime.gitit.network.api.post
 
@@ -62,6 +64,14 @@ class ProjectRepositoryImpl(
                 .get<ApiResponse<ProjectDetailResponse>>("$PATH_PROJECTS/$projectId")
                 .requireData("프로젝트 상세 조회 응답이 올바르지 않습니다.")
                 .toDomain()
+        }
+
+    override suspend fun deleteProject(projectId: String): Result<Unit> =
+        runCatchingResult {
+            requireProjectId(projectId)
+            networkClient
+                .delete<EmptyApiResponse>("$PATH_PROJECTS/$projectId")
+                .requireSuccess("프로젝트 삭제 응답이 올바르지 않습니다.")
         }
 
     /**

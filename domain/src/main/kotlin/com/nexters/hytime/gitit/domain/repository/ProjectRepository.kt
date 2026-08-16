@@ -43,6 +43,14 @@ interface ProjectRepository {
      */
     suspend fun getProjectDetail(projectId: String): Result<ProjectDetail>
 
+    /**
+     * 프로젝트를 삭제한다.
+     *
+     * @param projectId 삭제할 프로젝트 식별자
+     * @return 삭제 결과. 성공 시 [Unit], 실패 시 예외를 담는다
+     */
+    suspend fun deleteProject(projectId: String): Result<Unit>
+
     companion object {
         /** 서버 기본값과 같은 첫 페이지 번호다. */
         const val DEFAULT_PAGE = 0
