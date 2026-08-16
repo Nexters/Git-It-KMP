@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
@@ -27,12 +28,20 @@ import com.skydoves.cloudy.liquidGlass
  * @param sky 흐림 배경을 캡처하는 Cloudy 상태
  * @param backdropSize 레이아웃 이후 측정된 배경 크기. 0이면 리퀴드 글래스 효과를 건너뛴다
  * @param shape 배경과 흐림 효과를 자를 형태
+ * @param blurRadius Cloudy 배경 흐림 반경
+ * @param tint 흐림 배경 위에 합성할 색상
+ * @param refraction 배경 굴절 강도
+ * @param curve 렌즈 중심과 가장자리 사이의 곡률 강도
  */
 @Composable
 private fun Modifier.gitItLiquidGlassBackdrop(
     sky: Sky,
     backdropSize: IntSize,
     shape: Shape = RoundedCornerShape(99.dp),
+    blurRadius: Int = 0,
+    tint: Color = GitItTheme.colors.white15,
+    refraction: Float = 0.8f,
+    curve: Float = 2f,
 ): Modifier {
     val lensWidth = backdropSize.width.toFloat()
     val lensHeight = backdropSize.height.toFloat()
@@ -41,8 +50,8 @@ private fun Modifier.gitItLiquidGlassBackdrop(
     if (lensWidth <= 0f || lensHeight <= 0f) {
         return clippedModifier.cloudy(
             sky = sky,
-            radius = 0,
-            tint = GitItTheme.colors.white15,
+            radius = blurRadius,
+            tint = tint,
             shape = shape,
         )
     }
@@ -51,14 +60,14 @@ private fun Modifier.gitItLiquidGlassBackdrop(
         .liquidGlass(
             lensCenter = Offset(lensWidth / 2f, lensHeight / 2f),
             lensSize = Size(lensWidth, lensHeight),
-            refraction = 0.8f,
-            curve = 2f,
+            refraction = refraction,
+            curve = curve,
             glow = LiquidGlassDefaults.NoGlow,
             enabled = true,
         ).cloudy(
             sky = sky,
-            radius = 0,
-            tint = GitItTheme.colors.white15,
+            radius = blurRadius,
+            tint = tint,
             shape = shape,
         )
 }
@@ -72,6 +81,10 @@ private fun Modifier.gitItLiquidGlassBackdrop(
  * @param sky 흐림 배경을 캡처하는 Cloudy 상태
  * @param modifier 컨테이너의 외부 배치와 추가 수식자
  * @param shape 백드롭 형태
+ * @param blurRadius Cloudy 배경 흐림 반경
+ * @param tint 흐림 배경 위에 합성할 색상
+ * @param refraction 배경 굴절 강도
+ * @param curve 렌즈 중심과 가장자리 사이의 곡률 강도
  * @param content 백드롭 위에 배치할 콘텐츠
  */
 @Composable
@@ -79,6 +92,10 @@ fun GitItLiquidGlassContainer(
     sky: Sky,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(99.dp),
+    blurRadius: Int = 0,
+    tint: Color = GitItTheme.colors.white15,
+    refraction: Float = 0.8f,
+    curve: Float = 2f,
     content: @Composable () -> Unit,
 ) {
     var backdropSize by remember { mutableStateOf(IntSize.Zero) }
@@ -88,7 +105,15 @@ fun GitItLiquidGlassContainer(
                 Modifier
                     .matchParentSize()
                     .onSizeChanged { backdropSize = it }
-                    .gitItLiquidGlassBackdrop(sky = sky, backdropSize = backdropSize, shape = shape),
+                    .gitItLiquidGlassBackdrop(
+                        sky = sky,
+                        backdropSize = backdropSize,
+                        shape = shape,
+                        blurRadius = blurRadius,
+                        tint = tint,
+                        refraction = refraction,
+                        curve = curve,
+                    ),
         )
         content()
     }

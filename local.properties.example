@@ -18,3 +18,9 @@ google.desktopClientId=yyyyyyyy.apps.googleusercontent.com
 
 # 백엔드 API 기준 URL (Google OAuth와 무관한 독립 설정)
 api.baseUrl=https://api.gitit.example.com
+
+# Android release 서명 정보
+release.storeFile=.signing/gitit-release.jks
+release.storePassword=your-store-password
+release.keyAlias=gitit
+release.keyPassword=your-key-password

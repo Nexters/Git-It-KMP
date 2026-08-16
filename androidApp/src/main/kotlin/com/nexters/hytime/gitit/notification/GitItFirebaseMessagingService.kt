@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.SystemClock
@@ -23,7 +24,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
-/** FCM 앱 설치 등록을 동기화하고 문제 생성 결과와 시스템 알림을 처리한다. */
+/** FCM 앱 설치 등록을 서버와 동기화하고, 수신 메시지의 문제 생성 결과 반영과 시스템 알림 표시를 처리한다. */
 class GitItFirebaseMessagingService : FirebaseMessagingService() {
     /** FCM 수신과 토큰 갱신 상태를 기록하는 로거다. */
     private val logger by lazy { gitItLogger(tag = "FCM") }
@@ -41,11 +42,15 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**
-     * data payload의 문제 생성 결과를 반영하고, 제목과 본문이 있으면 학습 알림을 게시한다.
+     * data payload의 문제 생성 결과를 반영하고, data 또는 notification payload에 제목과 본문이 있으면 학습 알림을 게시한다.
      *
      * @param remoteMessage Firebase가 전달한 원본 메시지
      */
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        logger.i {
+            "FCM 메시지 수신: messageId=${remoteMessage.messageId}, " +
+                "dataKeys=${remoteMessage.data.keys}, notification=${remoteMessage.notification != null}"
+        }
         val data = remoteMessage.data
         val hasCreateFields = QUIZ_CREATE_PROJECT_ID_KEY in data || QUIZ_CREATE_STATUS_KEY in data
         val createResult = data.toQuizCreateResult()
@@ -62,10 +67,16 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
             logger.w { "FCM 문제 생성 결과 payload의 projectId 또는 status가 올바르지 않습니다." }
         }
 
-        val content = data.toNotificationContent()
+        val content =
+            resolveNotificationContent(
+                data = data,
+                notificationTitle = remoteMessage.notification?.title,
+                notificationBody = remoteMessage.notification?.body,
+            )
         if (content == null) {
+            // 문제 생성 결과 전용 메시지는 제목과 본문이 없는 것이 정상이라 경고하지 않는다.
             if (!hasCreateFields) {
-                logger.w { "FCM data payload에 title 또는 body가 없습니다." }
+                logger.w { "FCM payload에 title 또는 body가 없습니다." }
             }
             return
         }
@@ -78,6 +89,7 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
      * @param installationId Firebase가 앱 인스턴스에 발급한 식별자
      */
     override fun onRegistered(installationId: String) {
+        logger.i { "FCM 등록 완료" }
         serviceScope.launch { registerDevice(installationId) }
     }
 
@@ -101,7 +113,7 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     /**
-     * 학습 알림 채널을 준비하고 사용자가 누르면 앱을 여는 알림을 게시한다.
+     * 사용자가 누르면 앱을 여는 알림을 게시한다.
      *
      * @param content 표시할 제목과 본문
      * @param messageId 같은 FCM 메시지의 알림을 식별하는 값
@@ -111,16 +123,6 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
         messageId: String?,
     ) {
         val notificationManager = getSystemService(NotificationManager::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationManager.createNotificationChannel(
-                NotificationChannel(
-                    NOTIFICATION_CHANNEL_ID,
-                    getString(R.string.notification_channel_learning),
-                    NotificationManager.IMPORTANCE_DEFAULT,
-                ),
-            )
-        }
-
         val openAppIntent = Intent(this, MainActivity::class.java)
         val pendingIntent =
             PendingIntent.getActivity(
@@ -146,16 +148,26 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
                 .setCategory(Notification.CATEGORY_MESSAGE)
                 .build()
 
+        logger.i { "FCM 알림 게시: messageId=$messageId, 알림허용=${notificationManager.areNotificationsEnabled()}" }
         notificationManager.notify(messageId?.hashCode() ?: SystemClock.elapsedRealtime().toInt(), notification)
     }
 
     private companion object {
-        /** 학습 알림 설정을 유지하는 Android 채널 식별자다. */
-        private const val NOTIFICATION_CHANNEL_ID = "learning"
-
         /** 앱을 여는 PendingIntent를 갱신할 때 사용하는 요청 코드다. */
         private const val OPEN_APP_REQUEST_CODE = 1
     }
+}
+
+/** Android 8.0 이상에서 포그라운드와 백그라운드 FCM이 공유할 학습 알림 채널을 생성한다. */
+internal fun Context.createLearningNotificationChannel() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+    getSystemService(NotificationManager::class.java).createNotificationChannel(
+        NotificationChannel(
+            NOTIFICATION_CHANNEL_ID,
+            getString(R.string.notification_channel_learning),
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ),
+    )
 }
 
 /**
@@ -216,10 +228,41 @@ internal fun Map<String, String>.toQuizCreateResult(): QuizCreateResult? {
  * @return 제목과 본문이 모두 있으면 알림 내용, 아니면 `null`
  */
 internal fun Map<String, String>.toNotificationContent(): NotificationContent? {
-    val title = get("title")?.trim().orEmpty()
-    val body = get("body")?.trim().orEmpty()
-    return if (title.isBlank() || body.isBlank()) null else NotificationContent(title, body)
+    return createNotificationContent(get("title"), get("body"))
 }
+
+/**
+ * data payload을 우선하고 유효하지 않으면 notification payload로 알림 내용을 구성한다.
+ *
+ * @param data FCM data payload
+ * @param notificationTitle notification payload의 제목
+ * @param notificationBody notification payload의 본문
+ * @return 두 payload 중 먼저 유효한 알림 내용, 모두 유효하지 않으면 `null`
+ */
+internal fun resolveNotificationContent(
+    data: Map<String, String>,
+    notificationTitle: String?,
+    notificationBody: String?,
+): NotificationContent? = data.toNotificationContent() ?: createNotificationContent(notificationTitle, notificationBody)
+
+/**
+ * nullable 제목과 본문을 시스템 알림 내용으로 정리한다.
+ *
+ * @param title 공백을 제거할 알림 제목
+ * @param body 공백을 제거할 알림 본문
+ * @return 제목과 본문이 모두 있으면 알림 내용, 아니면 `null`
+ */
+internal fun createNotificationContent(
+    title: String?,
+    body: String?,
+): NotificationContent? {
+    val normalizedTitle = title?.trim().orEmpty()
+    val normalizedBody = body?.trim().orEmpty()
+    return if (normalizedTitle.isBlank() || normalizedBody.isBlank()) null else NotificationContent(normalizedTitle, normalizedBody)
+}
+
+/** 포그라운드와 백그라운드 FCM 알림이 공유하는 Android 채널 식별자다. */
+private const val NOTIFICATION_CHANNEL_ID = "learning"
 
 /**
  * Firebase Installation ID와 현재 앱 환경을 서버 기기 정보로 변환한다.

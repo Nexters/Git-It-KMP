@@ -4,9 +4,11 @@ package com.nexters.hytime.gitit.feature.projectlist
  * 프로젝트 리스트 화면의 단일 UI 상태다.
  *
  * @property projects 사용자가 참여 중인 프로젝트 목록
+ * @property pendingDeleteProjectId 삭제 확인 모달에 표시할 프로젝트 식별자. 모달이 닫혀 있으면 null
  */
 data class ProjectListUiState(
     val projects: List<ProjectListItem> = emptyList(),
+    val pendingDeleteProjectId: String? = null,
 )
 
 /**
@@ -18,8 +20,6 @@ data class ProjectListUiState(
  * @property setLabel 최근 학습 세트 라벨
  * @property recentSetTitle 최근 학습 세트 이름
  * @property progress 최근 세트 진행률(0..100)
- * @property footerText 카드 하단 보조 텍스트. null이면 표시하지 않는다
- * @property showPlayButton 카드 우측 상단에 문제풀이 버튼을 표시할지 여부
  */
 data class ProjectListItem(
     val id: String,
@@ -28,17 +28,12 @@ data class ProjectListItem(
     val setLabel: String,
     val recentSetTitle: String,
     val progress: Int,
-    val footerText: String? = null,
-    val showPlayButton: Boolean = false,
 )
 
 /**
  * 프로젝트 리스트 화면에서 발생하는 사용자 의도다.
  */
 sealed interface ProjectListIntent {
-    /** 뒤로가기 버튼 선택. */
-    data object BackClick : ProjectListIntent
-
     /** 홈 탭 선택. */
     data object HomeTabClick : ProjectListIntent
 
@@ -50,6 +45,36 @@ sealed interface ProjectListIntent {
 
     /** 마이 탭 선택. */
     data object MyTabClick : ProjectListIntent
+
+    /** 팝업 메뉴에서 프로젝트 삭제 선택. */
+    data object DeleteMenuClick : ProjectListIntent
+
+    /** 프로젝트 삭제 화면에서 뒤로가기 선택. */
+    data object DeleteModeBackClick : ProjectListIntent
+
+    /**
+     * 삭제 화면에서 프로젝트의 마이너스 버튼 선택으로 확인 모달을 표시한다.
+     *
+     * @property projectId 삭제할 프로젝트 식별자
+     */
+    data class DeleteProjectClick(
+        val projectId: String,
+    ) : ProjectListIntent
+
+    /** 삭제 확인 모달에서 삭제 선택. */
+    data object ConfirmDeleteClick : ProjectListIntent
+
+    /** 삭제 확인 모달에서 취소 또는 바깥 영역 선택. */
+    data object DismissDeleteClick : ProjectListIntent
+
+    /**
+     * 프로젝트 카드를 선택한다.
+     *
+     * @property projectId 상세 정보를 확인할 프로젝트 식별자
+     */
+    data class ProjectClick(
+        val projectId: String,
+    ) : ProjectListIntent
 
     /**
      * 문제풀이 버튼 선택.
@@ -65,7 +90,10 @@ sealed interface ProjectListIntent {
  * 프로젝트 리스트 화면이 한 번만 전달해야 하는 이벤트다.
  */
 sealed interface ProjectListSideEffect {
-    /** 이전 화면으로 이동. */
+    /** 프로젝트 삭제 화면으로 이동. */
+    data object NavigateToProjectDelete : ProjectListSideEffect
+
+    /** 현재 화면을 닫고 이전 화면으로 이동. */
     data object NavigateBack : ProjectListSideEffect
 
     /** 홈 화면으로 이동. */
@@ -76,6 +104,15 @@ sealed interface ProjectListSideEffect {
 
     /** 저장한 문제 화면으로 이동. */
     data object NavigateToBookmark : ProjectListSideEffect
+
+    /**
+     * 프로젝트 상세 화면으로 이동한다.
+     *
+     * @property projectId 상세 정보를 표시할 프로젝트 식별자
+     */
+    data class NavigateToProjectDetail(
+        val projectId: String,
+    ) : ProjectListSideEffect
 
     /**
      * 문제 풀이 화면으로 이동.

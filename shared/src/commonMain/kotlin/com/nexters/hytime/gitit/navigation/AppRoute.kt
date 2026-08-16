@@ -42,11 +42,21 @@ sealed interface AppRoute : NavKey {
     @Serializable
     data object Settings : AppRoute
 
+    /** 계정 삭제 전 주의사항을 안내하는 화면이다. */
+    @Serializable
+    data object AccountDelete : AppRoute
+
     /**
      * 사용자가 불러온 프로젝트 목록 화면이다.
      */
     @Serializable
     data object ProjectList : AppRoute
+
+    /**
+     * 사용자가 프로젝트를 삭제할 수 있는 목록 화면이다.
+     */
+    @Serializable
+    data object ProjectDelete : AppRoute
 
     /**
      * 질문 생성을 시작할 GitHub 저장소를 입력하고 확인하는 화면이다.

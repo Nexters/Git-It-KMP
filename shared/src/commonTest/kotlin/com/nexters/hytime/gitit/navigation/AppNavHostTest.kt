@@ -15,6 +15,7 @@ class AppNavHostTest {
      *
      * 등록이 빠지면 해당 화면이 백스택에 있는 상태로 앱이 백그라운드로 갈 때 크래시하므로,
      * 경로를 추가하고 [appRouteSavedStateConfiguration] 등록을 잊으면 이 테스트가 실패한다.
+     * AccountDelete, ProjectDelete 같은 개별 경로 검증도 이 테스트가 함께 포함한다.
      */
     @Test
     fun appRouteSavedStateConfiguration_allRoutes_returnsSerializer() {

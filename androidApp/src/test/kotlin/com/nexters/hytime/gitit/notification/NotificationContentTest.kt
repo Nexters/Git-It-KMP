@@ -65,6 +65,32 @@ class NotificationContentTest {
         invalidPayloads.forEach { payload -> assertNull(payload.toNotificationContent(), payload.toString()) }
     }
 
+    /** data payload가 유효하면 notification payload보다 우선하는지 검증한다. */
+    @Test
+    fun resolveNotificationContent_data가유효하면_data를우선한다() {
+        val content =
+            resolveNotificationContent(
+                data = mapOf("title" to "data 제목", "body" to "data 본문"),
+                notificationTitle = "notification 제목",
+                notificationBody = "notification 본문",
+            )
+
+        assertEquals(NotificationContent("data 제목", "data 본문"), content)
+    }
+
+    /** data payload가 유효하지 않으면 notification payload로 대체하는지 검증한다. */
+    @Test
+    fun resolveNotificationContent_data가유효하지않으면_notification으로대체한다() {
+        val content =
+            resolveNotificationContent(
+                data = emptyMap(),
+                notificationTitle = " notification 제목 ",
+                notificationBody = " notification 본문 ",
+            )
+
+        assertEquals(NotificationContent("notification 제목", "notification 본문"), content)
+    }
+
     /** 알림이 활성화되면 정리한 FID를 기기 ID와 푸시 토큰으로 사용하는지 검증한다. */
     @Test
     fun createAndroidDeviceInfo_알림이활성화되면_fid를토큰으로사용한다() {

@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -34,6 +35,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -42,6 +46,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -75,12 +81,14 @@ fun HomeScreen(
 ) {
     val sky = rememberGitItMainNavSky()
 
-    Box(
+    BoxWithConstraints(
         modifier =
             modifier
                 .fillMaxSize()
                 .background(GitItTheme.colors.grey700),
     ) {
+        val viewportSize = DpSize(maxWidth, maxHeight)
+
         Column(
             modifier =
                 Modifier
@@ -90,7 +98,10 @@ fun HomeScreen(
                     .statusBarsPadding()
                     .padding(top = 23.dp),
         ) {
-            HomeProfile(uiState = uiState)
+            HomeProfile(
+                uiState = uiState,
+                onClick = { onIntent(HomeIntent.MyTabClick) },
+            )
             Spacer(Modifier.height(18.dp))
             HomeTitle()
             Spacer(Modifier.height(22.dp))
@@ -99,7 +110,11 @@ fun HomeScreen(
                 onClick = { onIntent(HomeIntent.LoadProjectClick) },
             )
             Spacer(Modifier.height(40.dp))
-            LearningSection(uiState = uiState, onIntent = onIntent)
+            LearningSection(
+                uiState = uiState,
+                viewportSize = viewportSize,
+                onIntent = onIntent,
+            )
         }
 
         GitItMainNavBar(
@@ -127,9 +142,13 @@ fun HomeScreen(
  * 사용자 프로필을 Figma 인라인 툴바 규격으로 표시한다.
  *
  * @param uiState 사용자 이름과 역할을 포함한 홈 상태
+ * @param onClick 프로필 선택 시 마이 화면 이동 의도를 전달할 동작
  */
 @Composable
-private fun HomeProfile(uiState: HomeUiState) {
+private fun HomeProfile(
+    uiState: HomeUiState,
+    onClick: () -> Unit,
+) {
     GitItTopBar(
         type = GitItTopBarType.InlineUser,
         userName = uiState.userName,
@@ -140,6 +159,7 @@ private fun HomeProfile(uiState: HomeUiState) {
                     Modifier
                         .size(40.dp)
                         .clip(CircleShape)
+                        .clickable(role = Role.Button, onClick = onClick)
                         .background(GitItTheme.colors.grey300),
                 contentAlignment = Alignment.Center,
             ) {
@@ -255,11 +275,13 @@ private fun QuizCreateLoadingIndicator() {
  * 학습 중인 레포지토리 제목과 카드 또는 빈 상태를 표시한다.
  *
  * @param uiState 학습 카드 목록을 포함한 홈 상태
+ * @param viewportSize 카드가 사용할 수 있는 화면 크기
  * @param onIntent 카드와 전체 보기 입력을 전달할 콜백
  */
 @Composable
 private fun LearningSection(
     uiState: HomeUiState,
+    viewportSize: DpSize,
     onIntent: (HomeIntent) -> Unit,
 ) {
     Row(
@@ -303,7 +325,11 @@ private fun LearningSection(
             if (uiState.learningProjects.size < 3) {
                 EmptyLearningProjects(showMessage = false)
             }
-            LearningProjectPager(projects = uiState.learningProjects, onIntent = onIntent)
+            LearningProjectPager(
+                projects = uiState.learningProjects,
+                viewportSize = viewportSize,
+                onIntent = onIntent,
+            )
         }
     }
 }
@@ -315,67 +341,41 @@ private fun LearningSection(
  */
 @Composable
 private fun EmptyLearningProjects(showMessage: Boolean = true) {
-    Box(
+    BoxWithConstraints(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .height(237.dp),
         contentAlignment = Alignment.Center,
     ) {
-        val outlineColor = GitItTheme.colors.blue300.copy(alpha = 0.26f)
+        val fillColor = GitItTheme.colors.blue500.copy(alpha = 0.3f)
+        val outlineColor = GitItTheme.colors.blue300.copy(alpha = 0.3f)
+        val cardCount = emptyLearningProjectCardCount(maxWidth)
         Canvas(Modifier.fillMaxSize()) {
-            drawRoundRect(
-                color = outlineColor,
-                topLeft =
-                    androidx.compose.ui.geometry
-                        .Offset(20.dp.toPx(), 27.dp.toPx()),
-                size =
-                    androidx.compose.ui.geometry
-                        .Size(154.dp.toPx(), 192.dp.toPx()),
-                cornerRadius =
-                    androidx.compose.ui.geometry
-                        .CornerRadius(12.dp.toPx()),
-                style = Stroke(1.dp.toPx()),
-            )
-            rotate(
-                degrees = 16f,
-                pivot =
-                    androidx.compose.ui.geometry
-                        .Offset(253.dp.toPx(), 123.dp.toPx()),
-            ) {
-                drawRoundRect(
-                    color = outlineColor,
-                    topLeft =
-                        androidx.compose.ui.geometry
-                            .Offset(176.dp.toPx(), 27.dp.toPx()),
-                    size =
-                        androidx.compose.ui.geometry
-                            .Size(154.dp.toPx(), 192.dp.toPx()),
-                    cornerRadius =
-                        androidx.compose.ui.geometry
-                            .CornerRadius(12.dp.toPx()),
-                    style = Stroke(1.dp.toPx()),
-                )
-            }
-            rotate(
-                degrees = -12f,
-                pivot =
-                    androidx.compose.ui.geometry
-                        .Offset(405.dp.toPx(), 123.dp.toPx()),
-            ) {
-                drawRoundRect(
-                    color = outlineColor,
-                    topLeft =
-                        androidx.compose.ui.geometry
-                            .Offset(328.dp.toPx(), 27.dp.toPx()),
-                    size =
-                        androidx.compose.ui.geometry
-                            .Size(154.dp.toPx(), 192.dp.toPx()),
-                    cornerRadius =
-                        androidx.compose.ui.geometry
-                            .CornerRadius(12.dp.toPx()),
-                    style = Stroke(1.dp.toPx()),
-                )
+            val cardSize = Size(154.dp.toPx(), 192.dp.toPx())
+            val cornerRadius = CornerRadius(12.dp.toPx())
+
+            repeat(cardCount) { index ->
+                val left = (20 + index * 154 + if (index % 2 == 1) 2 else 0).dp.toPx()
+                val topLeft = Offset(left, 27.dp.toPx())
+                rotate(
+                    degrees = learningCardAngle(index, index.coerceAtMost(1).toFloat()),
+                    pivot = Offset(left + 77.dp.toPx(), 123.dp.toPx()),
+                ) {
+                    drawRoundRect(
+                        color = fillColor,
+                        topLeft = topLeft,
+                        size = cardSize,
+                        cornerRadius = cornerRadius,
+                    )
+                    drawRoundRect(
+                        color = outlineColor,
+                        topLeft = topLeft,
+                        size = cardSize,
+                        cornerRadius = cornerRadius,
+                        style = Stroke(1.dp.toPx()),
+                    )
+                }
             }
         }
         if (showMessage) {
@@ -390,17 +390,28 @@ private fun EmptyLearningProjects(showMessage: Boolean = true) {
 }
 
 /**
+ * 빈 카드 영역이 화면 오른쪽까지 이어지도록 필요한 카드 수를 계산한다.
+ *
+ * @param availableWidth 빈 카드 영역에 사용할 수 있는 화면 너비
+ * @return 화면 끝을 넘어 그려질 최소 카드 수
+ */
+internal fun emptyLearningProjectCardCount(availableWidth: Dp): Int = (((availableWidth.value - 20f) / 154f).toInt() + 1).coerceAtLeast(1)
+
+/**
  * 카드를 수평으로 넘기며 현재 카드가 정면을 향하도록 회전시킨다.
  *
  * @param projects 표시할 학습 프로젝트 목록
+ * @param viewportSize 카드 크기와 마지막 페이지 여백을 계산할 화면 크기
  * @param onIntent 카드 입력을 전달할 콜백
  */
 @Composable
 private fun LearningProjectPager(
     projects: List<HomeLearningProject>,
+    viewportSize: DpSize,
     onIntent: (HomeIntent) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = projects::size)
+    val cardSize = learningCardSize(viewportSize.height)
     // 실제 데이터의 개수와 무관하게 카드 순서대로 세 색상을 반복한다.
     val backgroundColors =
         listOf(
@@ -414,9 +425,13 @@ private fun LearningProjectPager(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .height(237.dp),
-        contentPadding = PaddingValues(start = 20.dp, end = 186.dp),
-        pageSize = PageSize.Fixed(154.dp),
+                .height(cardSize.height + 45.dp),
+        contentPadding =
+            PaddingValues(
+                start = 20.dp,
+                end = (viewportSize.width - 20.dp - cardSize.width).coerceAtLeast(20.dp),
+            ),
+        pageSize = PageSize.Fixed(cardSize.width),
         beyondViewportPageCount = 2,
         userScrollEnabled = projects.size > 2,
         key = { projects[it].id },
@@ -440,10 +455,28 @@ private fun LearningProjectPager(
                 backgroundColor = backgroundColors[page % backgroundColors.size],
                 onCardClick = { onIntent(HomeIntent.LearningCardClick(project.id)) },
                 onPlayClick = { onIntent(HomeIntent.LearningPlayClick(project.id)) },
-                modifier = Modifier.graphicsLayer { rotationZ = learningCardAngle(page, pageOffset) },
+                modifier =
+                    Modifier
+                        .size(cardSize)
+                        .graphicsLayer { rotationZ = learningCardAngle(page, pageOffset) },
             )
         }
     }
+}
+
+/**
+ * 화면 하단의 가용 공간에 맞춰 학습 카드 크기를 최소·최대 범위에서 확대한다.
+ *
+ * @param viewportHeight 홈 화면 전체 높이
+ * @return 806dp 이하에서는 154×192dp, 874dp 이상에서는 209×260dp인 카드 크기
+ */
+internal fun learningCardSize(viewportHeight: Dp): DpSize {
+    val height = (viewportHeight - 614.dp).coerceIn(192.dp, 260.dp)
+    val growthFraction = (height - 192.dp) / 68.dp
+    return DpSize(
+        width = 154.dp + 55.dp * growthFraction,
+        height = height,
+    )
 }
 
 /**

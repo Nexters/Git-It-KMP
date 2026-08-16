@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -41,13 +40,16 @@ class BookmarkViewModel : ViewModel() {
             BookmarkIntent.SavedTabClick -> Unit
             BookmarkIntent.MyTabClick -> emit(BookmarkSideEffect.NavigateToMy)
             is BookmarkIntent.FilterClick -> {
-                _uiState.update { state -> state.copy(selectedFilterId = intent.filterId) }
+                setState { copy(selectedFilterId = intent.filterId) }
             }
             is BookmarkIntent.BookmarkClick -> {
-                // TODO: 저장한 문제 해제 API 연동 후 상태를 갱신한다.
-            }
-            is BookmarkIntent.ExplanationClick -> {
-                // TODO: 해설 화면 route 추가 후 연결한다.
+                setState {
+                    copy(
+                        bookmarkChanges =
+                            bookmarkChanges +
+                                (intent.questionId to !(bookmarkChanges[intent.questionId] ?: true)),
+                    )
+                }
             }
             is BookmarkIntent.SolveClick -> {
                 // TODO: 문제풀이 화면 route 추가 후 연결한다.
@@ -57,6 +59,10 @@ class BookmarkViewModel : ViewModel() {
 
     private fun emit(sideEffect: BookmarkSideEffect) {
         viewModelScope.launch { _sideEffects.emit(sideEffect) }
+    }
+
+    private fun setState(reducer: BookmarkUiState.() -> BookmarkUiState) {
+        _uiState.value = _uiState.value.reducer()
     }
 }
 
