@@ -1,10 +1,27 @@
 package com.nexters.hytime.gitit.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.NavDisplay
+import androidx.navigationevent.NavigationEvent
+import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.feature.bookmark.BookmarkRoute
 import com.nexters.hytime.gitit.feature.home.HomeRoute
 import com.nexters.hytime.gitit.feature.my.AccountDeleteRoute
@@ -17,6 +34,122 @@ import com.nexters.hytime.gitit.feature.questioncreate.QuestionCreateRoute
 import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizRoute
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
 import com.nexters.hytime.gitit.presentation.splash.IntermediateSplashScreen
+
+/** 메인 화면 전환에 사용하는 페이드 시간이다. */
+private const val FADE_DURATION_MILLIS = 180
+
+/** 계층형 화면과 집중형 화면 전환에 사용하는 이동 시간이다. */
+private const val SLIDE_DURATION_MILLIS = 300
+
+/** 화면의 역할에 따라 적용할 전환 유형이다. */
+internal enum class AppNavigationMotion {
+    Fade,
+    Horizontal,
+    Vertical,
+}
+
+/**
+ * 화면의 역할에 맞는 전환 유형을 반환한다.
+ *
+ * @return 메인·모드 화면은 페이드, 계층형 화면은 가로 이동, 집중형 화면은 세로 이동
+ */
+internal fun AppRoute.navigationMotion(): AppNavigationMotion =
+    when (this) {
+        AppRoute.Bookmark,
+        AppRoute.Home,
+        AppRoute.IntermediateSplash,
+        AppRoute.My,
+        AppRoute.Onboarding,
+        AppRoute.ProjectDelete,
+        AppRoute.ProjectList,
+        -> AppNavigationMotion.Fade
+
+        AppRoute.AccountDelete,
+        AppRoute.LiquidGlassExample,
+        is AppRoute.ProjectDetail,
+        AppRoute.Settings,
+        -> AppNavigationMotion.Horizontal
+
+        AppRoute.QuestionCreate,
+        is AppRoute.Quiz,
+        -> AppNavigationMotion.Vertical
+    }
+
+/**
+ * 화면 역할과 이동 방향에 맞는 애니메이션을 만든다.
+ *
+ * @param motion 적용할 화면 전환 유형
+ * @param isPop 뒤로가기로 이전 화면을 표시하는 전환인지 여부
+ * @return Navigation 3가 두 화면 사이에 적용할 전환
+ */
+private fun AnimatedContentTransitionScope<Scene<*>>.appNavigationTransform(
+    motion: AppNavigationMotion,
+    isPop: Boolean,
+): ContentTransform =
+    when (motion) {
+        AppNavigationMotion.Fade ->
+            if (isPop) {
+                EnterTransition.None togetherWith fadeOut(animationSpec = tween(FADE_DURATION_MILLIS))
+            } else {
+                fadeIn(animationSpec = tween(FADE_DURATION_MILLIS)) togetherWith ExitTransition.None
+            }
+
+        AppNavigationMotion.Horizontal -> {
+            val direction =
+                if (isPop) {
+                    AnimatedContentTransitionScope.SlideDirection.Right
+                } else {
+                    AnimatedContentTransitionScope.SlideDirection.Left
+                }
+
+            slideIntoContainer(direction, animationSpec = tween(SLIDE_DURATION_MILLIS)) togetherWith
+                slideOutOfContainer(direction, animationSpec = tween(SLIDE_DURATION_MILLIS))
+        }
+
+        AppNavigationMotion.Vertical ->
+            if (isPop) {
+                EnterTransition.None togetherWith
+                    slideOutVertically(animationSpec = tween(SLIDE_DURATION_MILLIS)) { it }
+            } else {
+                slideInVertically(animationSpec = tween(SLIDE_DURATION_MILLIS)) { it } togetherWith
+                    ExitTransition.None
+            }
+    }
+
+/**
+ * 예측 뒤로가기 제스처의 시작 가장자리를 따라 화면을 이동시킨다.
+ *
+ * @param swipeEdge 사용자가 뒤로가기 제스처를 시작한 화면 가장자리
+ * @return 축소 효과 없이 이전 화면으로 이동하는 전환
+ */
+private fun AnimatedContentTransitionScope<Scene<*>>.appPredictivePopTransform(
+    @NavigationEvent.SwipeEdge swipeEdge: Int,
+): ContentTransform {
+    val direction =
+        if (swipeEdge == NavigationEvent.EDGE_RIGHT) {
+            AnimatedContentTransitionScope.SlideDirection.Left
+        } else {
+            AnimatedContentTransitionScope.SlideDirection.Right
+        }
+
+    return slideIntoContainer(direction, animationSpec = tween(SLIDE_DURATION_MILLIS)) togetherWith
+        slideOutOfContainer(direction, animationSpec = tween(SLIDE_DURATION_MILLIS))
+}
+
+/**
+ * 화면 경로에 맞는 Navigation 3 전환 메타데이터를 만든다.
+ *
+ * @return 앞으로 이동과 뒤로가기 전환이 등록된 메타데이터
+ */
+private fun AppRoute.navigationMetadata(): Map<String, Any> {
+    val motion = navigationMotion()
+
+    return metadata {
+        put(NavDisplay.TransitionKey) { appNavigationTransform(motion, isPop = false) }
+        put(NavDisplay.PopTransitionKey) { appNavigationTransform(motion, isPop = true) }
+        put(NavDisplay.PredictivePopTransitionKey) { swipeEdge -> appPredictivePopTransform(swipeEdge) }
+    }
+}
 
 @Composable
 actual fun AppNavHost() {
@@ -38,16 +171,17 @@ actual fun AppNavHost() {
 
     NavDisplay(
         backStack = backStack,
+        modifier = Modifier.fillMaxSize().background(GitItTheme.colors.grey700),
         onBack = { backStack.removeLastOrNull() },
         entryProvider =
             entryProvider {
-                entry<AppRoute.Onboarding> {
+                entry<AppRoute.Onboarding>(metadata = AppRoute.Onboarding.navigationMetadata()) {
                     OnboardingRoute(onNavigateToHome = { backStack[0] = AppRoute.Home })
                 }
-                entry<AppRoute.IntermediateSplash> {
+                entry<AppRoute.IntermediateSplash>(metadata = AppRoute.IntermediateSplash.navigationMetadata()) {
                     IntermediateSplashScreen(onFinished = { navigateToMainRoute(AppRoute.Home) })
                 }
-                entry<AppRoute.Home> {
+                entry<AppRoute.Home>(metadata = AppRoute.Home.navigationMetadata()) {
                     HomeRoute(
                         onNavigateToQuestionCreate = { backStack.add(AppRoute.QuestionCreate) },
                         onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
@@ -57,27 +191,27 @@ actual fun AppNavHost() {
                         onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )
                 }
-                entry<AppRoute.Settings> {
+                entry<AppRoute.Settings>(metadata = AppRoute.Settings.navigationMetadata()) {
                     SettingsScreen(
                         onBackClick = { backStack.removeLastOrNull() },
                         onPolicyClick = { uriHandler.openUri(POLICY_URL) },
                         onDeleteAccountClick = { backStack.add(AppRoute.AccountDelete) },
                     )
                 }
-                entry<AppRoute.AccountDelete> {
+                entry<AppRoute.AccountDelete>(metadata = AppRoute.AccountDelete.navigationMetadata()) {
                     AccountDeleteRoute(
                         onBackClick = { backStack.removeLastOrNull() },
                         onDeleteAccountClick = {},
                     )
                 }
-                entry<AppRoute.Bookmark> {
+                entry<AppRoute.Bookmark>(metadata = AppRoute.Bookmark.navigationMetadata()) {
                     BookmarkRoute(
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                         onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                     )
                 }
-                entry<AppRoute.My> {
+                entry<AppRoute.My>(metadata = AppRoute.My.navigationMetadata()) {
                     MyRoute(
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
@@ -85,7 +219,7 @@ actual fun AppNavHost() {
                         onNavigateToSettings = { backStack.add(AppRoute.Settings) },
                     )
                 }
-                entry<AppRoute.ProjectList> {
+                entry<AppRoute.ProjectList>(metadata = AppRoute.ProjectList.navigationMetadata()) {
                     ProjectListRoute(
                         onNavigateToProjectDelete = { backStack.add(AppRoute.ProjectDelete) },
                         onBackClick = { backStack.removeLastOrNull() },
@@ -96,7 +230,7 @@ actual fun AppNavHost() {
                         onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )
                 }
-                entry<AppRoute.ProjectDelete> {
+                entry<AppRoute.ProjectDelete>(metadata = AppRoute.ProjectDelete.navigationMetadata()) {
                     ProjectListRoute(
                         isDeleteMode = true,
                         onNavigateToProjectDelete = {},
@@ -108,7 +242,7 @@ actual fun AppNavHost() {
                         onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )
                 }
-                entry<AppRoute.ProjectDetail> { route ->
+                entry<AppRoute.ProjectDetail>(metadata = { it.navigationMetadata() }) { route ->
                     ProjectDetailRoute(
                         projectId = route.projectId,
                         onBackClick = { backStack.removeLastOrNull() },
@@ -118,20 +252,20 @@ actual fun AppNavHost() {
                         onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )
                 }
-                entry<AppRoute.QuestionCreate> {
+                entry<AppRoute.QuestionCreate>(metadata = AppRoute.QuestionCreate.navigationMetadata()) {
                     QuestionCreateRoute(
                         onBackClick = { backStack.removeLastOrNull() },
                         onRepositoryConfirmed = {},
                     )
                 }
-                entry<AppRoute.Quiz> { route ->
+                entry<AppRoute.Quiz>(metadata = { it.navigationMetadata() }) { route ->
                     SolveQuizRoute(
                         projectId = route.projectId,
                         setId = route.setId,
                         onBackClick = { backStack.removeLastOrNull() },
                     )
                 }
-                entry<AppRoute.LiquidGlassExample> {
+                entry<AppRoute.LiquidGlassExample>(metadata = AppRoute.LiquidGlassExample.navigationMetadata()) {
                     LiquidGlassExampleScreen(onBackClick = { backStack.removeLastOrNull() })
                 }
             },
