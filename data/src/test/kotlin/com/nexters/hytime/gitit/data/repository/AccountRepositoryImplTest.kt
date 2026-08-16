@@ -4,6 +4,7 @@ package com.nexters.hytime.gitit.data.repository
 
 import com.nexters.hytime.gitit.domain.model.CareerLevel
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
+import com.nexters.hytime.gitit.domain.model.MemberCuration
 import com.nexters.hytime.gitit.domain.model.Position
 import com.nexters.hytime.gitit.network.api.NetworkClient
 import kotlinx.coroutines.runBlocking
@@ -144,6 +145,32 @@ class AccountRepositoryImplTest {
             val result = runBlocking { AccountRepositoryImpl(LoginFakeNetworkClient(response)).getMemberProfile() }
             assertTrue(result.isFailure, response)
         }
+    }
+
+    /** 큐레이션 등록이 열거형 이름을 그대로 전송하는지 검증한다. */
+    @Test
+    fun curateMember_성공하면_열거형이름으로요청한다() {
+        val networkClient = LoginFakeNetworkClient("""{"success":true}""")
+        val curation = MemberCuration(name = "김이박", position = Position.ANDROID, careerLevel = CareerLevel.JUNIOR)
+
+        val result = runBlocking { AccountRepositoryImpl(networkClient).curateMember(curation) }
+
+        assertEquals(Unit, result.getOrThrow())
+        assertEquals("/api/v1/members/me/curation", networkClient.requestedPath)
+        assertEquals("""{"name":"김이박","position":"ANDROID","careerLevel":"JUNIOR"}""", networkClient.requestBody)
+        assertEquals(true, networkClient.requestedAuthenticated)
+    }
+
+    /** 이름이 비어 있으면 요청을 보내지 않고 실패로 처리하는지 검증한다. */
+    @Test
+    fun curateMember_이름이비어있으면_요청하지않고실패한다() {
+        val networkClient = LoginFakeNetworkClient("""{"success":true}""")
+        val curation = MemberCuration(name = " ", position = Position.BACKEND, careerLevel = CareerLevel.ENTRY)
+
+        val result = runBlocking { AccountRepositoryImpl(networkClient).curateMember(curation) }
+
+        assertTrue(result.isFailure)
+        assertEquals("", networkClient.requestedPath)
     }
 
     private companion object {
