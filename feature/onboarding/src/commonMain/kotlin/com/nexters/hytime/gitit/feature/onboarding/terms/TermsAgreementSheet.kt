@@ -35,6 +35,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.button.GitItButton
+import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
+import com.nexters.hytime.gitit.designsystem.button.GitItButtonStyle
 import git_it_kmp.core.designsystem.generated.resources.ic_check
 import git_it_kmp.core.designsystem.generated.resources.ic_chevron_detail
 import git_it_kmp.feature.onboarding.generated.resources.Res
@@ -243,22 +246,17 @@ private fun TermsAgreementSheetContent(
                     .padding(bottom = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            TermsActionButton(
-                label = stringResource(Res.string.terms_agreement_cancel),
-                textColor = GitItTheme.colors.grey100,
+            GitItButton(
+                text = stringResource(Res.string.terms_agreement_cancel),
                 modifier = Modifier.weight(1f),
+                style = GitItButtonStyle.Secondary,
                 onClick = onCancelClick,
             )
-            TermsActionButton(
-                label = stringResource(Res.string.terms_agreement_next),
-                textColor =
-                    if (state.isAllAgreed) {
-                        GitItTheme.colors.grey100
-                    } else {
-                        GitItTheme.colors.white30
-                    },
+            GitItButton(
+                text = stringResource(Res.string.terms_agreement_next),
                 modifier = Modifier.weight(1f),
-                onClick = { if (state.isAllAgreed) onConfirmClick() },
+                state = if (state.isAllAgreed) GitItButtonState.Default else GitItButtonState.Disabled,
+                onClick = onConfirmClick,
             )
         }
 
@@ -304,38 +302,6 @@ private fun TermsCheckItem(
             Spacer(Modifier.weight(1f))
             ChevronIcon()
         }
-    }
-}
-
-/**
- * 약관 동의 시트 하단의 둥근 버튼을 그린다.
- *
- * @param label 버전 텍스트
- * @param textColor 텍스트 색상
- * @param modifier 크기와 배치를 지정할 수식자
- * @param onClick 버튼 클릭 시 호출될 콜백
- */
-@Composable
-private fun TermsActionButton(
-    label: String,
-    textColor: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier =
-            modifier
-                .height(54.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(GitItTheme.colors.white15)
-                .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            color = textColor,
-            style = GitItTheme.typography.body1,
-        )
     }
 }
 

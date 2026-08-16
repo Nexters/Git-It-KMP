@@ -17,11 +17,15 @@ data class MyUiState(
  * 마이 화면 상단 프로필 정보다.
  *
  * @property name 화면에 표시할 사용자 이름
- * @property role 사용자 학습 단계나 직군 설명
+ * @property email 사용자 계정 이메일
+ * @property developmentField 사용자가 선택한 개발 분야
+ * @property learningLevel 사용자가 선택한 학습 수준
  */
 data class MyProfile(
     val name: String = "",
-    val role: String = "",
+    val email: String = "",
+    val developmentField: String = "",
+    val learningLevel: String = "",
 )
 
 /**

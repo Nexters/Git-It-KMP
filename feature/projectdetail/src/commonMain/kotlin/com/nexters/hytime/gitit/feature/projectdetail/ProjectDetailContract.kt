@@ -25,17 +25,13 @@ data class ProjectDetailUiState(
  *
  * @property name 프로젝트 이름
  * @property thumbnailUrl 썸네일 이미지 URL
- * @property category 카테고리 칩 텍스트 (예: "Back-end")
- * @property difficulty 난이도 칩 텍스트 (예: "입문")
- * @property memberCount 참여자 수
+ * @property starCount GitHub 스타 수를 축약해 표시할 문자열
  * @property techStack 기술 스택 요약 문자열 (예: "Kotlin · Compose · Coroutines")
  */
 data class ProjectInfo(
     val name: String,
     val thumbnailUrl: String,
-    val category: String,
-    val difficulty: String,
-    val memberCount: Int,
+    val starCount: String,
     val techStack: String,
 )
 
@@ -65,6 +61,9 @@ sealed interface ProjectDetailEvent {
 
     /** 저장한 문제 화면으로 이동. */
     data object NavigateToSavedQuestions : ProjectDetailEvent
+
+    /** 홈 화면으로 이동. */
+    data object NavigateToHome : ProjectDetailEvent
 
     /**
      * 문제 풀이 화면으로 이동.

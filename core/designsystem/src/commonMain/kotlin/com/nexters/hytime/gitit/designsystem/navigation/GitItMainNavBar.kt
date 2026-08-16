@@ -13,7 +13,7 @@ import com.skydoves.cloudy.Sky
 import com.skydoves.cloudy.rememberSky
 import com.skydoves.cloudy.sky
 import git_it_kmp.core.designsystem.generated.resources.Res
-import git_it_kmp.core.designsystem.generated.resources.ic_bookmark
+import git_it_kmp.core.designsystem.generated.resources.ic_bookmark_filled
 import git_it_kmp.core.designsystem.generated.resources.ic_nav_bookmark
 import git_it_kmp.core.designsystem.generated.resources.ic_nav_file_text
 import git_it_kmp.core.designsystem.generated.resources.ic_nav_home
@@ -152,7 +152,7 @@ fun GitItBookmarkIcon(
     filled: Boolean = false,
 ) {
     Icon(
-        painterResource(if (filled) Res.drawable.ic_bookmark else Res.drawable.ic_nav_bookmark),
+        painterResource(if (filled) Res.drawable.ic_bookmark_filled else Res.drawable.ic_nav_bookmark),
         contentDescription = null,
         modifier =
             if (filled) {

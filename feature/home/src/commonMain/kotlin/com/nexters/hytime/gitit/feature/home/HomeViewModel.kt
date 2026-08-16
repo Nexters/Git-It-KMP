@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * 홈 화면의 상태와 사용자 의도를 관리한다.
  */
 class HomeViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(HomeUiState())
+    private val _uiState = MutableStateFlow(HomeUiState(learningProjects = dummyLearningProjects))
 
     /**
      * 홈 화면이 구독할 현재 UI 상태이다.
@@ -37,7 +37,7 @@ class HomeViewModel : ViewModel() {
             HomeIntent.HomeTabClick -> Unit
             HomeIntent.LoadProjectClick -> emit(HomeSideEffect.NavigateToQuestionCreate)
             HomeIntent.ViewAllProjectsClick -> emit(HomeSideEffect.NavigateToProjectList)
-            is HomeIntent.LearningCardClick -> Unit
+            is HomeIntent.LearningCardClick -> emit(HomeSideEffect.NavigateToProjectDetail(intent.projectId))
             is HomeIntent.LearningPlayClick -> emit(HomeSideEffect.NavigateToQuiz(intent.projectId))
             HomeIntent.ProjectTabClick -> emit(HomeSideEffect.NavigateToProjectList)
             HomeIntent.SavedTabClick -> emit(HomeSideEffect.NavigateToBookmark)

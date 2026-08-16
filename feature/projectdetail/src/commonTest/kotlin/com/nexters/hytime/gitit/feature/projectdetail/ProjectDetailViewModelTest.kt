@@ -34,6 +34,18 @@ class ProjectDetailViewModelTest {
         assertFalse(viewModel.uiState.value.showMoreMenu)
     }
 
+    /** 삭제 확인 시 홈 이동 이벤트를 발행하는지 검증한다. */
+    @Test
+    fun onDeleteProjectClick_emitsNavigateToHome() =
+        runBlocking {
+            val viewModel = ProjectDetailViewModel(projectId = "project-1")
+            val event = async(start = CoroutineStart.UNDISPATCHED) { viewModel.events.first() }
+
+            viewModel.onDeleteProjectClick()
+
+            assertEquals(ProjectDetailEvent.NavigateToHome, event.await())
+        }
+
     /** 프로젝트 상세의 플레이 버튼이 문제 풀이 이동 이벤트를 발행하는지 검증한다. */
     @Test
     fun onQuestionSolvingClick_emitsNavigateToQuiz() =

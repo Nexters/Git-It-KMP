@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -20,32 +22,60 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.button.GitItButton
+import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
+import com.nexters.hytime.gitit.designsystem.button.GitItButtonStyle
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassContainer
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassDropdownMenu
+import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassDropdownMenuItem
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButton
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonSize
 import com.nexters.hytime.gitit.designsystem.liquidglass.GitItLiquidGlassIconButtonVariant
+import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
+import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
+import com.skydoves.cloudy.Sky
 import git_it_kmp.core.designsystem.generated.resources.Res
 import git_it_kmp.core.designsystem.generated.resources.ic_menu
 import git_it_kmp.core.designsystem.generated.resources.ic_play_circle
 import git_it_kmp.core.designsystem.generated.resources.ic_play_project
-import git_it_kmp.core.designsystem.generated.resources.ic_users
+import git_it_kmp.feature.projectdetail.generated.resources.ic_star
+import git_it_kmp.feature.projectdetail.generated.resources.project_detail_delete_cancel
+import git_it_kmp.feature.projectdetail.generated.resources.project_detail_delete_confirm
+import git_it_kmp.feature.projectdetail.generated.resources.project_detail_delete_sheet_description
+import git_it_kmp.feature.projectdetail.generated.resources.project_detail_delete_sheet_title
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import git_it_kmp.feature.projectdetail.generated.resources.Res as ProjectDetailRes
 
 /**
- * 프로젝트 상세 화면의 순수 UI 영역이다. 상태와 콜백만 주입받아 상태를 소유하지 않는다.
+ * 프로젝트 상세 화면의 순수 UI 영역이다. 비즈니스 상태와 콜백을 주입받는다.
  *
  * @param uiState 단일 UI 상태
  * @param onBackClick 뒤로가기 콜백
@@ -53,10 +83,8 @@ import org.jetbrains.compose.resources.painterResource
  * @param onDismissMoreMenu 더보기 메뉴 닫기 콜백
  * @param onSavedQuestionsClick 저장한 문제 콜백
  * @param onQuestionSolvingClick 문제풀이 바로가기 콜백
- * @param onQuestionSolvingShortcutClick 더보기 메뉴의 문제풀이 바로가기 콜백
- * @param onDeleteProjectClick 삭제 콜백
+ * @param onDeleteProjectClick 프로젝트 삭제 확인 콜백
  * @param onLearningSetClick 학습 세트 진입 콜백
- * @param onReviewStartClick 복습 시작 콜백
  * @param modifier 화면의 크기와 배치를 지정할 수식자
  */
 @Composable
@@ -67,39 +95,72 @@ fun ProjectDetailScreen(
     onDismissMoreMenu: () -> Unit,
     onSavedQuestionsClick: () -> Unit,
     onQuestionSolvingClick: () -> Unit,
-    onQuestionSolvingShortcutClick: () -> Unit,
     onDeleteProjectClick: () -> Unit,
     onLearningSetClick: (String) -> Unit,
-    onReviewStartClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val sky = rememberGitItMainNavSky()
+    val dismissMenuInteractionSource = remember { MutableInteractionSource() }
+    var showDeleteSheet by remember { mutableStateOf(false) }
+
     Box(
         modifier =
             modifier
                 .fillMaxSize()
                 .background(GitItTheme.colors.grey700),
     ) {
-        Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
-            ProjectDetailTopBar(
-                onBackClick = onBackClick,
-                onMoreClick = onMoreMenuClick,
-            )
+        LazyColumn(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .gitItMainNavSky(sky)
+                    .navigationBarsPadding(),
+            contentPadding = PaddingValues(bottom = 24.dp),
+        ) {
+            item {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(179.dp)
+                                .drawWithCache {
+                                    val center = Offset(size.width * 0.71f, -size.height * 0.08f)
+                                    val brush =
+                                        Brush.radialGradient(
+                                            0f to Color(0xFF56718A),
+                                            0.5f to Color(0xFF485469),
+                                            1f to Color(0xFF3B3749),
+                                            center = center,
+                                            radius = size.width * 0.73f,
+                                        )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
-                contentPadding = PaddingValues(bottom = 24.dp),
-            ) {
-                item {
-                    ProjectHeader(uiState = uiState, onQuestionSolvingClick = onQuestionSolvingClick)
-                    Spacer(Modifier.height(28.dp))
+                                    onDrawBehind {
+                                        scale(scaleX = 2f, scaleY = 1f, pivot = center) {
+                                            drawRect(brush = brush)
+                                        }
+                                    }
+                                },
+                    )
+                    Column(
+                        modifier =
+                            Modifier
+                                .statusBarsPadding()
+                                .padding(top = 82.dp, start = 20.dp, end = 20.dp),
+                    ) {
+                        ProjectHeader(uiState = uiState, onQuestionSolvingClick = onQuestionSolvingClick)
+                        Spacer(Modifier.height(28.dp))
+                    }
                 }
-                item {
+            }
+            item {
+                Box(modifier = Modifier.padding(horizontal = 20.dp)) {
                     ProjectTotalProgress(progress = uiState.totalProgress)
-                    Spacer(Modifier.height(31.dp))
                 }
-                item {
+                Spacer(Modifier.height(31.dp))
+            }
+            item {
+                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                     Text(
                         text = "학습 세트",
                         color = GitItTheme.colors.grey100,
@@ -107,24 +168,59 @@ fun ProjectDetailScreen(
                     )
                     Spacer(Modifier.height(16.dp))
                 }
-                items(uiState.learningSets, key = { it.id }) { set ->
+            }
+            items(uiState.learningSets, key = { it.id }) { set ->
+                Box(modifier = Modifier.padding(horizontal = 20.dp)) {
                     LearningSetCard(item = set, onClick = { onLearningSetClick(set.id) })
-                    Spacer(Modifier.height(12.dp))
                 }
-                item {
-                    Spacer(Modifier.height(4.dp))
-                    ReviewCard(onReviewStartClick = onReviewStartClick)
-                }
+                Spacer(Modifier.height(12.dp))
             }
         }
 
-        ProjectDetailMoreMenu(
-            expanded = uiState.showMoreMenu,
-            onDismiss = onDismissMoreMenu,
-            onSavedQuestionsClick = onSavedQuestionsClick,
-            onQuestionSolvingShortcutClick = onQuestionSolvingShortcutClick,
-            onDeleteProjectClick = onDeleteProjectClick,
-        )
+        Box(modifier = Modifier.fillMaxWidth().statusBarsPadding()) {
+            ProjectDetailTopBar(
+                onBackClick = onBackClick,
+                onMoreClick = onMoreMenuClick,
+                sky = sky,
+            )
+        }
+
+        if (uiState.showMoreMenu) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = dismissMenuInteractionSource,
+                            indication = null,
+                            onClick = onDismissMoreMenu,
+                        ),
+            )
+            ProjectDetailMoreMenu(
+                onSavedQuestionsClick = onSavedQuestionsClick,
+                onDeleteProjectClick = {
+                    onDismissMoreMenu()
+                    showDeleteSheet = true
+                },
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 102.dp, end = 20.dp)
+                        .width(160.dp),
+                sky = sky,
+            )
+        }
+
+        if (showDeleteSheet) {
+            ProjectDeleteSheet(
+                projectName = uiState.project?.name.orEmpty(),
+                onConfirm = {
+                    showDeleteSheet = false
+                    onDeleteProjectClick()
+                },
+                onDismiss = { showDeleteSheet = false },
+            )
+        }
     }
 }
 
@@ -133,30 +229,40 @@ fun ProjectDetailScreen(
  *
  * @param onBackClick 뒤로가기 콜백
  * @param onMoreClick 더보기 버튼 클릭 콜백
+ * @param sky 두 버튼 뒤쪽 콘텐츠를 굴절시킬 Cloudy 상태
  */
 @Composable
 private fun ProjectDetailTopBar(
     onBackClick: () -> Unit,
     onMoreClick: () -> Unit,
+    sky: Sky? = null,
 ) {
     GitItTopBar(
         type = GitItTopBarType.Default,
         modifier = Modifier.padding(top = 8.dp),
+        sky = sky,
         onBackClick = onBackClick,
         actions = {
-            GitItLiquidGlassIconButton(
-                onClick = onMoreClick,
-                size = GitItLiquidGlassIconButtonSize.Md,
-                variant = GitItLiquidGlassIconButtonVariant.Secondary,
-            ) {
-                MenuIcon()
+            val moreButton: @Composable () -> Unit = {
+                GitItLiquidGlassIconButton(
+                    onClick = onMoreClick,
+                    size = GitItLiquidGlassIconButtonSize.Md,
+                    variant = GitItLiquidGlassIconButtonVariant.Secondary,
+                ) {
+                    MenuIcon()
+                }
+            }
+            if (sky == null) {
+                moreButton()
+            } else {
+                GitItLiquidGlassContainer(sky = sky) { moreButton() }
             }
         },
     )
 }
 
 /**
- * 헤더 영역: 썸네일·칩·제목·참여자/기술스택·문제풀이 바로가기 버튼을 배치한다.
+ * 헤더 영역: 썸네일·제목·스타 수/기술스택·문제풀이 바로가기 버튼을 배치한다.
  *
  * @param uiState 단일 UI 상태
  * @param onQuestionSolvingClick 문제풀이 바로가기 콜백
@@ -168,31 +274,7 @@ private fun ProjectHeader(
 ) {
     val project = uiState.project ?: return
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Bottom,
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(99.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(GitItTheme.colors.grey600),
-            contentAlignment = Alignment.Center,
-        ) {
-            // TODO: data 연동 후 AsyncImage로 교체한다.
-            Text(
-                text = project.name.take(1),
-                color = GitItTheme.colors.grey100,
-                style = GitItTheme.typography.headline2,
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-            CategoryChip(text = project.category, isCategory = true)
-            CategoryChip(text = project.difficulty, isCategory = false)
-        }
-    }
+    ProjectThumbnail(projectName = project.name, size = 99.dp)
 
     Spacer(Modifier.height(31.dp))
 
@@ -209,10 +291,10 @@ private fun ProjectHeader(
             )
             Spacer(Modifier.height(5.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                UsersIcon(modifier = Modifier.size(14.dp))
+                StarIcon()
                 Spacer(Modifier.width(5.dp))
                 Text(
-                    text = "${project.memberCount}명",
+                    text = project.starCount,
                     color = GitItTheme.colors.blue100,
                     style = GitItTheme.typography.caption1,
                 )
@@ -237,35 +319,6 @@ private fun ProjectHeader(
             painter = painterResource(Res.drawable.ic_play_project),
             contentDescription = null,
             modifier = Modifier.size(40.dp).clickable(onClick = onQuestionSolvingClick),
-        )
-    }
-}
-
-/**
- * 카테고리/난이도 칩이다.
- *
- * @param text 칩 텍스트
- * @param isCategory true면 blue400 배경(카테고리), false면 grey500 배경(난이도)
- */
-@Composable
-private fun CategoryChip(
-    text: String,
-    isCategory: Boolean,
-) {
-    val background = if (isCategory) GitItTheme.colors.blue400 else GitItTheme.colors.grey500
-    Box(
-        modifier =
-            Modifier
-                .height(28.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(background)
-                .padding(horizontal = if (isCategory) 9.dp else 7.dp, vertical = 5.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = text,
-            color = GitItTheme.colors.blue100,
-            style = GitItTheme.typography.body3,
         )
     }
 }
@@ -298,7 +351,7 @@ private fun ProjectTotalProgress(progress: Int) {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(10.dp)
+                    .height(8.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(GitItTheme.colors.grey400),
         ) {
@@ -306,7 +359,7 @@ private fun ProjectTotalProgress(progress: Int) {
                 modifier =
                     Modifier
                         .fillMaxWidth(progress / 100f)
-                        .height(10.dp)
+                        .height(8.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(GitItTheme.colors.blue200),
             )
@@ -378,104 +431,146 @@ private fun LearningSetCard(
 }
 
 /**
- * 복습 카드. 제목·설명·"복습 시작" 버튼을 배치한다.
- *
- * @param onReviewStartClick 복습 시작 콜백
- */
-@Composable
-private fun ReviewCard(onReviewStartClick: () -> Unit) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(GitItTheme.colors.blue400)
-                .padding(horizontal = 14.dp, vertical = 18.dp),
-    ) {
-        Text(
-            text = "아이디어 PT 오답 복습",
-            color = GitItTheme.colors.blue100,
-            style = GitItTheme.typography.subtitle3,
-        )
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = "해당 프로젝트의 모든 세트에서 학습한 내용을 복습하여\n학습을 완료하세요.",
-            color = GitItTheme.colors.grey200,
-            style = GitItTheme.typography.caption1,
-        )
-        Spacer(Modifier.height(18.dp))
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(GitItTheme.colors.blue100)
-                    .clickable(onClick = onReviewStartClick)
-                    .padding(vertical = 10.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = "복습 시작",
-                color = GitItTheme.colors.grey700,
-                style = GitItTheme.typography.body2,
-            )
-        }
-    }
-}
-
-/**
  * 더보기 드롭다운 메뉴.
  *
- * @param expanded 메뉴 노출 여부
- * @param onDismiss 닫기 콜백
  * @param onSavedQuestionsClick 저장한 문제 콜백
- * @param onQuestionSolvingShortcutClick 문제풀이 바로가기 콜백
  * @param onDeleteProjectClick 삭제 콜백
+ * @param modifier 메뉴의 크기와 화면 내 배치를 지정할 수식자
+ * @param sky 뒤쪽 콘텐츠를 흐림 배경으로 읽을 Cloudy 상태
  */
 @Composable
 private fun ProjectDetailMoreMenu(
-    expanded: Boolean,
-    onDismiss: () -> Unit,
     onSavedQuestionsClick: () -> Unit,
-    onQuestionSolvingShortcutClick: () -> Unit,
     onDeleteProjectClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    sky: Sky? = null,
 ) {
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismiss,
-        modifier = Modifier.background(GitItTheme.colors.grey600),
+    GitItLiquidGlassDropdownMenu(
+        modifier = modifier,
+        sky = sky,
     ) {
-        MoreMenuItem(text = "저장한 문제", onClick = onSavedQuestionsClick)
-        MoreMenuItem(text = "문제풀이 바로가기", onClick = onQuestionSolvingShortcutClick)
-        MoreMenuItem(
+        GitItLiquidGlassDropdownMenuItem(text = "저장한 문제", onClick = onSavedQuestionsClick)
+        GitItLiquidGlassDropdownMenuItem(text = "GitHub에서 보기", onClick = {})
+        GitItLiquidGlassDropdownMenuItem(
             text = "삭제하기",
-            color = GitItTheme.colors.grey300,
+            color = GitItTheme.colors.error,
             onClick = onDeleteProjectClick,
         )
     }
 }
 
 /**
- * 더보기 메뉴의 개별 항목.
+ * 프로젝트 삭제를 확인하는 바텀시트를 표시한다.
  *
- * @param text 항목 텍스트
- * @param color 텍스트 색상
- * @param onClick 클릭 콜백
+ * @param projectName 썸네일 대체 문자로 사용할 프로젝트 이름
+ * @param onConfirm 삭제 확인 시 실행할 동작
+ * @param onDismiss 취소 또는 시트 바깥 영역 선택 시 실행할 동작
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProjectDeleteSheet(
+    projectName: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.fillMaxWidth(),
+        sheetState = sheetState,
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        containerColor = GitItTheme.colors.grey600,
+        contentColor = GitItTheme.colors.grey100,
+        scrimColor = GitItTheme.colors.black70,
+        tonalElevation = 0.dp,
+        dragHandle = { ProjectDeleteSheetDragHandle() },
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(Modifier.height(22.dp))
+            ProjectThumbnail(projectName = projectName, size = 128.dp)
+            Spacer(Modifier.height(22.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = stringResource(ProjectDetailRes.string.project_detail_delete_sheet_title),
+                    color = GitItTheme.colors.grey100,
+                    style = GitItTheme.typography.subtitle1.copy(fontSize = 22.sp, lineHeight = 32.56.sp),
+                )
+                Text(
+                    text = stringResource(ProjectDetailRes.string.project_detail_delete_sheet_description),
+                    color = GitItTheme.colors.grey400,
+                    style = GitItTheme.typography.body2,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Spacer(Modifier.height(24.dp))
+            GitItButton(
+                text = stringResource(ProjectDetailRes.string.project_detail_delete_confirm),
+                onClick = onConfirm,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                style = GitItButtonStyle.Primary,
+                state = GitItButtonState.Error,
+            )
+            Spacer(Modifier.height(8.dp))
+            GitItButton(
+                text = stringResource(ProjectDetailRes.string.project_detail_delete_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                style = GitItButtonStyle.Text,
+            )
+        }
+    }
+}
+
+/** Figma 바텀시트 상단의 58×4dp grabber를 그린다. */
+@Composable
+private fun ProjectDeleteSheetDragHandle() {
+    Box(
+        modifier = Modifier.fillMaxWidth().height(16.dp).padding(top = 5.dp),
+        contentAlignment = Alignment.TopCenter,
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(width = 58.dp, height = 4.dp)
+                    .clip(RoundedCornerShape(99.dp))
+                    .background(GitItTheme.colors.grey400),
+        )
+    }
+}
+
+/**
+ * 프로젝트 이름의 첫 글자를 썸네일 대체 이미지로 표시한다.
+ *
+ * @param projectName 첫 글자를 표시할 프로젝트 이름
+ * @param size 썸네일의 가로·세로 크기
  */
 @Composable
-private fun MoreMenuItem(
-    text: String,
-    color: Color = GitItTheme.colors.grey100,
-    onClick: () -> Unit,
+private fun ProjectThumbnail(
+    projectName: String,
+    size: Dp,
 ) {
     Box(
         modifier =
             Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .size(size)
+                .clip(RoundedCornerShape(10.dp))
+                .background(GitItTheme.colors.grey600),
+        contentAlignment = Alignment.Center,
     ) {
-        Text(text = text, color = color, style = GitItTheme.typography.body3)
+        // TODO: data 연동 후 AsyncImage로 교체한다.
+        Text(
+            text = projectName.take(1),
+            color = GitItTheme.colors.grey100,
+            style = GitItTheme.typography.headline2,
+        )
     }
 }
 
@@ -489,14 +584,19 @@ private fun MenuIcon() {
     )
 }
 
+/** Figma 프로젝트 스타 아이콘을 16dp 영역 중앙에 표시한다. */
 @Composable
-private fun UsersIcon(modifier: Modifier = Modifier) {
-    Icon(
-        painter = painterResource(Res.drawable.ic_users),
-        contentDescription = null,
-        modifier = modifier,
-        tint = GitItTheme.colors.blue100,
-    )
+private fun StarIcon() {
+    Box(
+        modifier = Modifier.size(16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painter = painterResource(ProjectDetailRes.drawable.ic_star),
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+        )
+    }
 }
 
 @Preview
@@ -510,9 +610,7 @@ private fun ProjectDetailScreenPreview() {
                         ProjectInfo(
                             name = "Nexters",
                             thumbnailUrl = "",
-                            category = "Back-end",
-                            difficulty = "입문",
-                            memberCount = 13,
+                            starCount = "3.6k",
                             techStack = "Kotlin · Compose · Coroutines",
                         ),
                     learningSets =
@@ -528,10 +626,8 @@ private fun ProjectDetailScreenPreview() {
             onDismissMoreMenu = {},
             onSavedQuestionsClick = {},
             onQuestionSolvingClick = {},
-            onQuestionSolvingShortcutClick = {},
             onDeleteProjectClick = {},
             onLearningSetClick = {},
-            onReviewStartClick = {},
         )
     }
 }

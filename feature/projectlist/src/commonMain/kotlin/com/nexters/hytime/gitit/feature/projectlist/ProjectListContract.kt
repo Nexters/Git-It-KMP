@@ -68,6 +68,15 @@ sealed interface ProjectListIntent {
     data object DismissDeleteClick : ProjectListIntent
 
     /**
+     * 프로젝트 카드를 선택한다.
+     *
+     * @property projectId 상세 정보를 확인할 프로젝트 식별자
+     */
+    data class ProjectClick(
+        val projectId: String,
+    ) : ProjectListIntent
+
+    /**
      * 문제풀이 버튼 선택.
      *
      * @property projectId 문제풀이를 시작할 프로젝트 식별자
@@ -95,6 +104,15 @@ sealed interface ProjectListSideEffect {
 
     /** 저장한 문제 화면으로 이동. */
     data object NavigateToBookmark : ProjectListSideEffect
+
+    /**
+     * 프로젝트 상세 화면으로 이동한다.
+     *
+     * @property projectId 상세 정보를 표시할 프로젝트 식별자
+     */
+    data class NavigateToProjectDetail(
+        val projectId: String,
+    ) : ProjectListSideEffect
 
     /**
      * 문제 풀이 화면으로 이동.

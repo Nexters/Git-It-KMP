@@ -53,6 +53,9 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -561,10 +564,14 @@ private fun QuizEssayInput(
                     innerTextField()
                 }
                 Text(
-                    text = stringResource(Res.string.quiz_essay_count, answer.length, ESSAY_ANSWER_MAX_LENGTH),
+                    text =
+                        buildAnnotatedString {
+                            append(stringResource(Res.string.quiz_essay_count, answer.length, ESSAY_ANSWER_MAX_LENGTH))
+                            addStyle(SpanStyle(color = GitItTheme.colors.blue200), 0, answer.length.toString().length)
+                        },
                     modifier = Modifier.align(Alignment.End),
                     color = GitItTheme.colors.grey400,
-                    style = GitItTheme.typography.body2,
+                    style = GitItTheme.typography.body2.copy(fontWeight = FontWeight.Bold),
                 )
             }
         },
