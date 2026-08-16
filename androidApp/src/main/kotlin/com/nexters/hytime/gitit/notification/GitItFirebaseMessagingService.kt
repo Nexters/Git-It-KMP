@@ -57,7 +57,6 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
             return
         }
         showNotification(content, remoteMessage.messageId)
-        logger.i { "FCM 알림 표시 완료: messageId=${remoteMessage.messageId}" }
     }
 
     /**
@@ -125,6 +124,7 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
                 .setCategory(Notification.CATEGORY_MESSAGE)
                 .build()
 
+        logger.i { "FCM 알림 게시: messageId=$messageId, 알림허용=${notificationManager.areNotificationsEnabled()}" }
         notificationManager.notify(messageId?.hashCode() ?: SystemClock.elapsedRealtime().toInt(), notification)
     }
 
