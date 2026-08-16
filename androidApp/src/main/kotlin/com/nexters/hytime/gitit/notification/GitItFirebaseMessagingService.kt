@@ -48,10 +48,11 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
                 "dataKeys=${remoteMessage.data.keys}, notification=${remoteMessage.notification != null}"
         }
         val content =
-            remoteMessage.data.toNotificationContent()
-                ?: remoteMessage.notification?.let { notification ->
-                    createNotificationContent(notification.title, notification.body)
-                }
+            resolveNotificationContent(
+                data = remoteMessage.data,
+                notificationTitle = remoteMessage.notification?.title,
+                notificationBody = remoteMessage.notification?.body,
+            )
         if (content == null) {
             logger.w { "FCM payload에 title 또는 body가 없습니다." }
             return
@@ -165,6 +166,20 @@ internal data class NotificationContent(
 internal fun Map<String, String>.toNotificationContent(): NotificationContent? {
     return createNotificationContent(get("title"), get("body"))
 }
+
+/**
+ * data payload을 우선하고 유효하지 않으면 notification payload로 알림 내용을 구성한다.
+ *
+ * @param data FCM data payload
+ * @param notificationTitle notification payload의 제목
+ * @param notificationBody notification payload의 본문
+ * @return 두 payload 중 먼저 유효한 알림 내용, 모두 유효하지 않으면 `null`
+ */
+internal fun resolveNotificationContent(
+    data: Map<String, String>,
+    notificationTitle: String?,
+    notificationBody: String?,
+): NotificationContent? = data.toNotificationContent() ?: createNotificationContent(notificationTitle, notificationBody)
 
 /**
  * nullable 제목과 본문을 시스템 알림 내용으로 정리한다.
