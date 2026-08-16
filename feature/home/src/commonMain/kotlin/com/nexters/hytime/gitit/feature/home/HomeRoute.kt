@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.collectLatest
 /**
  * 홈 기능의 상태와 이벤트를 화면에 연결하는 진입점이다.
  *
- * @param onNavigateToQuestionCreate 질문 생성용 저장소 확인 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
+ * @param isQuizCreating 앱 범위에서 문제 생성 세션이 진행 중인지 여부
+ * @param onNavigateToProjectLoad 프로젝트로 등록할 저장소 확인 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
  * @param onNavigateToProjectList 프로젝트 리스트 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
  * @param onNavigateToMy 마이 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
  * @param onNavigateToBookmark 저장한 문제 화면으로 이동하는 콜백. 전달하지 않으면 이동하지 않는다
@@ -19,7 +20,8 @@ import kotlinx.coroutines.flow.collectLatest
  */
 @Composable
 fun HomeRoute(
-    onNavigateToQuestionCreate: () -> Unit = {},
+    isQuizCreating: Boolean = false,
+    onNavigateToProjectLoad: () -> Unit = {},
     onNavigateToProjectList: () -> Unit = {},
     onNavigateToMy: () -> Unit = {},
     onNavigateToBookmark: () -> Unit = {},
@@ -32,7 +34,7 @@ fun HomeRoute(
     LaunchedEffect(Unit) {
         viewModel.sideEffects.collectLatest { sideEffect ->
             when (sideEffect) {
-                HomeSideEffect.NavigateToQuestionCreate -> onNavigateToQuestionCreate()
+                HomeSideEffect.NavigateToProjectLoad -> onNavigateToProjectLoad()
                 HomeSideEffect.NavigateToProjectList -> onNavigateToProjectList()
                 HomeSideEffect.NavigateToMy -> onNavigateToMy()
                 HomeSideEffect.NavigateToBookmark -> onNavigateToBookmark()
@@ -44,6 +46,7 @@ fun HomeRoute(
 
     HomeScreen(
         uiState = uiState,
+        isQuizCreating = isQuizCreating,
         onIntent = viewModel::onIntent,
     )
 }

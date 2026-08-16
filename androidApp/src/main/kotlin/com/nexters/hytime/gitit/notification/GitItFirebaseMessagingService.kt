@@ -16,6 +16,7 @@ import com.nexters.hytime.gitit.R
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.repository.AccountRepository
+import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStore
 import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
-/** FCM 앱 설치 등록을 서버와 동기화하고 수신 메시지를 Android 시스템 알림으로 표시한다. */
+/** FCM 앱 설치 등록을 서버와 동기화하고, 수신 메시지의 문제 생성 결과 반영과 시스템 알림 표시를 처리한다. */
 class GitItFirebaseMessagingService : FirebaseMessagingService() {
     /** FCM 수신과 토큰 갱신 상태를 기록하는 로거다. */
     private val logger by lazy { gitItLogger(tag = "FCM") }
@@ -34,11 +35,14 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
     /** API 호출 가능 여부를 확인할 로그인 세션 저장소다. */
     private val sessionStorage by inject<LoginSessionStorage>()
 
-    /** 서비스 콜백 이후에도 기기 등록 요청을 완료하는 코루틴 범위다. */
-    private val registrationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    /** 문제 생성 완료·실패 신호를 앱 범위 생성 세션에 반영하는 Store다. */
+    private val quizCreateStore by inject<QuizCreateStore>()
+
+    /** 서비스 콜백 이후에도 기기 등록과 생성 결과 반영을 완료하는 코루틴 범위다. */
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**
-     * data 또는 notification payload의 제목과 본문을 검증한 뒤 학습 알림을 게시한다.
+     * data payload의 문제 생성 결과를 반영하고, data 또는 notification payload에 제목과 본문이 있으면 학습 알림을 게시한다.
      *
      * @param remoteMessage Firebase가 전달한 원본 메시지
      */
@@ -47,14 +51,33 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
             "FCM 메시지 수신: messageId=${remoteMessage.messageId}, " +
                 "dataKeys=${remoteMessage.data.keys}, notification=${remoteMessage.notification != null}"
         }
+        val data = remoteMessage.data
+        val hasCreateFields = QUIZ_CREATE_PROJECT_ID_KEY in data || QUIZ_CREATE_STATUS_KEY in data
+        val createResult = data.toQuizCreateResult()
+        if (createResult != null) {
+            serviceScope.launch {
+                when (createResult.status) {
+                    QuizCreateResultStatus.Success -> quizCreateStore.complete(createResult.projectId)
+                    QuizCreateResultStatus.Failed,
+                    QuizCreateResultStatus.Rejected,
+                    -> quizCreateStore.fail(createResult.projectId)
+                }
+            }
+        } else if (hasCreateFields) {
+            logger.w { "FCM 문제 생성 결과 payload의 projectId 또는 status가 올바르지 않습니다." }
+        }
+
         val content =
             resolveNotificationContent(
-                data = remoteMessage.data,
+                data = data,
                 notificationTitle = remoteMessage.notification?.title,
                 notificationBody = remoteMessage.notification?.body,
             )
         if (content == null) {
-            logger.w { "FCM payload에 title 또는 body가 없습니다." }
+            // 문제 생성 결과 전용 메시지는 제목과 본문이 없는 것이 정상이라 경고하지 않는다.
+            if (!hasCreateFields) {
+                logger.w { "FCM payload에 title 또는 body가 없습니다." }
+            }
             return
         }
         showNotification(content, remoteMessage.messageId)
@@ -67,7 +90,7 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
      */
     override fun onRegistered(installationId: String) {
         logger.i { "FCM 등록 완료" }
-        registrationScope.launch { registerDevice(installationId) }
+        serviceScope.launch { registerDevice(installationId) }
     }
 
     /**
@@ -158,6 +181,47 @@ internal data class NotificationContent(
     val body: String,
 )
 
+/** 서버가 FCM data payload로 전달하는 문제 생성 결과 상태다. */
+internal enum class QuizCreateResultStatus {
+    /** 문제 생성이 정상적으로 끝났다. */
+    Success,
+
+    /** 문제 생성 처리 중 오류가 발생했다. */
+    Failed,
+
+    /** 서버가 문제 생성 요청을 거절했다. */
+    Rejected,
+}
+
+/**
+ * FCM으로 수신한 문제 생성 결과다.
+ *
+ * @property projectId 결과를 반영할 프로젝트 식별자
+ * @property status 서버가 전달한 생성 처리 상태
+ */
+internal data class QuizCreateResult(
+    val projectId: String,
+    val status: QuizCreateResultStatus,
+)
+
+/**
+ * FCM data payload의 `projectId`와 `status`를 문제 생성 결과로 변환한다.
+ *
+ * @return 두 필드가 서버 규격에 맞으면 생성 결과, 아니면 `null`
+ */
+internal fun Map<String, String>.toQuizCreateResult(): QuizCreateResult? {
+    val projectId = get(QUIZ_CREATE_PROJECT_ID_KEY)?.trim().orEmpty()
+    if (projectId.isBlank()) return null
+    val status =
+        when (get(QUIZ_CREATE_STATUS_KEY)?.trim()) {
+            "success" -> QuizCreateResultStatus.Success
+            "failed" -> QuizCreateResultStatus.Failed
+            "rejected" -> QuizCreateResultStatus.Rejected
+            else -> return null
+        }
+    return QuizCreateResult(projectId = projectId, status = status)
+}
+
 /**
  * FCM data payload에서 필수 제목과 본문을 꺼내 공백을 정리한다.
  *
@@ -225,3 +289,9 @@ internal fun createAndroidDeviceInfo(
         deviceToken = normalizedInstallationId.takeIf { notificationsEnabled },
     )
 }
+
+/** FCM data payload에서 문제 생성 프로젝트를 식별하는 키다. */
+private const val QUIZ_CREATE_PROJECT_ID_KEY = "projectId"
+
+/** FCM data payload에서 문제 생성 결과 상태를 식별하는 키다. */
+private const val QUIZ_CREATE_STATUS_KEY = "status"

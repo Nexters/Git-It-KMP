@@ -21,6 +21,7 @@ import org.jetbrains.compose.resources.Font
  * @property headline1 가장 큰 화면 제목에 사용하는 30sp 굵은 스타일
  * @property headline2 두 번째 수준 화면 제목에 사용하는 28sp 굵은 스타일
  * @property subtitle1 가장 큰 부제목에 사용하는 24sp 굵은 스타일
+ * @property title1 화면 주요 제목에 사용하는 22sp 굵은 스타일
  * @property subtitle2 중간 부제목에 사용하는 18sp 굵은 스타일
  * @property subtitle3 작은 부제목에 사용하는 16sp 굵은 스타일
  * @property body1 강조 본문에 사용하는 16sp 중간 굵기 스타일
@@ -36,6 +37,7 @@ class GitItTypography internal constructor(
     val headline1: TextStyle,
     val headline2: TextStyle,
     val subtitle1: TextStyle,
+    val title1: TextStyle,
     val subtitle2: TextStyle,
     val subtitle3: TextStyle,
     val body1: TextStyle,
@@ -66,6 +68,7 @@ internal fun createGitItTypography(): GitItTypography {
         headline1 = textStyle(fontFamily, FontWeight.Bold, 30, 37.2f),
         headline2 = textStyle(fontFamily, FontWeight.Bold, 28, 36.4f),
         subtitle1 = textStyle(fontFamily, FontWeight.Bold, 24, 35.52f),
+        title1 = textStyle(fontFamily, FontWeight.Bold, 22, 32.56f),
         subtitle2 = textStyle(fontFamily, FontWeight.Bold, 18, 26.64f),
         subtitle3 = textStyle(fontFamily, FontWeight.Bold, 16, 23.68f),
         body1 = textStyle(fontFamily, FontWeight.Medium, 16, 24f),

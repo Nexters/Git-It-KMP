@@ -47,7 +47,6 @@ include(":feature:onboarding")
 include(":feature:my")
 include(":feature:projectdetail")
 include(":feature:projectlist")
-include(":feature:questioncreate")
 include(":feature:quiz")
 
 include(":core:designsystem")
