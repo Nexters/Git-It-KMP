@@ -94,6 +94,20 @@ interface ProjectRepository {
         text: String,
     ): Result<EssayAnswerResult>
 
+    /**
+     * 문제의 북마크 상태를 설정한다.
+     *
+     * @param projectId 문제가 속한 프로젝트 식별자
+     * @param questionId 북마크할 문제 식별자
+     * @param bookmarked 설정할 북마크 상태
+     * @return 설정 결과. 성공 시 서버에 적용된 북마크 상태, 실패 시 예외를 담는다
+     */
+    suspend fun bookmarkQuestion(
+        projectId: String,
+        questionId: String,
+        bookmarked: Boolean,
+    ): Result<Boolean>
+
     companion object {
         /** 서버 기본값과 같은 첫 페이지 번호다. */
         const val DEFAULT_PAGE = 0

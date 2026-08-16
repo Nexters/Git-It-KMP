@@ -1,6 +1,8 @@
 package com.nexters.hytime.gitit.data.repository
 
 import com.nexters.hytime.gitit.data.dto.ApiResponse
+import com.nexters.hytime.gitit.data.dto.BookmarkQuestionRequest
+import com.nexters.hytime.gitit.data.dto.BookmarkQuestionResponse
 import com.nexters.hytime.gitit.data.dto.EmptyApiResponse
 import com.nexters.hytime.gitit.data.dto.LearningSetResponse
 import com.nexters.hytime.gitit.data.dto.ProjectDetailResponse
@@ -128,6 +130,21 @@ class ProjectRepositoryImpl(
                     SubmitEssayAnswerRequest(text),
                 ).requireData("서술형 답변 제출 응답이 올바르지 않습니다.")
                 .toDomain()
+        }
+
+    override suspend fun bookmarkQuestion(
+        projectId: String,
+        questionId: String,
+        bookmarked: Boolean,
+    ): Result<Boolean> =
+        runCatchingResult {
+            requireQuestion(projectId, questionId)
+            networkClient
+                .post<BookmarkQuestionRequest, ApiResponse<BookmarkQuestionResponse>>(
+                    "${questionPath(projectId, questionId)}/bookmark",
+                    BookmarkQuestionRequest(bookmarked),
+                ).requireData("문제 북마크 응답이 올바르지 않습니다.")
+                .isBookmarked
         }
 
     /**

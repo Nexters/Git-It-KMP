@@ -279,6 +279,18 @@ class ProjectRepositoryImplTest {
         assertEquals("", tooLongClient.requestedMethod)
     }
 
+    /** 북마크 설정이 서버가 적용한 상태를 돌려주는지 검증한다. */
+    @Test
+    fun bookmarkQuestion_성공하면_적용된상태를반환한다() {
+        val networkClient = FakeNetworkClient("""{"success":true,"data":{"isBookmarked":true}}""")
+
+        val bookmarked = runBlocking { ProjectRepositoryImpl(networkClient).bookmarkQuestion("p1", "q1", true) }.getOrThrow()
+
+        assertEquals("/api/v1/projects/p1/questions/q1/bookmark", networkClient.requestedPath)
+        assertEquals("""{"bookmarked":true}""", networkClient.requestBody)
+        assertEquals(true, bookmarked)
+    }
+
     private companion object {
         /** 테스트 요청에 사용하는 GitHub 저장소 URL이다. */
         const val REPOSITORY_URL = "https://github.com/Nexters/Git-it-Server"

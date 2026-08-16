@@ -94,4 +94,10 @@ private class RecordingProjectRepository : ProjectRepository {
         questionId: String,
         text: String,
     ): Result<EssayAnswerResult> = error("호출되면 안 됩니다.")
+
+    override suspend fun bookmarkQuestion(
+        projectId: String,
+        questionId: String,
+        bookmarked: Boolean,
+    ): Result<Boolean> = error("호출되면 안 됩니다.")
 }
