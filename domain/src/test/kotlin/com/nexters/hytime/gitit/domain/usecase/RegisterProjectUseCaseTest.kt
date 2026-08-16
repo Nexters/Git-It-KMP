@@ -3,6 +3,7 @@
 package com.nexters.hytime.gitit.domain.usecase
 
 import com.nexters.hytime.gitit.domain.model.ProjectGenerationStatus
+import com.nexters.hytime.gitit.domain.model.ProjectPage
 import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
 import com.nexters.hytime.gitit.domain.model.ProjectRegistration
 import com.nexters.hytime.gitit.domain.repository.ProjectRepository
@@ -63,4 +64,9 @@ private class RecordingProjectRepository : ProjectRepository {
         this.quizLevel = quizLevel
         return Result.success(ProjectRegistration("project-127", ProjectGenerationStatus.Ready))
     }
+
+    override suspend fun getProjects(
+        page: Int,
+        size: Int,
+    ): Result<ProjectPage> = error("호출되면 안 됩니다.")
 }

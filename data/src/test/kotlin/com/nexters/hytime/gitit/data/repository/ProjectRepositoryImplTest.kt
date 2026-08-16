@@ -4,20 +4,18 @@ package com.nexters.hytime.gitit.data.repository
 
 import com.nexters.hytime.gitit.domain.model.ProjectGenerationStatus
 import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
-import com.nexters.hytime.gitit.network.api.NetworkClient
+import com.nexters.hytime.gitit.domain.repository.ProjectRepository
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/** [ProjectRepositoryImpl]의 프로젝트 등록 API 계약과 응답 매핑을 검증한다. */
+/** [ProjectRepositoryImpl]의 프로젝트 API 계약과 응답 매핑을 검증한다. */
 class ProjectRepositoryImplTest {
     /** 서버 명세의 경로와 요청 필드를 사용하고 반환된 프로젝트를 도메인 모델로 변환하는지 검증한다. */
     @Test
     fun registerProject_successUsesServerContractAndMapsProject() {
-        val networkClient = ProjectFakeNetworkClient(SUCCESS_RESPONSE)
+        val networkClient = FakeNetworkClient(SUCCESS_RESPONSE)
 
         val project =
             runBlocking {
@@ -48,7 +46,7 @@ class ProjectRepositoryImplTest {
             val response = """{"success":true,"data":{"projectId":"project-127","status":"$serverStatus"}}"""
             val result =
                 runBlocking {
-                    ProjectRepositoryImpl(ProjectFakeNetworkClient(response))
+                    ProjectRepositoryImpl(FakeNetworkClient(response))
                         .registerProject(REPOSITORY_URL, ProjectQuizLevel.L1)
                 }
 
@@ -70,12 +68,63 @@ class ProjectRepositoryImplTest {
         invalidResponses.forEach { response ->
             val result =
                 runBlocking {
-                    ProjectRepositoryImpl(ProjectFakeNetworkClient(response))
+                    ProjectRepositoryImpl(FakeNetworkClient(response))
                         .registerProject(REPOSITORY_URL, ProjectQuizLevel.L1)
                 }
 
             assertTrue(result.isFailure, response)
         }
+    }
+
+    /** 목록 조회가 페이지 정보를 쿼리 파라미터로 보내고 응답을 매핑하는지 검증한다. */
+    @Test
+    fun getProjects_성공하면_페이지를쿼리로보내고매핑한다() {
+        val networkClient = FakeNetworkClient(PROJECT_LIST_RESPONSE)
+
+        val page = runBlocking { ProjectRepositoryImpl(networkClient).getProjects(page = 2, size = 5) }.getOrThrow()
+
+        assertEquals("GET", networkClient.requestedMethod)
+        assertEquals("/api/v1/projects", networkClient.requestedPath)
+        assertEquals(mapOf("page" to "2", "size" to "5"), networkClient.requestedQueryParameters)
+        assertEquals(true, networkClient.requestedAuthenticated)
+        assertEquals(true, page.hasNext)
+        assertEquals(listOf("p1"), page.items.map { it.projectId })
+        assertEquals(listOf("react"), page.items.map { it.repositoryName })
+        assertEquals(listOf("TypeScript", "JavaScript"), page.items.first().techStack)
+        assertEquals("Set 1", page.items.first().currentSetLabel)
+        assertEquals("q1", page.items.first().nextProblemId)
+        assertEquals(40, page.items.first().overallProgressPercent)
+    }
+
+    /** 서버 기본값과 같은 페이지 값을 기본으로 사용하는지 검증한다. */
+    @Test
+    fun getProjects_인자를생략하면_서버기본값을보낸다() {
+        val networkClient = FakeNetworkClient(PROJECT_LIST_RESPONSE)
+
+        runBlocking { ProjectRepositoryImpl(networkClient).getProjects() }.getOrThrow()
+
+        assertEquals(
+            mapOf(
+                "page" to ProjectRepository.DEFAULT_PAGE.toString(),
+                "size" to ProjectRepository.DEFAULT_PAGE_SIZE.toString(),
+            ),
+            networkClient.requestedQueryParameters,
+        )
+    }
+
+    /** 페이지 인자가 범위를 벗어나면 요청하지 않고 실패로 처리하는지 검증한다. */
+    @Test
+    fun getProjects_페이지인자가범위밖이면_요청하지않고실패한다() {
+        val negativePage = FakeNetworkClient(PROJECT_LIST_RESPONSE)
+        val zeroSize = FakeNetworkClient(PROJECT_LIST_RESPONSE)
+
+        val negativePageResult = runBlocking { ProjectRepositoryImpl(negativePage).getProjects(page = -1) }
+        val zeroSizeResult = runBlocking { ProjectRepositoryImpl(zeroSize).getProjects(size = 0) }
+
+        assertTrue(negativePageResult.isFailure)
+        assertTrue(zeroSizeResult.isFailure)
+        assertEquals("", negativePage.requestedMethod)
+        assertEquals("", zeroSize.requestedMethod)
     }
 
     private companion object {
@@ -85,52 +134,11 @@ class ProjectRepositoryImplTest {
         /** 준비 상태 프로젝트를 반환하는 정상 서버 응답이다. */
         const val SUCCESS_RESPONSE =
             """{"success":true,"data":{"projectId":"project-127","status":"READY"}}"""
+
+        private const val PROJECT_LIST_RESPONSE =
+            """{"success":true,"data":{"items":[{"projectId":"p1","repositoryName":"react",""" +
+                """"repositoryImageUrl":"https://example.com/a.png","techStack":["TypeScript","JavaScript"],""" +
+                """"currentSetLabel":"Set 1","currentSetTitle":"라우팅","nextProblemId":"q1","overallProgressPercent":40}],""" +
+                """"hasNext":true}}"""
     }
-}
-
-/** 테스트 응답을 역직렬화하며 마지막 프로젝트 등록 요청을 기록한다. */
-private class ProjectFakeNetworkClient(
-    private val responseBody: String,
-) : NetworkClient {
-    /** 마지막으로 요청한 API 경로다. */
-    var requestedPath: String = ""
-
-    /** 마지막으로 직렬화한 요청 본문이다. */
-    var requestBody: String = ""
-
-    /** 마지막 요청에 액세스 토큰 인증이 설정됐는지 여부다. */
-    var requestedAuthenticated: Boolean = false
-
-    override suspend fun <Res : Any> get(
-        path: String,
-        queryParameters: Map<String, String>,
-        authenticated: Boolean,
-        responseSerializer: KSerializer<Res>,
-    ): Res = error("호출되면 안 됩니다.")
-
-    override suspend fun <Res : Any> getAbsolute(
-        url: String,
-        headers: Map<String, String>,
-        authenticated: Boolean,
-        responseSerializer: KSerializer<Res>,
-    ): Res = error("호출되면 안 됩니다.")
-
-    override suspend fun <Req : Any, Res : Any> post(
-        path: String,
-        body: Req,
-        authenticated: Boolean,
-        requestSerializer: KSerializer<Req>,
-        responseSerializer: KSerializer<Res>,
-    ): Res {
-        requestedPath = path
-        requestBody = Json.encodeToString(requestSerializer, body)
-        requestedAuthenticated = authenticated
-        return Json.decodeFromString(responseSerializer, responseBody)
-    }
-
-    override suspend fun <Res : Any> delete(
-        path: String,
-        authenticated: Boolean,
-        responseSerializer: KSerializer<Res>,
-    ): Res = error("호출되면 안 됩니다.")
 }
