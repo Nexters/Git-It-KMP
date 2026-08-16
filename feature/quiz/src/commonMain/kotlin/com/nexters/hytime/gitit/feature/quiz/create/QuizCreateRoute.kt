@@ -24,11 +24,7 @@ fun QuizCreateRoute(
     onNavigateHome: () -> Unit,
     onRequestNotificationPermission: () -> Unit = {},
 ) {
-    val viewModel =
-        koinViewModel<QuizCreateViewModel>(
-            key = "quiz-create:$repositoryUrl",
-            parameters = { parametersOf(repositoryUrl) },
-        )
+    val viewModel = koinViewModel<QuizCreateViewModel> { parametersOf(repositoryUrl) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
