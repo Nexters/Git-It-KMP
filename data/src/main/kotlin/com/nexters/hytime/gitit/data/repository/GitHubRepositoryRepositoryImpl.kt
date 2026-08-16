@@ -6,7 +6,7 @@ import com.nexters.hytime.gitit.domain.model.GitHubRepository
 import com.nexters.hytime.gitit.domain.repository.GitHubRepositoryRepository
 import com.nexters.hytime.gitit.domain.util.runCatchingResult
 import com.nexters.hytime.gitit.network.api.NetworkClient
-import com.nexters.hytime.gitit.network.api.get
+import com.nexters.hytime.gitit.network.api.getAbsolute
 
 /**
  * 공개 GitHub REST API로 저장소 정보를 조회한다.
@@ -22,7 +22,7 @@ class GitHubRepositoryRepositoryImpl(
     ): Result<GitHubRepository> =
         runCatchingResult {
             networkClient
-                .get<GitHubRepositoryResponse>(
+                .getAbsolute<GitHubRepositoryResponse>(
                     url = "$GITHUB_API_BASE_URL/repos/$owner/$name",
                     headers = mapOf("User-Agent" to "Git-It-KMP"),
                 ).toDomain()

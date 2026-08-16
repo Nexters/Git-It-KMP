@@ -111,6 +111,12 @@ private class LoginFakeNetworkClient(
     var requestedAuthenticated: Boolean = true
 
     override suspend fun <Res : Any> get(
+        path: String,
+        authenticated: Boolean,
+        responseSerializer: KSerializer<Res>,
+    ): Res = error("호출되면 안 됩니다.")
+
+    override suspend fun <Res : Any> getAbsolute(
         url: String,
         headers: Map<String, String>,
         authenticated: Boolean,

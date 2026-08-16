@@ -3,6 +3,7 @@ package com.nexters.hytime.gitit.network.http
 import com.nexters.hytime.gitit.network.api.NetworkClient
 import com.nexters.hytime.gitit.network.api.NetworkException
 import com.nexters.hytime.gitit.network.api.get
+import com.nexters.hytime.gitit.network.api.getAbsolute
 import com.nexters.hytime.gitit.network.api.post
 import com.nexters.hytime.gitit.network.logging.NetworkLogger
 import io.ktor.client.HttpClient
@@ -151,7 +152,7 @@ class KtorNetworkClientTest {
                     json = json,
                     baseUrl = "https://example.com",
                     accessTokenProvider = { "backend-access-token" },
-                ).get<TestResponse>("https://api.github.com/repos/facebook/react", mapOf("User-Agent" to "Git-It-KMP"))
+                ).getAbsolute<TestResponse>("https://api.github.com/repos/facebook/react", mapOf("User-Agent" to "Git-It-KMP"))
 
             assertTrue(requestedUrl.startsWith("https://api.github.com/repos/facebook/react"))
             assertEquals("Git-It-KMP", requestedUserAgent)
@@ -160,12 +161,49 @@ class KtorNetworkClientTest {
         }
     }
 
+    /** 경로 GET이 baseUrl을 앞에 붙이고 인증 여부에 따라 액세스 토큰을 전달하는지 검증한다. */
+    @Test
+    fun get_pathRequestPrependsBaseUrlAndControlsAccessTokenHeader() {
+        val requestedUrls = mutableListOf<String>()
+        val authorizationHeaders = mutableListOf<String?>()
+        val httpClient =
+            HttpClient(
+                MockEngine { request ->
+                    requestedUrls += request.url.toString()
+                    authorizationHeaders += request.headers[HttpHeaders.Authorization]
+                    respond(
+                        content = """{"result":"ok"}""",
+                        headers = headers { append("Content-Type", "application/json") },
+                    )
+                },
+            ) {
+                configureGitItHttpClient(NetworkLogger { })
+            }
+        val client =
+            KtorNetworkClient(
+                client = httpClient,
+                json = json,
+                baseUrl = "https://example.com",
+                accessTokenProvider = { "access-token" },
+            )
+
+        runBlocking {
+            val response = client.get<TestResponse>("/api/v1/members/me")
+            client.get<TestResponse>("/api/v1/public", authenticated = false)
+
+            assertEquals("ok", response.result)
+        }
+
+        assertEquals(listOf("https://example.com/api/v1/members/me", "https://example.com/api/v1/public"), requestedUrls)
+        assertEquals(listOf("Bearer access-token", null), authorizationHeaders)
+    }
+
     /** GET 실패 상태를 네트워크 예외로 변환하는지 검증한다. */
     @Test
     fun get_non2xxThrowsNetworkException() {
         runBlocking {
             assertFailsWith<NetworkException> {
-                client(status = HttpStatusCode.NotFound).get<TestResponse>("https://example.com/missing")
+                client(status = HttpStatusCode.NotFound).getAbsolute<TestResponse>("https://example.com/missing")
             }
         }
     }

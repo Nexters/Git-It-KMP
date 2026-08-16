@@ -34,6 +34,17 @@ internal class KtorNetworkClient(
     private val backendUrl = Url(baseUrl)
 
     override suspend fun <Res : Any> get(
+        path: String,
+        authenticated: Boolean,
+        responseSerializer: KSerializer<Res>,
+    ): Res =
+        getAbsolute(
+            url = "$baseUrl$path",
+            authenticated = authenticated,
+            responseSerializer = responseSerializer,
+        )
+
+    override suspend fun <Res : Any> getAbsolute(
         url: String,
         headers: Map<String, String>,
         authenticated: Boolean,
