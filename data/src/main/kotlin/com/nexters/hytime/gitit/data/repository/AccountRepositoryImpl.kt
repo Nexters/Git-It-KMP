@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.data.repository
 
+import com.nexters.hytime.gitit.data.dto.CareerLevelRequest
 import com.nexters.hytime.gitit.data.dto.CurationRequest
 import com.nexters.hytime.gitit.data.dto.DeviceInfoRequest
 import com.nexters.hytime.gitit.data.dto.EmptyApiResponse
@@ -8,6 +9,7 @@ import com.nexters.hytime.gitit.data.dto.MemberProfileApiResponse
 import com.nexters.hytime.gitit.data.dto.PositionRequest
 import com.nexters.hytime.gitit.data.dto.SignInWithGoogleRequest
 import com.nexters.hytime.gitit.data.mapping.toDomain
+import com.nexters.hytime.gitit.domain.model.CareerLevel
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
 import com.nexters.hytime.gitit.domain.model.MemberCuration
@@ -36,6 +38,7 @@ class AccountRepositoryImpl(
                     SignInWithGoogleRequest(idToken),
                     authenticated = false,
                 )
+            // 서버가 200으로 응답해도 토큰이 비어 있으면 이후 인증 요청이 모두 실패하므로 여기서 걸러낸다.
             val data =
                 response.data?.takeIf {
                     response.success && it.accessToken.isNotBlank() && it.refreshToken.isNotBlank()
@@ -96,6 +99,15 @@ class AccountRepositoryImpl(
                 ).requireSuccess("개발 분야 변경 응답이 올바르지 않습니다.")
         }
 
+    override suspend fun updateCareerLevel(careerLevel: CareerLevel): Result<Unit> =
+        runCatchingResult {
+            networkClient
+                .post<CareerLevelRequest, EmptyApiResponse>(
+                    PATH_CAREER_LEVEL,
+                    CareerLevelRequest(careerLevel.name),
+                ).requireSuccess("개발 수준 변경 응답이 올바르지 않습니다.")
+        }
+
     /**
      * 본문 없는 성공 응답을 검증한다.
      *
@@ -114,5 +126,6 @@ class AccountRepositoryImpl(
         private const val PATH_REGISTER_DEVICE = "/api/v1/members/me/device"
         private const val PATH_CURATION = "/api/v1/members/me/curation"
         private const val PATH_POSITION = "/api/v1/members/me/position"
+        private const val PATH_CAREER_LEVEL = "/api/v1/members/me/career-level"
     }
 }

@@ -185,6 +185,32 @@ class AccountRepositoryImplTest {
         assertEquals("""{"position":"BACKEND"}""", networkClient.requestBody)
     }
 
+    /** 개발 수준 변경이 전용 경로로 요청하는지 검증한다. */
+    @Test
+    fun updateCareerLevel_성공하면_개발수준경로로요청한다() {
+        val networkClient = LoginFakeNetworkClient("""{"success":true}""")
+
+        val result = runBlocking { AccountRepositoryImpl(networkClient).updateCareerLevel(CareerLevel.SENIOR) }
+
+        assertEquals(Unit, result.getOrThrow())
+        assertEquals("/api/v1/members/me/career-level", networkClient.requestedPath)
+        assertEquals("""{"careerLevel":"SENIOR"}""", networkClient.requestBody)
+    }
+
+    /** 본문 없는 회원 API가 실패를 응답하면 실패로 변환하는지 검증한다. */
+    @Test
+    fun 회원설정변경_응답이실패면_실패를반환한다() {
+        val failureResponse = """{"success":false,"code":"MEMBER-001","message":"회원을 찾을 수 없습니다"}"""
+
+        val positionResult =
+            runBlocking { AccountRepositoryImpl(LoginFakeNetworkClient(failureResponse)).updatePosition(Position.IOS) }
+        val careerLevelResult =
+            runBlocking { AccountRepositoryImpl(LoginFakeNetworkClient(failureResponse)).updateCareerLevel(CareerLevel.MIDDLE) }
+
+        assertTrue(positionResult.isFailure)
+        assertTrue(careerLevelResult.isFailure)
+    }
+
     private companion object {
         private const val SUCCESS_RESPONSE =
             """{"success":true,"data":{"accessToken":"access-token","refreshToken":"refresh-token","needsCuration":true}}"""

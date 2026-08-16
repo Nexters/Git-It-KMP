@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.domain.repository
 
+import com.nexters.hytime.gitit.domain.model.CareerLevel
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
 import com.nexters.hytime.gitit.domain.model.MemberCuration
@@ -54,4 +55,12 @@ interface AccountRepository {
      * @return 변경 결과. 성공 시 [Unit], 실패 시 예외를 담는다
      */
     suspend fun updatePosition(position: Position): Result<Unit>
+
+    /**
+     * 개발 수준만 변경한다. 개발 분야에는 영향을 주지 않는다.
+     *
+     * @param careerLevel 새로 선택한 개발 수준
+     * @return 변경 결과. 성공 시 [Unit], 실패 시 예외를 담는다
+     */
+    suspend fun updateCareerLevel(careerLevel: CareerLevel): Result<Unit>
 }

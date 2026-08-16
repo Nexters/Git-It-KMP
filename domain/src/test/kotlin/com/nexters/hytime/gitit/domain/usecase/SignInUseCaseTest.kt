@@ -2,6 +2,7 @@ package com.nexters.hytime.gitit.domain.usecase
 
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
+import com.nexters.hytime.gitit.domain.model.CareerLevel
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
 import com.nexters.hytime.gitit.domain.model.MemberCuration
@@ -52,6 +53,8 @@ private class FakeAccountRepository(
     override suspend fun curateMember(curation: MemberCuration): Result<Unit> = error("호출되면 안 됩니다.")
 
     override suspend fun updatePosition(position: Position): Result<Unit> = error("호출되면 안 됩니다.")
+
+    override suspend fun updateCareerLevel(careerLevel: CareerLevel): Result<Unit> = error("호출되면 안 됩니다.")
 }
 
 /** 테스트 중 메모리에만 세션을 보관한다. */
