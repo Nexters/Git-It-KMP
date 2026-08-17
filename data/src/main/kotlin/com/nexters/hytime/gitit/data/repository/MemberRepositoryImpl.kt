@@ -58,12 +58,10 @@ class MemberRepositoryImpl(
 
     override suspend fun curateMember(curation: MemberCuration): Result<Unit> =
         runCatchingResult {
-            require(curation.name.isNotBlank()) { "이름이 비어 있습니다." }
             networkClient
                 .post<CurationRequest, EmptyApiResponse>(
                     PATH_CURATION,
                     CurationRequest(
-                        name = curation.name,
                         position = curation.position.name,
                         careerLevel = curation.careerLevel.name,
                     ),
