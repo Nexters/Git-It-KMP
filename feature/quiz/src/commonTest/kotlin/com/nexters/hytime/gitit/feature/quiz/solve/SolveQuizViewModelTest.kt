@@ -4,6 +4,7 @@ package com.nexters.hytime.gitit.feature.quiz.solve
 
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerState
 import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
+import com.nexters.hytime.gitit.domain.model.EssayAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.LearningSetSummary
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
@@ -11,9 +12,11 @@ import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
 import com.nexters.hytime.gitit.domain.model.Question
 import com.nexters.hytime.gitit.domain.model.QuestionFormat
 import com.nexters.hytime.gitit.domain.model.QuestionSource
+import com.nexters.hytime.gitit.domain.model.Rubric
 import com.nexters.hytime.gitit.domain.usecase.GetLearningSetUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
 import com.nexters.hytime.gitit.domain.usecase.SubmitChoiceAnswerUseCase
+import com.nexters.hytime.gitit.domain.usecase.SubmitEssayAnswerUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -121,14 +124,16 @@ class SolveQuizViewModelTest {
     @Test
     fun next_마지막문제를마치면_완료단계로이동한다() {
         runTest(dispatcher) {
-            val viewModel = createViewModel()
+            val viewModel = createViewModel(repository = repositoryWithEssayResult())
             runCurrent()
             viewModel.onIntent(SolveQuizIntent.Start)
             viewModel.onIntent(SolveQuizIntent.AnswerClick("0"))
             viewModel.onIntent(SolveQuizIntent.Submit)
             runCurrent()
             viewModel.onIntent(SolveQuizIntent.Next)
+            viewModel.onIntent(SolveQuizIntent.EssayAnswerChange("라우터가 한곳에 모여 있습니다"))
             viewModel.onIntent(SolveQuizIntent.Submit)
+            runCurrent()
             viewModel.onIntent(SolveQuizIntent.Next)
             viewModel.onIntent(SolveQuizIntent.AnswerClick("1"))
             viewModel.onIntent(SolveQuizIntent.Submit)
@@ -254,6 +259,40 @@ class SolveQuizViewModelTest {
         }
     }
 
+    /** 서술형 제출이 성공하면 만점 예시를 모범 답안으로 채운다. */
+    @Test
+    fun submit_서술형제출에성공하면_모범답안을채운다() {
+        runTest(dispatcher) {
+            val repository = repositoryWithEssayResult()
+            val viewModel = essayViewModel(repository)
+
+            viewModel.onIntent(SolveQuizIntent.EssayAnswerChange("라우터가 한곳에 모여 있습니다"))
+            viewModel.onIntent(SolveQuizIntent.Submit)
+            runCurrent()
+
+            val state = viewModel.uiState.value
+            assertEquals("q2", repository.submittedEssayQuestionId)
+            assertEquals("라우터가 한곳에 모여 있습니다", repository.submittedEssayText)
+            assertTrue(state.isEssaySubmitted)
+            assertEquals("만점 예시", state.essayQuestion.modelAnswer)
+        }
+    }
+
+    /** 빈 답안은 서버가 거부하므로 제출하지 않는다. */
+    @Test
+    fun submit_빈서술형답안이면_제출하지않는다() {
+        runTest(dispatcher) {
+            val repository = repositoryWithEssayResult()
+            val viewModel = essayViewModel(repository)
+
+            viewModel.onIntent(SolveQuizIntent.Submit)
+            runCurrent()
+
+            assertEquals(null, repository.submittedEssayQuestionId)
+            assertFalse(viewModel.uiState.value.isEssaySubmitted)
+        }
+    }
+
     /** 오답 결과가 선택한 답안과 실제 정답에 서로 다른 디자인 상태를 적용한다. */
     @Test
     fun answerCardState_incorrectResult_mapsIncorrectAndCorrectStates() {
@@ -280,8 +319,8 @@ class SolveQuizViewModelTest {
     }
 
     /** 서술형 단계까지 이동한 ViewModel을 만든다. */
-    private fun TestScope.essayViewModel(): SolveQuizViewModel {
-        val viewModel = createViewModel()
+    private fun TestScope.essayViewModel(repository: FakeSolveQuizRepository = repositoryWithEssayResult()): SolveQuizViewModel {
+        val viewModel = createViewModel(repository = repository)
         runCurrent()
         viewModel.onIntent(SolveQuizIntent.Start)
         viewModel.onIntent(SolveQuizIntent.AnswerClick("0"))
@@ -290,6 +329,28 @@ class SolveQuizViewModelTest {
         viewModel.onIntent(SolveQuizIntent.Next)
         return viewModel
     }
+
+    /** 채점 결과가 설정된 기본 페이크 리포지토리를 만든다. */
+    private fun repositoryWithEssayResult(): FakeSolveQuizRepository =
+        FakeSolveQuizRepository(
+            Result.success(DETAIL),
+            Result.success(LEARNING_SET),
+            Result.success(ChoiceAnswerResult(questionId = "q1", correct = true, answerIndex = 0, explanation = "해설")),
+            Result.success(
+                EssayAnswerResult(
+                    questionId = "q2",
+                    explanation = "서술형 해설",
+                    rubric =
+                        Rubric(
+                            criteria = emptyList(),
+                            keyPoints = listOf("라우터"),
+                            fullMarkExample = "만점 예시",
+                            partialExample = "부분 예시",
+                            zeroExample = "0점 예시",
+                        ),
+                ),
+            ),
+        )
 
     private fun createViewModel(
         repository: FakeSolveQuizRepository =
@@ -305,6 +366,7 @@ class SolveQuizViewModelTest {
             getProjectDetail = GetProjectDetailUseCase(repository),
             getLearningSet = GetLearningSetUseCase(repository),
             submitChoiceAnswer = SubmitChoiceAnswerUseCase(repository),
+            submitEssayAnswer = SubmitEssayAnswerUseCase(repository),
         )
 
     private companion object {

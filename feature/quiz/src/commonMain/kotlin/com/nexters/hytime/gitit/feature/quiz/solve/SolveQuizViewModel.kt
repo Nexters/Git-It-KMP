@@ -6,6 +6,7 @@ import com.nexters.hytime.gitit.domain.model.LearningSetSummary
 import com.nexters.hytime.gitit.domain.usecase.GetLearningSetUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
 import com.nexters.hytime.gitit.domain.usecase.SubmitChoiceAnswerUseCase
+import com.nexters.hytime.gitit.domain.usecase.SubmitEssayAnswerUseCase
 import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,12 +34,14 @@ data class SolveQuizArgs(
  * @property getProjectDetail 세트 라벨과 이어 풀 세트를 정하기 위한 프로젝트 상세 조회 유스케이스
  * @property getLearningSet 문제 목록을 조회하는 유스케이스
  * @property submitChoiceAnswer 4지선다 답을 서버에 제출하고 채점 결과를 받는 유스케이스
+ * @property submitEssayAnswer 서술형 답안을 서버에 제출하고 채점 기준을 받는 유스케이스
  */
 class SolveQuizViewModel(
     private val args: SolveQuizArgs,
     private val getProjectDetail: GetProjectDetailUseCase,
     private val getLearningSet: GetLearningSetUseCase,
     private val submitChoiceAnswer: SubmitChoiceAnswerUseCase,
+    private val submitEssayAnswer: SubmitEssayAnswerUseCase,
 ) : ViewModel() {
     private val logger = gitItLogger()
 
@@ -142,7 +145,7 @@ class SolveQuizViewModel(
         val state = uiState.value
         when (state.step) {
             QuizStep.MultipleChoice -> submitMultipleChoiceAnswer(state)
-            QuizStep.Essay -> setState { copy(isEssaySubmitted = true) }
+            QuizStep.Essay -> submitEssayAnswerToServer(state)
             QuizStep.Intro,
             QuizStep.Completed,
             -> Unit
@@ -170,6 +173,26 @@ class SolveQuizViewModel(
                         )
                     }
                 }.onFailure { error -> logger.e(throwable = error) { "4지선다 답변 제출 실패" } }
+        }
+    }
+
+    /**
+     * 작성한 답안을 서버에 제출하고 채점 기준의 만점 예시를 모범 답안으로 채운다.
+     * 실패하면 제출 전 상태를 유지해 다시 시도할 수 있게 하고 원인을 로그로 남긴다.
+     */
+    private fun submitEssayAnswerToServer(state: SolveQuizUiState) {
+        if (state.isEssaySubmitted || state.essayAnswer.isBlank()) return
+
+        viewModelScope.launch {
+            submitEssayAnswer(args.projectId, state.essayQuestion.id, state.essayAnswer)
+                .onSuccess { result ->
+                    setState {
+                        copy(
+                            questions = questions.withEssayModelAnswer(currentIndex, result.rubric.fullMarkExample),
+                            isEssaySubmitted = true,
+                        )
+                    }
+                }.onFailure { error -> logger.e(throwable = error) { "서술형 답변 제출 실패" } }
         }
     }
 
@@ -253,6 +276,25 @@ private fun List<SolveQuizQuestionItem>.withGradedCurrentQuestion(
     mapIndexed { i, item ->
         if (i == index && item is SolveQuizQuestionItem.MultipleChoice) {
             item.copy(item.question.copy(correctAnswerId = correctAnswerId, explanation = explanation))
+        } else {
+            item
+        }
+    }
+
+/**
+ * 현재 서술형 문제에 모범 답안을 채운 목록을 만든다.
+ *
+ * @param index 제출한 문제의 위치
+ * @param modelAnswer 채점 기준의 만점 답안 예시
+ * @return 모범 답안이 반영된 문제 목록
+ */
+private fun List<SolveQuizQuestionItem>.withEssayModelAnswer(
+    index: Int,
+    modelAnswer: String,
+): List<SolveQuizQuestionItem> =
+    mapIndexed { i, item ->
+        if (i == index && item is SolveQuizQuestionItem.Essay) {
+            item.copy(item.question.copy(modelAnswer = modelAnswer))
         } else {
             item
         }
