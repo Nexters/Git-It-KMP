@@ -7,6 +7,7 @@ import com.nexters.hytime.gitit.domain.repository.GitHubRepositoryRepository
 import com.nexters.hytime.gitit.domain.repository.MemberRepository
 import com.nexters.hytime.gitit.domain.repository.ProjectRepository
 import com.nexters.hytime.gitit.domain.usecase.GetMemberProfileUseCase
+import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectsUseCase
 import com.nexters.hytime.gitit.domain.usecase.LoadGitHubRepositoryUseCase
 import com.nexters.hytime.gitit.domain.usecase.RegisterProjectUseCase
@@ -44,12 +45,13 @@ val appModule: Module =
         single { LoadGitHubRepositoryUseCase(repository = get<GitHubRepositoryRepository>()) }
         single { GetMemberProfileUseCase(repository = get<MemberRepository>()) }
         single { GetProjectsUseCase(repository = get<ProjectRepository>()) }
+        single { GetProjectDetailUseCase(repository = get<ProjectRepository>()) }
         single { RegisterProjectUseCase(repository = get<ProjectRepository>()) }
         viewModel { SplashViewModel(authRepository = get(), sessionStorage = get()) }
         viewModel { MyViewModel(getMemberProfile = get()) }
         viewModel { HomeViewModel(getProjects = get()) }
         viewModel { ProjectListViewModel(getProjects = get()) }
-        viewModel { params -> ProjectDetailViewModel(projectId = params.get<String>()) }
+        viewModel { params -> ProjectDetailViewModel(projectId = params.get<String>(), getProjectDetail = get()) }
         viewModel { ProjectLoadViewModel(loadGitHubRepository = get()) }
         single { QuizCreateStore() }
         single { QuizCreateRetryHandler(registerProject = get(), createStore = get()) }
