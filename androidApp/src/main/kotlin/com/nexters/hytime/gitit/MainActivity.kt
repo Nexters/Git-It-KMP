@@ -9,6 +9,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
+/** 재생성 중 보존할 미처리 공유 저장소 URL의 상태 키다. */
+private const val SHARED_REPOSITORY_URL_STATE = "sharedRepositoryUrl"
+
 /** 공유 대상으로 허용하는 GitHub 저장소 루트 URL 형식이다. */
 private val GITHUB_REPOSITORY_URL =
     Regex(
@@ -40,11 +43,19 @@ class MainActivity : ComponentActivity() {
     /** 공통 내비게이션이 아직 소비하지 않은 공유 저장소 URL이다. */
     private var sharedRepositoryUrl by mutableStateOf<String?>(null)
 
-    /** Activity를 만들고 최초 실행 Intent를 Compose 콘텐츠에 전달한다. */
+    /**
+     * Activity를 만들고 최초 실행 Intent 또는 저장된 미처리 URL을 Compose 콘텐츠에 전달한다.
+     *
+     * @param savedInstanceState 재생성 전 저장된 Activity 상태
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        handleSharedIntent(intent)
+        if (savedInstanceState == null) {
+            handleSharedIntent(intent)
+        } else {
+            sharedRepositoryUrl = savedInstanceState.getString(SHARED_REPOSITORY_URL_STATE)
+        }
 
         setContent {
             App(
@@ -52,6 +63,16 @@ class MainActivity : ComponentActivity() {
                 onSharedRepositoryUrlConsumed = { sharedRepositoryUrl = null },
             )
         }
+    }
+
+    /**
+     * 재생성 전에 아직 처리하지 않은 공유 URL을 저장한다.
+     *
+     * @param outState 새 Activity에 전달할 상태 Bundle
+     */
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString(SHARED_REPOSITORY_URL_STATE, sharedRepositoryUrl)
+        super.onSaveInstanceState(outState)
     }
 
     /**
