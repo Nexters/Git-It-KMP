@@ -1,12 +1,19 @@
 package com.nexters.hytime.gitit.presentation.splash
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import git_it_kmp.shared.generated.resources.Res
+import git_it_kmp.shared.generated.resources.logo_appicon
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * 앱 시작 시 토큰 검증이 끝날 때까지 표시하는 스플래시 화면이다.
@@ -24,7 +31,14 @@ fun SplashScreen(
             modifier
                 .fillMaxSize()
                 .background(GitItTheme.colors.grey700),
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painter = painterResource(Res.drawable.logo_appicon),
+            contentDescription = null,
+            modifier = Modifier.size(160.dp),
+        )
+    }
 }
 
 @Preview
