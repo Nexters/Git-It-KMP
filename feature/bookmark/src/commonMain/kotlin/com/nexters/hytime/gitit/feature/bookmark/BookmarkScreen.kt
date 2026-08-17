@@ -30,6 +30,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.animation.GitItAnimation
+import com.nexters.hytime.gitit.designsystem.animation.GitItLottieAnimation
 import com.nexters.hytime.gitit.designsystem.navigation.GitItBookmarkIcon
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
@@ -141,15 +143,20 @@ fun BookmarkScreen(
 private fun BookmarkEmptyState(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        GitItLottieAnimation(
+            animation = GitItAnimation.StorageEmpty,
+            modifier = Modifier.size(128.dp),
+        )
+        Spacer(Modifier.height(24.dp))
         Text(
             text = "Nothing saved yet.",
             color = GitItTheme.colors.grey200,
             style = GitItTheme.typography.subtitle1,
             textAlign = TextAlign.Center,
         )
+        Spacer(Modifier.height(8.dp))
         Text(
             text = "아직 저장한 문제가 없네요!\n다시 확인하고 싶은 문제를 저장해 보세요.",
             color = GitItTheme.colors.grey400,
