@@ -131,6 +131,7 @@ class BookmarkViewModelTest {
                         DomainBookmarkedQuestion(
                             projectId = "p1",
                             projectName = "flask",
+                            setId = "s1",
                             setLabel = "Set 1",
                             problemNumber = 3,
                             questionId = "q1",

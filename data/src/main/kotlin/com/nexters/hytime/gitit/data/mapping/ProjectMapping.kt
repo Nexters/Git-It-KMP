@@ -57,7 +57,8 @@ internal fun ProjectItemResponse.toDomain(): ProjectSummary =
         techStack = techStack,
         currentSetLabel = currentSetLabel,
         currentSetTitle = currentSetTitle,
-        nextProblemId = nextProblemId,
+        nextSetId = nextSetId,
+        nextQuestionId = nextQuestionId,
         overallProgressPercent = overallProgressPercent,
     )
 
@@ -233,6 +234,7 @@ internal fun BookmarkedQuestionResponse.toDomain(): BookmarkedQuestion =
     BookmarkedQuestion(
         projectId = projectId,
         projectName = projectName,
+        setId = setId,
         setLabel = setLabel,
         problemNumber = problemNumber,
         questionId = questionId,

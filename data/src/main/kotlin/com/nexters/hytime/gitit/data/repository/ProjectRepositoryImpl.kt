@@ -146,7 +146,7 @@ class ProjectRepositoryImpl(
                     "${questionPath(projectId, questionId)}/bookmark",
                     BookmarkQuestionRequest(bookmarked),
                 ).requireData("문제 북마크 응답이 올바르지 않습니다.")
-                .isBookmarked
+                .bookmarked
         }
 
     override suspend fun getBookmarkedQuestions(projectId: String?): Result<BookmarkedQuestions> =

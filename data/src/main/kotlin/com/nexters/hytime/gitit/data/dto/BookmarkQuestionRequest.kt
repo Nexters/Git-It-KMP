@@ -15,9 +15,9 @@ internal data class BookmarkQuestionRequest(
 /**
  * 문제 북마크 설정 응답이다.
  *
- * @property isBookmarked 서버에 적용된 북마크 상태
+ * @property bookmarked 서버에 적용된 북마크 상태
  */
 @Serializable
 internal data class BookmarkQuestionResponse(
-    val isBookmarked: Boolean = false,
+    val bookmarked: Boolean = false,
 )

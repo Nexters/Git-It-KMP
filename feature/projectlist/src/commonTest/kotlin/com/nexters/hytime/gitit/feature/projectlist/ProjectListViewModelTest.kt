@@ -205,7 +205,8 @@ class ProjectListViewModelTest {
                             techStack = listOf("TypeScript", "JavaScript"),
                             currentSetLabel = "Set 1",
                             currentSetTitle = "라우팅 흐름 따라가기",
-                            nextProblemId = "q1",
+                            nextSetId = "s1",
+                            nextQuestionId = "q1",
                             overallProgressPercent = 40,
                         )
                     },
