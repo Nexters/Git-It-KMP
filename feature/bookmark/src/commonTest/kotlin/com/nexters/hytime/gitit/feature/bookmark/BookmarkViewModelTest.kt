@@ -4,6 +4,7 @@ package com.nexters.hytime.gitit.feature.bookmark
 
 import com.nexters.hytime.gitit.domain.model.AvailableProject
 import com.nexters.hytime.gitit.domain.model.BookmarkedQuestions
+import com.nexters.hytime.gitit.domain.usecase.BookmarkQuestionUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetBookmarkedQuestionsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,7 +41,7 @@ class BookmarkViewModelTest {
     fun init_목록조회에성공하면_필터와문제를채운다() {
         runTest(dispatcher) {
             val repository = FakeBookmarkRepository(Result.success(BOOKMARKS))
-            val viewModel = BookmarkViewModel(GetBookmarkedQuestionsUseCase(repository))
+            val viewModel = createViewModel(repository)
             runCurrent()
 
             val state = viewModel.uiState.value
@@ -59,7 +60,7 @@ class BookmarkViewModelTest {
     fun filterClick_프로젝트필터를선택하면_프로젝트로다시조회한다() {
         runTest(dispatcher) {
             val repository = FakeBookmarkRepository(Result.success(BOOKMARKS))
-            val viewModel = BookmarkViewModel(GetBookmarkedQuestionsUseCase(repository))
+            val viewModel = createViewModel(repository)
             runCurrent()
 
             viewModel.onIntent(BookmarkIntent.FilterClick("p1"))
@@ -75,7 +76,8 @@ class BookmarkViewModelTest {
     @Test
     fun onIntent_bookmarkClick_togglesBookmarkState() {
         runTest(dispatcher) {
-            val viewModel = BookmarkViewModel(GetBookmarkedQuestionsUseCase(FakeBookmarkRepository(Result.success(BOOKMARKS))))
+            val repository = FakeBookmarkRepository(Result.success(BOOKMARKS))
+            val viewModel = createViewModel(repository)
             runCurrent()
             val questionId =
                 viewModel.uiState.value.questions
@@ -85,12 +87,39 @@ class BookmarkViewModelTest {
             assertEquals(emptyMap(), viewModel.uiState.value.bookmarkChanges)
 
             viewModel.onIntent(BookmarkIntent.BookmarkClick(questionId))
+            runCurrent()
             assertEquals(mapOf(questionId to false), viewModel.uiState.value.bookmarkChanges)
+            assertEquals("p1", repository.bookmarkedProjectId)
+            assertEquals(questionId, repository.bookmarkedQuestionId)
+            assertEquals(false, repository.requestedBookmarked)
 
             viewModel.onIntent(BookmarkIntent.BookmarkClick(questionId))
+            runCurrent()
             assertEquals(mapOf(questionId to true), viewModel.uiState.value.bookmarkChanges)
         }
     }
+
+    /** 북마크 설정이 실패하면 표시 상태를 유지한다. */
+    @Test
+    fun bookmarkClick_설정이실패하면_표시상태를유지한다() {
+        runTest(dispatcher) {
+            val repository = FakeBookmarkRepository(Result.success(BOOKMARKS))
+            repository.bookmarkResult = Result.failure(IllegalStateException("네트워크 오류"))
+            val viewModel = createViewModel(repository)
+            runCurrent()
+
+            viewModel.onIntent(BookmarkIntent.BookmarkClick("q1"))
+            runCurrent()
+
+            assertEquals(emptyMap(), viewModel.uiState.value.bookmarkChanges)
+        }
+    }
+
+    private fun createViewModel(repository: FakeBookmarkRepository): BookmarkViewModel =
+        BookmarkViewModel(
+            getBookmarkedQuestions = GetBookmarkedQuestionsUseCase(repository),
+            bookmarkQuestion = BookmarkQuestionUseCase(repository),
+        )
 
     private companion object {
         private val BOOKMARKS =

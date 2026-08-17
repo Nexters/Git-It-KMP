@@ -3,6 +3,7 @@ package com.nexters.hytime.gitit.feature.quiz.solve
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexters.hytime.gitit.domain.model.LearningSetSummary
+import com.nexters.hytime.gitit.domain.usecase.BookmarkQuestionUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetLearningSetUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
 import com.nexters.hytime.gitit.domain.usecase.SubmitChoiceAnswerUseCase
@@ -35,6 +36,7 @@ data class SolveQuizArgs(
  * @property getLearningSet 문제 목록을 조회하는 유스케이스
  * @property submitChoiceAnswer 4지선다 답을 서버에 제출하고 채점 결과를 받는 유스케이스
  * @property submitEssayAnswer 서술형 답안을 서버에 제출하고 채점 기준을 받는 유스케이스
+ * @property bookmarkQuestion 문제의 북마크 상태를 서버에 설정하는 유스케이스
  */
 class SolveQuizViewModel(
     private val args: SolveQuizArgs,
@@ -42,6 +44,7 @@ class SolveQuizViewModel(
     private val getLearningSet: GetLearningSetUseCase,
     private val submitChoiceAnswer: SubmitChoiceAnswerUseCase,
     private val submitEssayAnswer: SubmitEssayAnswerUseCase,
+    private val bookmarkQuestion: BookmarkQuestionUseCase,
 ) : ViewModel() {
     private val logger = gitItLogger()
 
@@ -220,17 +223,30 @@ class SolveQuizViewModel(
         setState { copy(essayAnswer = answer.take(ESSAY_ANSWER_MAX_LENGTH)) }
     }
 
+    /**
+     * 현재 문제의 북마크 상태를 반전해 서버에 설정하고, 적용된 값을 화면에 반영한다.
+     * 실패하면 표시 상태를 유지하고 원인을 로그로 남긴다.
+     */
     private fun toggleBookmark() {
-        val questionNumber = uiState.value.currentQuestionNumber()
-        setState {
-            copy(
-                bookmarkedQuestionNumbers =
-                    if (questionNumber in bookmarkedQuestionNumbers) {
-                        bookmarkedQuestionNumbers - questionNumber
-                    } else {
-                        bookmarkedQuestionNumbers + questionNumber
-                    },
-            )
+        val state = uiState.value
+        val questionItem = state.questions.getOrNull(state.currentIndex) ?: return
+        val questionNumber = questionItem.number
+        val desired = questionNumber !in state.bookmarkedQuestionNumbers
+
+        viewModelScope.launch {
+            bookmarkQuestion(args.projectId, questionItem.questionId, desired)
+                .onSuccess { applied ->
+                    setState {
+                        copy(
+                            bookmarkedQuestionNumbers =
+                                if (applied) {
+                                    bookmarkedQuestionNumbers + questionNumber
+                                } else {
+                                    bookmarkedQuestionNumbers - questionNumber
+                                },
+                        )
+                    }
+                }.onFailure { error -> logger.e(throwable = error) { "문제 북마크 변경 실패" } }
         }
     }
 

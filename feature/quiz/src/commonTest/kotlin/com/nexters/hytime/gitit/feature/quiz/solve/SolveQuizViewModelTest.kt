@@ -13,6 +13,7 @@ import com.nexters.hytime.gitit.domain.model.Question
 import com.nexters.hytime.gitit.domain.model.QuestionFormat
 import com.nexters.hytime.gitit.domain.model.QuestionSource
 import com.nexters.hytime.gitit.domain.model.Rubric
+import com.nexters.hytime.gitit.domain.usecase.BookmarkQuestionUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetLearningSetUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
 import com.nexters.hytime.gitit.domain.usecase.SubmitChoiceAnswerUseCase
@@ -176,18 +177,41 @@ class SolveQuizViewModelTest {
     @Test
     fun onIntent_bookmarkEachQuestion_keepsBothQuestionNumbers() {
         runTest(dispatcher) {
-            val viewModel = createViewModel()
+            val repository = repositoryWithEssayResult()
+            val viewModel = createViewModel(repository = repository)
             runCurrent()
             viewModel.onIntent(SolveQuizIntent.Start)
             viewModel.onIntent(SolveQuizIntent.BookmarkClick)
+            runCurrent()
+            assertEquals("q1", repository.bookmarkedQuestionId)
+            assertEquals(true, repository.requestedBookmarked)
             viewModel.onIntent(SolveQuizIntent.AnswerClick("0"))
             viewModel.onIntent(SolveQuizIntent.Submit)
             runCurrent()
             viewModel.onIntent(SolveQuizIntent.Next)
 
             viewModel.onIntent(SolveQuizIntent.BookmarkClick)
+            runCurrent()
 
+            assertEquals("q2", repository.bookmarkedQuestionId)
             assertEquals(setOf(1, 2), viewModel.uiState.value.bookmarkedQuestionNumbers)
+        }
+    }
+
+    /** 북마크 설정이 실패하면 표시 상태를 유지한다. */
+    @Test
+    fun bookmarkClick_설정이실패하면_표시상태를유지한다() {
+        runTest(dispatcher) {
+            val repository = repositoryWithEssayResult()
+            repository.bookmarkResult = Result.failure(IllegalStateException("네트워크 오류"))
+            val viewModel = createViewModel(repository = repository)
+            runCurrent()
+            viewModel.onIntent(SolveQuizIntent.Start)
+
+            viewModel.onIntent(SolveQuizIntent.BookmarkClick)
+            runCurrent()
+
+            assertEquals(emptySet(), viewModel.uiState.value.bookmarkedQuestionNumbers)
         }
     }
 
@@ -367,6 +391,7 @@ class SolveQuizViewModelTest {
             getLearningSet = GetLearningSetUseCase(repository),
             submitChoiceAnswer = SubmitChoiceAnswerUseCase(repository),
             submitEssayAnswer = SubmitEssayAnswerUseCase(repository),
+            bookmarkQuestion = BookmarkQuestionUseCase(repository),
         )
 
     private companion object {

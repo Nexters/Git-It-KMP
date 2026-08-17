@@ -2,6 +2,7 @@ package com.nexters.hytime.gitit.feature.bookmark
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nexters.hytime.gitit.domain.usecase.BookmarkQuestionUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetBookmarkedQuestionsUseCase
 import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,9 +17,11 @@ import kotlinx.coroutines.launch
  * 저장한 문제 화면의 상태와 사용자 의도를 관리한다.
  *
  * @property getBookmarkedQuestions 북마크한 문제 목록을 조회하는 유스케이스
+ * @property bookmarkQuestion 문제의 북마크 상태를 서버에 설정하는 유스케이스
  */
 class BookmarkViewModel(
     private val getBookmarkedQuestions: GetBookmarkedQuestionsUseCase,
+    private val bookmarkQuestion: BookmarkQuestionUseCase,
 ) : ViewModel() {
     private val logger = gitItLogger()
 
@@ -52,15 +55,7 @@ class BookmarkViewModel(
             BookmarkIntent.SavedTabClick -> Unit
             BookmarkIntent.MyTabClick -> emit(BookmarkSideEffect.NavigateToMy)
             is BookmarkIntent.FilterClick -> loadBookmarks(intent.filterId)
-            is BookmarkIntent.BookmarkClick -> {
-                setState {
-                    copy(
-                        bookmarkChanges =
-                            bookmarkChanges +
-                                (intent.questionId to !(bookmarkChanges[intent.questionId] ?: true)),
-                    )
-                }
-            }
+            is BookmarkIntent.BookmarkClick -> toggleBookmark(intent.questionId)
             is BookmarkIntent.SolveClick -> {
                 // TODO: 문제풀이 화면 route 추가 후 연결한다.
             }
@@ -73,6 +68,25 @@ class BookmarkViewModel(
 
     private fun setState(reducer: BookmarkUiState.() -> BookmarkUiState) {
         _uiState.value = _uiState.value.reducer()
+    }
+
+    /**
+     * 문제의 북마크 상태를 반전해 서버에 설정하고, 적용된 값을 화면에 반영한다.
+     * 실패하면 표시 상태를 유지하고 원인을 로그로 남긴다.
+     *
+     * @param questionId 북마크를 전환할 문제 식별자
+     */
+    private fun toggleBookmark(questionId: String) {
+        val state = _uiState.value
+        val question = state.questions.firstOrNull { it.id == questionId } ?: return
+        val desired = !(state.bookmarkChanges[questionId] ?: true)
+
+        viewModelScope.launch {
+            bookmarkQuestion(question.projectId, questionId, desired)
+                .onSuccess { applied ->
+                    setState { copy(bookmarkChanges = bookmarkChanges + (questionId to applied)) }
+                }.onFailure { error -> logger.e(throwable = error) { "문제 북마크 변경 실패" } }
+        }
     }
 
     /**

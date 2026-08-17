@@ -18,6 +18,18 @@ import com.nexters.hytime.gitit.domain.repository.ProjectRepository
 internal class FakeBookmarkRepository(
     private val bookmarksResult: Result<BookmarkedQuestions>,
 ) : ProjectRepository {
+    /** 북마크 설정 요청이 실패해야 하면 지정하는 결과다. null이면 요청 값을 그대로 적용한다. */
+    var bookmarkResult: Result<Boolean>? = null
+
+    /** 마지막으로 북마크를 설정한 문제 식별자다. */
+    var bookmarkedQuestionId: String? = null
+
+    /** 마지막으로 북마크를 설정한 프로젝트 식별자다. */
+    var bookmarkedProjectId: String? = null
+
+    /** 마지막으로 요청한 북마크 상태다. */
+    var requestedBookmarked: Boolean? = null
+
     /** 마지막으로 목록 조회에 사용한 프로젝트 필터다. */
     var requestedProjectId: String? = null
 
@@ -59,7 +71,12 @@ internal class FakeBookmarkRepository(
         projectId: String,
         questionId: String,
         bookmarked: Boolean,
-    ): Result<Boolean> = error("호출되면 안 됩니다.")
+    ): Result<Boolean> {
+        bookmarkedQuestionId = questionId
+        bookmarkedProjectId = projectId
+        requestedBookmarked = bookmarked
+        return bookmarkResult ?: Result.success(bookmarked)
+    }
 
     override suspend fun getBookmarkedQuestions(projectId: String?): Result<BookmarkedQuestions> {
         requestedProjectId = projectId

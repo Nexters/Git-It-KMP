@@ -6,6 +6,7 @@ import com.nexters.hytime.gitit.domain.repository.AuthRepository
 import com.nexters.hytime.gitit.domain.repository.GitHubRepositoryRepository
 import com.nexters.hytime.gitit.domain.repository.MemberRepository
 import com.nexters.hytime.gitit.domain.repository.ProjectRepository
+import com.nexters.hytime.gitit.domain.usecase.BookmarkQuestionUseCase
 import com.nexters.hytime.gitit.domain.usecase.DeleteProjectUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetBookmarkedQuestionsUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetLearningSetUseCase
@@ -59,11 +60,12 @@ val appModule: Module =
         single { SubmitChoiceAnswerUseCase(repository = get<ProjectRepository>()) }
         single { SubmitEssayAnswerUseCase(repository = get<ProjectRepository>()) }
         single { GetBookmarkedQuestionsUseCase(repository = get<ProjectRepository>()) }
+        single { BookmarkQuestionUseCase(repository = get<ProjectRepository>()) }
         single { RegisterProjectUseCase(repository = get<ProjectRepository>()) }
         viewModel { SplashViewModel(authRepository = get(), sessionStorage = get()) }
         viewModel { MyViewModel(getMemberProfile = get()) }
         viewModel { HomeViewModel(getProjects = get()) }
-        viewModel { BookmarkViewModel(getBookmarkedQuestions = get()) }
+        viewModel { BookmarkViewModel(getBookmarkedQuestions = get(), bookmarkQuestion = get()) }
         viewModel { ProjectListViewModel(getProjects = get(), deleteProject = get()) }
         viewModel { params ->
             ProjectDetailViewModel(projectId = params.get<String>(), getProjectDetail = get(), deleteProject = get())
@@ -76,6 +78,7 @@ val appModule: Module =
                 getLearningSet = get(),
                 submitChoiceAnswer = get(),
                 submitEssayAnswer = get(),
+                bookmarkQuestion = get(),
             )
         }
         single { QuizCreateStore() }
