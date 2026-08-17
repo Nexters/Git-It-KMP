@@ -74,7 +74,7 @@ val appModule: Module =
         viewModel { SettingsViewModel(getMemberProfile = get()) }
         viewModel { SettingsPositionViewModel(getMemberProfile = get(), updatePosition = get()) }
         viewModel { SettingsCareerLevelViewModel(getMemberProfile = get(), updateCareerLevel = get()) }
-        viewModel { HomeViewModel(getProjects = get()) }
+        viewModel { HomeViewModel(getProjects = get(), getMemberProfile = get()) }
         viewModel { BookmarkViewModel(getBookmarkedQuestions = get(), bookmarkQuestion = get()) }
         viewModel { ProjectListViewModel(getProjects = get(), deleteProject = get()) }
         viewModel { params ->

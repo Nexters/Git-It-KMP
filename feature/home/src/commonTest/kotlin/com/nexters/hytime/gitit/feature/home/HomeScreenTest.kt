@@ -1,8 +1,14 @@
+@file:Suppress("ktlint:standard:function-naming")
+
 package com.nexters.hytime.gitit.feature.home
 
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import com.nexters.hytime.gitit.domain.model.CareerLevel
+import com.nexters.hytime.gitit.domain.model.MemberProfile
+import com.nexters.hytime.gitit.domain.model.Position
 import com.nexters.hytime.gitit.domain.model.ProjectPage
+import com.nexters.hytime.gitit.domain.usecase.GetMemberProfileUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectsUseCase
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +17,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
@@ -88,11 +95,40 @@ class HomeScreenTest {
             assertEquals(HomeSideEffect.NavigateToProjectDetail("project-1"), sideEffect.await())
         }
 
+    /** 프로필 조회가 성공하면 헤더의 이름과 역할을 서버 값으로 채운다. */
+    @Test
+    fun init_프로필조회에성공하면_헤더이름과역할을채운다() {
+        runTest(dispatcher) {
+            val viewModel = createViewModel()
+            runCurrent()
+
+            assertEquals("김이박", viewModel.uiState.value.userName)
+            assertEquals("Junior Developer", viewModel.uiState.value.userRole)
+        }
+    }
+
     private fun createViewModel(): HomeViewModel =
         HomeViewModel(
             getProjects =
                 GetProjectsUseCase(
                     FakeHomeProjectRepository(Result.success(ProjectPage(items = emptyList(), hasNext = false))),
+                ),
+            getMemberProfile =
+                GetMemberProfileUseCase(
+                    FakeHomeMemberRepository(
+                        Result.success(
+                            MemberProfile(
+                                name = "김이박",
+                                email = "gitit@example.com",
+                                position = Position.BACKEND,
+                                careerLevel = CareerLevel.JUNIOR,
+                                thisWeekSolvedCount = 0,
+                                thisMonthSolvedCount = 0,
+                                streakDays = 0,
+                                weeklyChart = emptyList(),
+                            ),
+                        ),
+                    ),
                 ),
         )
 }

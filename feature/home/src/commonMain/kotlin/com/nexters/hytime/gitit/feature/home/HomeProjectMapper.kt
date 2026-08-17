@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.feature.home
 
+import com.nexters.hytime.gitit.domain.model.CareerLevel
 import com.nexters.hytime.gitit.domain.model.ProjectSummary
 
 /**
@@ -16,3 +17,19 @@ internal fun ProjectSummary.toLearningProject(): HomeLearningProject =
         description = currentSetTitle,
         progress = overallProgressPercent / 100f,
     )
+
+/**
+ * 개발 수준을 홈 프로필 헤더의 역할 표기로 변환한다.
+ *
+ * 시안의 표기(Junior Developer) 패턴을 수준별로 잇는다.
+ *
+ * @return 역할 표기. 큐레이션 전이라 값이 없으면 빈 문자열
+ */
+internal fun CareerLevel?.toRoleLabel(): String =
+    when (this) {
+        CareerLevel.ENTRY -> "Entry Developer"
+        CareerLevel.JUNIOR -> "Junior Developer"
+        CareerLevel.MIDDLE -> "Middle Developer"
+        CareerLevel.SENIOR -> "Senior Developer"
+        null -> ""
+    }
