@@ -40,8 +40,9 @@ private val selectCardThumbnailShape = RoundedCornerShape(8.dp)
  * Figma Select Card 컴포넌트를 Compose로 렌더링한다.
  *
  * 선택 상태는 호출자가 [selected]로 소유하며, 카드를 누르면 [onClick]만 전달한다. [thumbnail]은
- * 52×52dp 영역에 클리핑되므로 이미지 콘텐츠가 영역을 채우도록 구성한다. [description]과 [tag]에
- * null을 전달하면 해당 요소를 렌더링하지 않는다.
+ * 52×52dp 영역에 클리핑되므로 이미지 콘텐츠가 영역을 채우도록 구성한다. [description], [tag],
+ * [thumbnail]에 null을 전달하면 해당 요소를 렌더링하지 않는다. 특히 [thumbnail]이 null이면
+ * 썸네일 영역과 텍스트 사이 간격까지 함께 사라져 텍스트가 카드 왼쪽 패딩에 바로 붙는다.
  *
  * @param title 카드가 나타내는 선택지를 한 줄로 설명하는 제목
  * @param onClick 사용자가 카드를 선택했을 때 호출할 이벤트
@@ -49,7 +50,7 @@ private val selectCardThumbnailShape = RoundedCornerShape(8.dp)
  * @param selected 현재 선택 여부. true이면 blue200 테두리를 표시한다
  * @param description 제목 아래에 표시할 선택적 한 줄 설명
  * @param tag 제목 옆에 표시할 선택적 짧은 태그
- * @param thumbnail 52×52dp로 클리핑되는 썸네일 콘텐츠
+ * @param thumbnail 52×52dp로 클리핑되는 선택적 썸네일 콘텐츠
  */
 @Composable
 fun GitItSelectCard(
@@ -59,7 +60,7 @@ fun GitItSelectCard(
     selected: Boolean = false,
     description: String? = null,
     tag: String? = null,
-    thumbnail: @Composable BoxScope.() -> Unit,
+    thumbnail: (@Composable BoxScope.() -> Unit)? = null,
 ) {
     val colors = resolveSelectCardColors(selected = selected, colors = GitItTheme.colors)
 
@@ -80,14 +81,16 @@ fun GitItSelectCard(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(52.dp)
-                    .clip(selectCardThumbnailShape),
-            contentAlignment = Alignment.Center,
-            content = thumbnail,
-        )
+        thumbnail?.let { thumbnailContent ->
+            Box(
+                modifier =
+                    Modifier
+                        .size(52.dp)
+                        .clip(selectCardThumbnailShape),
+                contentAlignment = Alignment.Center,
+                content = thumbnailContent,
+            )
+        }
 
         Column(
             modifier = Modifier.weight(1f),
@@ -201,7 +204,7 @@ internal fun resolveSelectCardColors(
         tagContentColor = colors.blue200,
     )
 
-@Preview(widthDp = 360, heightDp = 380)
+@Preview(widthDp = 360, heightDp = 520)
 @Composable
 private fun GitItSelectCardPreview() {
     GitItTheme {
@@ -246,6 +249,15 @@ private fun GitItSelectCardPreview() {
                 title = "유사 프로젝트 경험이 있어요",
                 onClick = {},
                 thumbnail = thumbnail,
+            )
+            GitItSelectCard(
+                title = "Front-end",
+                onClick = {},
+            )
+            GitItSelectCard(
+                title = "Back-end",
+                selected = true,
+                onClick = {},
             )
         }
     }
