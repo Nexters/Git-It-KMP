@@ -22,11 +22,27 @@ class AppNavigationMotionTest {
                 AppRoute.LiquidGlassExample to AppNavigationMotion.Horizontal,
                 AppRoute.ProjectDetail(projectId = "project-1") to AppNavigationMotion.Horizontal,
                 AppRoute.Settings to AppNavigationMotion.Horizontal,
-                AppRoute.ProjectLoad to AppNavigationMotion.Vertical,
+                AppRoute.ProjectLoad() to AppNavigationMotion.Vertical,
                 AppRoute.QuizCreate(repositoryUrl = "https://github.com/Nexters/Git-It-KMP") to AppNavigationMotion.Vertical,
                 AppRoute.Quiz(projectId = "project-1") to AppNavigationMotion.Vertical,
             )
 
         assertEquals(expected, expected.keys.associateWith { it.navigationMotion() })
+    }
+
+    /** 인증 흐름에 따라 공유 저장소 URL을 대기, 폐기, 열기로 분류하는지 검증한다. */
+    @Test
+    fun sharedRepositoryAction_routeCategory_returnsExpectedAction() {
+        val expected =
+            mapOf<AppRoute, SharedRepositoryAction>(
+                AppRoute.Splash to SharedRepositoryAction.Wait,
+                AppRoute.Onboarding to SharedRepositoryAction.Discard,
+                AppRoute.IntermediateSplash to SharedRepositoryAction.Discard,
+                AppRoute.Home to SharedRepositoryAction.Open,
+                AppRoute.Settings to SharedRepositoryAction.Open,
+                AppRoute.ProjectLoad("https://github.com/Nexters/Git-It-KMP") to SharedRepositoryAction.Open,
+            )
+
+        assertEquals(expected, expected.keys.associateWith { it.sharedRepositoryAction() })
     }
 }
