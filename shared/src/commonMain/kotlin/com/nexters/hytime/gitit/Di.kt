@@ -7,6 +7,7 @@ import com.nexters.hytime.gitit.domain.repository.GitHubRepositoryRepository
 import com.nexters.hytime.gitit.domain.repository.MemberRepository
 import com.nexters.hytime.gitit.domain.repository.ProjectRepository
 import com.nexters.hytime.gitit.domain.usecase.DeleteProjectUseCase
+import com.nexters.hytime.gitit.domain.usecase.GetBookmarkedQuestionsUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetLearningSetUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetMemberProfileUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
@@ -16,6 +17,7 @@ import com.nexters.hytime.gitit.domain.usecase.RegisterProjectUseCase
 import com.nexters.hytime.gitit.domain.usecase.SignInUseCase
 import com.nexters.hytime.gitit.domain.usecase.SubmitChoiceAnswerUseCase
 import com.nexters.hytime.gitit.domain.usecase.SubmitEssayAnswerUseCase
+import com.nexters.hytime.gitit.feature.bookmark.BookmarkViewModel
 import com.nexters.hytime.gitit.feature.home.HomeViewModel
 import com.nexters.hytime.gitit.feature.my.MyViewModel
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailViewModel
@@ -56,10 +58,12 @@ val appModule: Module =
         single { GetLearningSetUseCase(repository = get<ProjectRepository>()) }
         single { SubmitChoiceAnswerUseCase(repository = get<ProjectRepository>()) }
         single { SubmitEssayAnswerUseCase(repository = get<ProjectRepository>()) }
+        single { GetBookmarkedQuestionsUseCase(repository = get<ProjectRepository>()) }
         single { RegisterProjectUseCase(repository = get<ProjectRepository>()) }
         viewModel { SplashViewModel(authRepository = get(), sessionStorage = get()) }
         viewModel { MyViewModel(getMemberProfile = get()) }
         viewModel { HomeViewModel(getProjects = get()) }
+        viewModel { BookmarkViewModel(getBookmarkedQuestions = get()) }
         viewModel { ProjectListViewModel(getProjects = get(), deleteProject = get()) }
         viewModel { params ->
             ProjectDetailViewModel(projectId = params.get<String>(), getProjectDetail = get(), deleteProject = get())

@@ -30,11 +30,13 @@ data class BookmarkFilter(
  * 저장한 문제 카드 한 개를 표현한다.
  *
  * @property id 문제 식별자
+ * @property projectId 문제가 속한 프로젝트 식별자
  * @property meta 프로젝트·세트·문제 번호 정보
  * @property title 문제 제목
  */
 data class BookmarkedQuestion(
     val id: String,
+    val projectId: String = "",
     val meta: String,
     val title: String,
 )

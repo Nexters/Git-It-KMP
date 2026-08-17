@@ -2,6 +2,8 @@ package com.nexters.hytime.gitit.feature.bookmark
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nexters.hytime.gitit.domain.usecase.GetBookmarkedQuestionsUseCase
+import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -12,9 +14,15 @@ import kotlinx.coroutines.launch
 
 /**
  * 저장한 문제 화면의 상태와 사용자 의도를 관리한다.
+ *
+ * @property getBookmarkedQuestions 북마크한 문제 목록을 조회하는 유스케이스
  */
-class BookmarkViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(dummyBookmarkUiState)
+class BookmarkViewModel(
+    private val getBookmarkedQuestions: GetBookmarkedQuestionsUseCase,
+) : ViewModel() {
+    private val logger = gitItLogger()
+
+    private val _uiState = MutableStateFlow(BookmarkUiState(selectedFilterId = BOOKMARK_FILTER_ALL_ID))
 
     /**
      * 저장한 문제 화면이 구독할 현재 UI 상태이다.
@@ -28,6 +36,10 @@ class BookmarkViewModel : ViewModel() {
      */
     val sideEffects: SharedFlow<BookmarkSideEffect> = _sideEffects.asSharedFlow()
 
+    init {
+        loadBookmarks(BOOKMARK_FILTER_ALL_ID)
+    }
+
     /**
      * 저장한 문제 화면에서 발생한 사용자 의도를 처리한다.
      *
@@ -39,9 +51,7 @@ class BookmarkViewModel : ViewModel() {
             BookmarkIntent.ProjectTabClick -> emit(BookmarkSideEffect.NavigateToProjectList)
             BookmarkIntent.SavedTabClick -> Unit
             BookmarkIntent.MyTabClick -> emit(BookmarkSideEffect.NavigateToMy)
-            is BookmarkIntent.FilterClick -> {
-                setState { copy(selectedFilterId = intent.filterId) }
-            }
+            is BookmarkIntent.FilterClick -> loadBookmarks(intent.filterId)
             is BookmarkIntent.BookmarkClick -> {
                 setState {
                     copy(
@@ -64,24 +74,18 @@ class BookmarkViewModel : ViewModel() {
     private fun setState(reducer: BookmarkUiState.() -> BookmarkUiState) {
         _uiState.value = _uiState.value.reducer()
     }
-}
 
-/** domain/data 연동 전까지 화면에 표시할 더미 저장 문제 상태다. */
-private val dummyBookmarkUiState =
-    BookmarkUiState(
-        filters =
-            listOf(
-                BookmarkFilter(id = "all", label = "전체"),
-                BookmarkFilter(id = "flask", label = "Flask"),
-                BookmarkFilter(id = "android", label = "Now in Android"),
-            ),
-        selectedFilterId = "all",
-        questions =
-            List(4) { index ->
-                BookmarkedQuestion(
-                    id = "bookmark-$index",
-                    meta = "Android · Set2 · 문제 1",
-                    title = "sansio/blueprints.py에 정의된 BlueprintSetupState 클래스는 어떤 목적을 가진 개체인가?",
-                )
-            },
-    )
+    /**
+     * 선택한 필터로 북마크 목록을 조회해 화면 상태를 채운다.
+     * 실패하면 이전 목록을 유지하고 원인을 로그로 남긴다.
+     *
+     * @param filterId 조회할 프로젝트 필터 식별자. 전체면 프로젝트 조건 없이 조회한다
+     */
+    private fun loadBookmarks(filterId: String) {
+        viewModelScope.launch {
+            getBookmarkedQuestions(projectId = filterId.takeIf { it != BOOKMARK_FILTER_ALL_ID })
+                .onSuccess { bookmarks -> _uiState.value = bookmarks.toUiState(selectedFilterId = filterId) }
+                .onFailure { error -> logger.e(throwable = error) { "북마크 목록 조회 실패" } }
+        }
+    }
+}
