@@ -13,6 +13,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -95,6 +96,30 @@ internal enum class AppNavigationMotion {
     Vertical,
 }
 
+/** 공유 저장소 URL을 현재 화면에서 처리할 방법이다. */
+internal enum class SharedRepositoryAction {
+    /** 로그인 확인이 끝날 때까지 공유 URL을 보관한다. */
+    Wait,
+
+    /** 로그인하지 않은 흐름에서는 공유 URL을 폐기한다. */
+    Discard,
+
+    /** 로그인된 화면 위에 저장소 입력 화면을 연다. */
+    Open,
+}
+
+/**
+ * 현재 화면의 인증 상태에 맞는 공유 저장소 처리 방법을 반환한다.
+ *
+ * @return 스플래시는 대기, 온보딩 흐름은 폐기, 나머지 화면은 열기
+ */
+internal fun AppRoute.sharedRepositoryAction(): SharedRepositoryAction =
+    when (this) {
+        AppRoute.Splash -> SharedRepositoryAction.Wait
+        AppRoute.Onboarding, AppRoute.IntermediateSplash -> SharedRepositoryAction.Discard
+        else -> SharedRepositoryAction.Open
+    }
+
 /**
  * 화면의 역할에 맞는 전환 유형을 반환한다.
  *
@@ -118,7 +143,7 @@ internal fun AppRoute.navigationMotion(): AppNavigationMotion =
         AppRoute.Settings,
         -> AppNavigationMotion.Horizontal
 
-        AppRoute.ProjectLoad,
+        is AppRoute.ProjectLoad,
         is AppRoute.QuizCreate,
         is AppRoute.Quiz,
         -> AppNavigationMotion.Vertical
@@ -215,9 +240,17 @@ private fun rememberAppNavEntryDecorators(): List<NavEntryDecorator<NavKey>> =
         rememberViewModelStoreNavEntryDecorator(),
     )
 
-/** 앱의 모든 화면 경로를 백스택에 따라 표시한다. */
+/**
+ * 앱의 모든 화면 경로를 백스택에 따라 표시한다.
+ *
+ * @param sharedRepositoryUrl 외부 공유로 전달되어 아직 처리하지 않은 저장소 URL
+ * @param onSharedRepositoryUrlConsumed 공유 URL을 이동하거나 폐기한 뒤 호출하는 콜백
+ */
 @Composable
-fun AppNavHost() {
+fun AppNavHost(
+    sharedRepositoryUrl: String? = null,
+    onSharedRepositoryUrlConsumed: () -> Unit = {},
+) {
     val uriHandler = LocalUriHandler.current
     val notificationPermissionState = rememberNotificationPermissionState()
     val backStack =
@@ -232,6 +265,25 @@ fun AppNavHost() {
         }
         if (route != AppRoute.Home && backStack.lastOrNull() != route) {
             backStack.add(route)
+        }
+    }
+
+    LaunchedEffect(sharedRepositoryUrl, backStack.lastOrNull()) {
+        val repositoryUrl = sharedRepositoryUrl ?: return@LaunchedEffect
+        val currentRoute = backStack.lastOrNull() as? AppRoute ?: return@LaunchedEffect
+
+        when (currentRoute.sharedRepositoryAction()) {
+            SharedRepositoryAction.Wait -> Unit
+            SharedRepositoryAction.Discard -> onSharedRepositoryUrlConsumed()
+            SharedRepositoryAction.Open -> {
+                val projectLoad = AppRoute.ProjectLoad(repositoryUrl)
+                if (currentRoute is AppRoute.ProjectLoad) {
+                    backStack[backStack.lastIndex] = projectLoad
+                } else {
+                    backStack.add(projectLoad)
+                }
+                onSharedRepositoryUrlConsumed()
+            }
         }
     }
 
@@ -263,7 +315,7 @@ fun AppNavHost() {
                     ) { isQuizCreating ->
                         HomeRoute(
                             isQuizCreating = isQuizCreating,
-                            onNavigateToProjectLoad = { backStack.add(AppRoute.ProjectLoad) },
+                            onNavigateToProjectLoad = { backStack.add(AppRoute.ProjectLoad()) },
                             onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                             onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
                             onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
@@ -333,8 +385,9 @@ fun AppNavHost() {
                         onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )
                 }
-                entry<AppRoute.ProjectLoad>(metadata = AppRoute.ProjectLoad.navigationMetadata()) {
+                entry<AppRoute.ProjectLoad>(metadata = { it.navigationMetadata() }) { route ->
                     ProjectLoadRoute(
+                        repositoryUrl = route.repositoryUrl,
                         onBackClick = { backStack.removeLastOrNull() },
                         onRepositoryConfirmed = { repository ->
                             backStack.add(AppRoute.QuizCreate("https://github.com/${repository.ownerName}/${repository.name}"))

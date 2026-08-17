@@ -64,9 +64,13 @@ sealed interface AppRoute : NavKey {
 
     /**
      * 질문 생성을 시작할 GitHub 저장소를 입력하고 확인하는 화면이다.
+     *
+     * @property repositoryUrl 외부 공유로 미리 채울 저장소 URL. 일반 진입이면 빈 문자열
      */
     @Serializable
-    data object ProjectLoad : AppRoute
+    data class ProjectLoad(
+        val repositoryUrl: String = "",
+    ) : AppRoute
 
     /**
      * 선택한 저장소의 문제 생성 조건을 설정하고 생성 진행 상태를 표시한다.
