@@ -2,6 +2,7 @@ package com.nexters.hytime.gitit.domain.usecase
 
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
+import com.nexters.hytime.gitit.domain.model.LoginSession
 import com.nexters.hytime.gitit.domain.repository.AuthRepository
 import com.nexters.hytime.gitit.domain.util.runCatchingResult
 
@@ -20,11 +21,13 @@ class SignInUseCase(
     /**
      * Google 로그인 전체 흐름을 실행한다.
      *
-     * @return 성공 여부. 세션은 저장소에 보관하며 호출자에게 노출하지 않는다
+     * @return 저장을 마친 로그인 세션. 호출자는 [LoginSession.needsCuration]으로 다음 화면을 결정한다
      */
-    suspend operator fun invoke(): Result<Unit> =
+    suspend operator fun invoke(): Result<LoginSession> =
         runCatchingResult {
             val idToken = tokenProvider.obtainToken()
-            sessionStorage.save(authRepository.signInWithGoogle(idToken).getOrThrow())
+            authRepository.signInWithGoogle(idToken).getOrThrow().also { session ->
+                sessionStorage.save(session)
+            }
         }
 }

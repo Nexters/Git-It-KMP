@@ -8,6 +8,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 sealed interface AppRoute : NavKey {
+    /** 앱 시작 시 로그인 세션을 확인하는 스플래시 화면이다. */
+    @Serializable
+    data object Splash : AppRoute
+
     /**
      * 사용자가 저장한 문제 목록 화면이다.
      */

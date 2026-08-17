@@ -41,6 +41,7 @@ import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizRoute
 import com.nexters.hytime.gitit.permission.rememberNotificationPermissionState
 import com.nexters.hytime.gitit.presentation.example.LiquidGlassExampleScreen
 import com.nexters.hytime.gitit.presentation.splash.IntermediateSplashScreen
+import com.nexters.hytime.gitit.presentation.splash.SplashRoute
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -82,6 +83,7 @@ internal val appRouteSavedStateConfiguration =
                     subclass(AppRoute.ProjectLoad.serializer())
                     subclass(AppRoute.QuizCreate.serializer())
                     subclass(AppRoute.Quiz.serializer())
+                    subclass(AppRoute.Splash.serializer())
                 }
             }
     }
@@ -107,6 +109,7 @@ internal fun AppRoute.navigationMotion(): AppNavigationMotion =
         AppRoute.Onboarding,
         AppRoute.ProjectDelete,
         AppRoute.ProjectList,
+        AppRoute.Splash,
         -> AppNavigationMotion.Fade
 
         AppRoute.AccountDelete,
@@ -220,7 +223,7 @@ fun AppNavHost() {
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
-            AppRoute.Home,
+            AppRoute.Splash,
         )
 
     fun navigateToMainRoute(route: AppRoute) {
@@ -239,11 +242,20 @@ fun AppNavHost() {
         entryDecorators = rememberAppNavEntryDecorators(),
         entryProvider =
             entryProvider {
+                entry<AppRoute.Splash>(metadata = AppRoute.Splash.navigationMetadata()) {
+                    SplashRoute(
+                        onNavigateToHome = { backStack[0] = AppRoute.Home },
+                        onNavigateToOnboarding = { backStack[0] = AppRoute.Onboarding },
+                    )
+                }
                 entry<AppRoute.Onboarding>(metadata = AppRoute.Onboarding.navigationMetadata()) {
-                    OnboardingRoute(onNavigateToHome = { backStack[0] = AppRoute.Home })
+                    OnboardingRoute(
+                        onNavigateToHome = { backStack[0] = AppRoute.Home },
+                        onNavigateToIntermediateSplash = { backStack[0] = AppRoute.IntermediateSplash },
+                    )
                 }
                 entry<AppRoute.IntermediateSplash>(metadata = AppRoute.IntermediateSplash.navigationMetadata()) {
-                    IntermediateSplashScreen(onFinished = { navigateToMainRoute(AppRoute.Home) })
+                    IntermediateSplashScreen(onFinished = { backStack[0] = AppRoute.Home })
                 }
                 entry<AppRoute.Home>(metadata = AppRoute.Home.navigationMetadata()) {
                     QuizCreateHomeHost(

@@ -14,6 +14,7 @@ import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateRetryHandl
 import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStore
 import com.nexters.hytime.gitit.feature.quiz.load.ProjectLoadViewModel
 import com.nexters.hytime.gitit.logging.loggingModule
+import com.nexters.hytime.gitit.presentation.splash.SplashViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -36,6 +37,7 @@ val appModule: Module =
         }
         single { LoadGitHubRepositoryUseCase(repository = get<GitHubRepositoryRepository>()) }
         single { RegisterProjectUseCase(repository = get<ProjectRepository>()) }
+        viewModel { SplashViewModel(authRepository = get(), sessionStorage = get()) }
         viewModel { params -> ProjectDetailViewModel(projectId = params.get<String>()) }
         viewModel { ProjectLoadViewModel(loadGitHubRepository = get()) }
         single { QuizCreateStore() }

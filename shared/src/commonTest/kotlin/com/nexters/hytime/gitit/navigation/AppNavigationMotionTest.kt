@@ -17,6 +17,7 @@ class AppNavigationMotionTest {
                 AppRoute.Onboarding to AppNavigationMotion.Fade,
                 AppRoute.ProjectDelete to AppNavigationMotion.Fade,
                 AppRoute.ProjectList to AppNavigationMotion.Fade,
+                AppRoute.Splash to AppNavigationMotion.Fade,
                 AppRoute.AccountDelete to AppNavigationMotion.Horizontal,
                 AppRoute.LiquidGlassExample to AppNavigationMotion.Horizontal,
                 AppRoute.ProjectDetail(projectId = "project-1") to AppNavigationMotion.Horizontal,

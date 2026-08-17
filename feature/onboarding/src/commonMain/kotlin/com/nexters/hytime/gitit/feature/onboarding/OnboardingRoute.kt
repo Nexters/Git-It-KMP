@@ -9,8 +9,15 @@ import androidx.compose.runtime.Composable
  * ViewModel 생성, 상태 수집, 이벤트 구독은 [OnboardingScreen]이 담당한다.
  *
  * @param onNavigateToHome 로그인 성공 후 홈 화면으로 이동하는 콜백
+ * @param onNavigateToIntermediateSplash 큐레이션 완료 후 중간 스플래시로 이동하는 콜백
  */
 @Composable
-fun OnboardingRoute(onNavigateToHome: () -> Unit) {
-    OnboardingScreen(onNavigateToHome = onNavigateToHome)
+fun OnboardingRoute(
+    onNavigateToHome: () -> Unit,
+    onNavigateToIntermediateSplash: () -> Unit,
+) {
+    OnboardingScreen(
+        onNavigateToHome = onNavigateToHome,
+        onNavigateToIntermediateSplash = onNavigateToIntermediateSplash,
+    )
 }

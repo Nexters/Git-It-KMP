@@ -90,9 +90,13 @@ private val onboardingPages: List<OnboardingPage> =
  * 네비게이션 등 일회성 부작용은 [OnboardingViewModel.events]를 구독해 처리한다.
  *
  * @param onNavigateToHome 로그인 성공 후 홈 화면으로 이동하는 콜백
+ * @param onNavigateToIntermediateSplash 큐레이션 완료 후 중간 스플래시로 이동하는 콜백
  */
 @Composable
-fun OnboardingScreen(onNavigateToHome: () -> Unit) {
+fun OnboardingScreen(
+    onNavigateToHome: () -> Unit,
+    onNavigateToIntermediateSplash: () -> Unit,
+) {
     val viewModel = koinViewModel<OnboardingViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showTermsSheet by rememberSaveable { mutableStateOf(false) }
@@ -101,27 +105,36 @@ fun OnboardingScreen(onNavigateToHome: () -> Unit) {
         viewModel.events.collectLatest { event ->
             when (event) {
                 OnboardingEvent.NavigateToHome -> onNavigateToHome()
+                OnboardingEvent.NavigateToIntermediateSplash -> onNavigateToIntermediateSplash()
             }
         }
     }
 
-    OnboardingContent(
-        uiState = uiState,
-        showTermsSheet = showTermsSheet,
-        onGoogleLoginClick = { showTermsSheet = true },
-        onToggleAllTerms = viewModel::toggleAllTerms,
-        onToggleServiceTerm = viewModel::toggleServiceTerm,
-        onTogglePrivacyTerm = viewModel::togglePrivacyTerm,
-        onDismissTermsSheet = { showTermsSheet = false },
-        onCancelTerms = {
-            showTermsSheet = false
-            viewModel.resetTerms()
-        },
-        onConfirmTerms = {
-            showTermsSheet = false
-            viewModel.confirmTerms()
-        },
-    )
+    val curation = uiState.curation
+    if (curation == null) {
+        OnboardingContent(
+            uiState = uiState,
+            showTermsSheet = showTermsSheet,
+            onGoogleLoginClick = { showTermsSheet = true },
+            onToggleAllTerms = { viewModel.onIntent(OnboardingIntent.ToggleAllTerms) },
+            onToggleServiceTerm = { viewModel.onIntent(OnboardingIntent.ToggleServiceTerm) },
+            onTogglePrivacyTerm = { viewModel.onIntent(OnboardingIntent.TogglePrivacyTerm) },
+            onDismissTermsSheet = { showTermsSheet = false },
+            onCancelTerms = {
+                showTermsSheet = false
+                viewModel.onIntent(OnboardingIntent.ResetTerms)
+            },
+            onConfirmTerms = {
+                showTermsSheet = false
+                viewModel.onIntent(OnboardingIntent.ConfirmTerms)
+            },
+        )
+    } else {
+        CurationContent(
+            state = curation,
+            onIntent = viewModel::onIntent,
+        )
+    }
 }
 
 /**

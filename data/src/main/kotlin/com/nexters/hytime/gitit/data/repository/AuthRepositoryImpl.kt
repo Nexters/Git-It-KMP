@@ -1,6 +1,7 @@
 package com.nexters.hytime.gitit.data.repository
 
 import com.nexters.hytime.gitit.data.dto.ApiResponse
+import com.nexters.hytime.gitit.data.dto.EmptyApiResponse
 import com.nexters.hytime.gitit.data.dto.LoginResponse
 import com.nexters.hytime.gitit.data.dto.SignInWithGoogleRequest
 import com.nexters.hytime.gitit.data.mapping.toDomain
@@ -9,6 +10,7 @@ import com.nexters.hytime.gitit.domain.repository.AuthRepository
 import com.nexters.hytime.gitit.domain.util.runCatchingResult
 import com.nexters.hytime.gitit.network.api.NetworkClient
 import com.nexters.hytime.gitit.network.api.NetworkException
+import com.nexters.hytime.gitit.network.api.get
 import com.nexters.hytime.gitit.network.api.post
 
 /**
@@ -19,6 +21,13 @@ import com.nexters.hytime.gitit.network.api.post
 class AuthRepositoryImpl(
     private val networkClient: NetworkClient,
 ) : AuthRepository {
+    override suspend fun verifyAccessToken(): Result<Unit> =
+        runCatchingResult {
+            networkClient
+                .get<EmptyApiResponse>(PATH_VERIFY_ACCESS_TOKEN)
+                .requireSuccess("토큰 검증 응답이 올바르지 않습니다.")
+        }
+
     override suspend fun signInWithGoogle(idToken: String): Result<LoginSession> =
         runCatchingResult {
             val data =
@@ -36,6 +45,7 @@ class AuthRepositoryImpl(
         }
 
     private companion object {
+        private const val PATH_VERIFY_ACCESS_TOKEN = "/api/v1/auth/token"
         private const val PATH_SIGN_IN_GOOGLE = "/api/v1/auth/login/google"
         private const val INVALID_LOGIN_RESPONSE = "로그인 응답이 올바르지 않습니다."
     }

@@ -42,6 +42,10 @@ kotlin {
             implementation(libs.androidx.navigation3.ui)
             implementation(libs.androidx.lifecycle.viewmodelNavigation3)
         }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+        }
         androidMain.dependencies {
             implementation(libs.androidx.core)
         }
