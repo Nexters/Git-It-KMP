@@ -7,6 +7,7 @@ import com.nexters.hytime.gitit.domain.repository.GitHubRepositoryRepository
 import com.nexters.hytime.gitit.domain.repository.MemberRepository
 import com.nexters.hytime.gitit.domain.repository.ProjectRepository
 import com.nexters.hytime.gitit.domain.usecase.DeleteProjectUseCase
+import com.nexters.hytime.gitit.domain.usecase.GetLearningSetUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetMemberProfileUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectsUseCase
@@ -21,6 +22,8 @@ import com.nexters.hytime.gitit.feature.quiz.create.QuizCreateViewModel
 import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateRetryHandler
 import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStore
 import com.nexters.hytime.gitit.feature.quiz.load.ProjectLoadViewModel
+import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizArgs
+import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizViewModel
 import com.nexters.hytime.gitit.logging.loggingModule
 import com.nexters.hytime.gitit.presentation.splash.SplashViewModel
 import org.koin.core.module.Module
@@ -48,6 +51,7 @@ val appModule: Module =
         single { GetProjectsUseCase(repository = get<ProjectRepository>()) }
         single { GetProjectDetailUseCase(repository = get<ProjectRepository>()) }
         single { DeleteProjectUseCase(repository = get<ProjectRepository>()) }
+        single { GetLearningSetUseCase(repository = get<ProjectRepository>()) }
         single { RegisterProjectUseCase(repository = get<ProjectRepository>()) }
         viewModel { SplashViewModel(authRepository = get(), sessionStorage = get()) }
         viewModel { MyViewModel(getMemberProfile = get()) }
@@ -57,6 +61,9 @@ val appModule: Module =
             ProjectDetailViewModel(projectId = params.get<String>(), getProjectDetail = get(), deleteProject = get())
         }
         viewModel { ProjectLoadViewModel(loadGitHubRepository = get()) }
+        viewModel { params ->
+            SolveQuizViewModel(args = params.get<SolveQuizArgs>(), getProjectDetail = get(), getLearningSet = get())
+        }
         single { QuizCreateStore() }
         single { QuizCreateRetryHandler(registerProject = get(), createStore = get()) }
         viewModel { params ->

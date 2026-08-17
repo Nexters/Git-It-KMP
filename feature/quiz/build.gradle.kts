@@ -6,6 +6,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.designsystem)
+            implementation(projects.core.logging)
             implementation(projects.domain)
 
             implementation(libs.coil.compose)

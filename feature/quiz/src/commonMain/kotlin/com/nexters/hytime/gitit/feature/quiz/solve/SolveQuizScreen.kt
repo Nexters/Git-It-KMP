@@ -136,6 +136,7 @@ fun SolveQuizScreen(
             )
         QuizStep.Completed ->
             QuizCompletionScreen(
+                questionCount = uiState.questions.size,
                 onCloseClick = { onIntent(SolveQuizIntent.BackClick) },
                 onNextClick = { onIntent(SolveQuizIntent.BackClick) },
                 modifier = modifier,
@@ -637,12 +638,14 @@ private fun QuizEssayResultCard(
 /**
  * 세트의 모든 문제를 푼 뒤 완료 수치와 축하 일러스트를 표시한다.
  *
+ * @param questionCount 이번 세트에서 푼 문제 수
  * @param onCloseClick 완료 화면을 닫는 콜백
  * @param onNextClick 다음 버튼으로 문제 풀이를 종료하는 콜백
  * @param modifier 화면의 크기와 배치를 지정할 수식자
  */
 @Composable
 private fun QuizCompletionScreen(
+    questionCount: Int,
     onCloseClick: () -> Unit,
     onNextClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -670,7 +673,7 @@ private fun QuizCompletionScreen(
             )
             Spacer(Modifier.height(40.dp))
             Text(
-                text = stringResource(Res.string.quiz_completion_count, 2, 2),
+                text = stringResource(Res.string.quiz_completion_count, questionCount, questionCount),
                 color = GitItTheme.colors.blue200,
                 style = GitItTheme.typography.subtitle1,
             )
@@ -971,7 +974,7 @@ private fun Modifier.captureSky(sky: Sky?): Modifier = if (sky == null) this els
 @Composable
 private fun QuizIntroScreenPreview() {
     GitItTheme {
-        SolveQuizScreen(uiState = SolveQuizUiState(), onIntent = {})
+        SolveQuizScreen(uiState = previewSolveQuizUiState, onIntent = {})
     }
 }
 
@@ -981,11 +984,11 @@ private fun QuizResultScreenPreview() {
     GitItTheme {
         SolveQuizScreen(
             uiState =
-                SolveQuizUiState(
+                previewSolveQuizUiState.copy(
                     step = QuizStep.MultipleChoice,
-                    selectedAnswerId = "render",
+                    selectedAnswerId = "3",
                     isMultipleChoiceSubmitted = true,
-                    expandedAnswerIds = setOf("render", "set-content"),
+                    expandedAnswerIds = setOf("3", "0"),
                 ),
             onIntent = {},
         )
@@ -998,7 +1001,8 @@ private fun QuizEssayScreenPreview() {
     GitItTheme {
         SolveQuizScreen(
             uiState =
-                SolveQuizUiState(
+                previewSolveQuizUiState.copy(
+                    currentIndex = 1,
                     step = QuizStep.Essay,
                     essayAnswer = "공통 UI는 commonMain에서 공유하고 플랫폼별 구현만 소스셋으로 분리합니다.",
                 ),
@@ -1006,3 +1010,53 @@ private fun QuizEssayScreenPreview() {
         )
     }
 }
+
+/** 프리뷰에서 사용하는 고정 세트·문제 fixture다. */
+private val previewSolveQuizUiState =
+    SolveQuizUiState(
+        setInfo =
+            QuizSetInfo(
+                label = "Set 1",
+                title = "Android 앱 진입점 확인하기",
+                description = "Android 앱이 시작되고 Compose UI가 화면에 표시되는 기본 흐름을 실제 코드와 함께 확인하는 학습 세트",
+            ),
+        questions =
+            listOf(
+                SolveQuizQuestionItem.MultipleChoice(
+                    QuizQuestion(
+                        id = "q1",
+                        number = 1,
+                        text = "MainActivity에서 Compose UI를 화면에 표시하기 위해 호출하는 함수는 무엇일까요?",
+                        answers =
+                            listOf(
+                                QuizAnswer("0", "A", "setContent"),
+                                QuizAnswer("1", "B", "setState"),
+                                QuizAnswer("2", "C", "setView"),
+                                QuizAnswer("3", "D", "render"),
+                            ),
+                        correctAnswerId = "0",
+                        explanation = "ComponentActivity의 setContent 블록이 Compose UI 트리를 만들며, 이 프로젝트는 그 안에서 App 컴포저블을 호출합니다.",
+                        source =
+                            QuizSource(
+                                description = "MainActivity.onCreate()에서 setContent { App() }을 호출해 공유 Compose UI를 화면에 설정합니다.",
+                                label = "Git-It-KMP · MainActivity.kt:L12–L18",
+                                url = "https://github.com/Nexters/Git-It-KMP",
+                            ),
+                    ),
+                ),
+                SolveQuizQuestionItem.Essay(
+                    EssayQuestion(
+                        id = "q2",
+                        number = 2,
+                        text = "Git-It-KMP가 Android와 Desktop에서 같은 Compose UI를 사용할 수 있는 구조를 설명해 보세요.",
+                        modelAnswer = "공유 UI와 화면 로직은 shared 모듈의 commonMain에 두고, 플랫폼 API가 필요한 부분만 플랫폼별 소스셋으로 분리합니다.",
+                        source =
+                            QuizSource(
+                                description = "Android와 Desktop 진입점은 shared 모듈의 공통 App 컴포저블을 호출해 같은 UI를 표시합니다.",
+                                label = "Git-It-KMP · App.kt",
+                                url = "https://github.com/Nexters/Git-It-KMP",
+                            ),
+                    ),
+                ),
+            ),
+    )
