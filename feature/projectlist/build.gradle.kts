@@ -11,6 +11,9 @@ kotlin {
 
             implementation(libs.koin.compose.viewmodel)
 
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
+
             implementation(libs.compose.material3)
             implementation(libs.compose.components.resources)
             implementation(libs.androidx.lifecycle.viewmodelCompose)

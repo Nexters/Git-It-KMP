@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
@@ -77,8 +78,6 @@ import git_it_kmp.feature.projectlist.generated.resources.project_list_empty_tit
 import git_it_kmp.feature.projectlist.generated.resources.project_list_title
 import git_it_kmp.feature.projectlist.generated.resources.project_menu_button_description
 import git_it_kmp.feature.projectlist.generated.resources.project_play_button_description
-import git_it_kmp.feature.projectlist.generated.resources.projectlist_thumbnail_base
-import git_it_kmp.feature.projectlist.generated.resources.projectlist_thumbnail_mark
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import git_it_kmp.core.designsystem.generated.resources.Res as DesignSystemRes
@@ -236,8 +235,9 @@ fun ProjectListScreen(
         if (isDeleteMode) {
             uiState.pendingDeleteProjectId
                 ?.let { projectId -> uiState.projects.find { it.id == projectId } }
-                ?.let {
+                ?.let { project ->
                     ProjectDeleteSheet(
+                        imageUrl = project.thumbnailUrl,
                         onConfirm = { onIntent(ProjectListIntent.ConfirmDeleteClick) },
                         onDismiss = { onIntent(ProjectListIntent.DismissDeleteClick) },
                     )
@@ -309,7 +309,7 @@ private fun ProjectCard(
                 .padding(start = 18.dp, top = 16.dp, end = 18.dp, bottom = if (isDeleteMode) 18.dp else 16.dp),
     ) {
         Row(verticalAlignment = Alignment.Top) {
-            ProjectThumbnail()
+            ProjectThumbnail(imageUrl = item.thumbnailUrl)
             Spacer(Modifier.width(14.dp))
             ProjectTitleBlock(
                 item = item,
@@ -363,51 +363,39 @@ private fun ProjectDeleteButton(onClick: () -> Unit) {
 /**
  * 프로젝트 리스트 썸네일을 그린다.
  *
+ * @param imageUrl 서버에서 받은 썸네일 이미지 URL
  * @param modifier 썸네일의 크기와 외부 배치를 지정할 수식자
  * @param size 썸네일의 가로와 세로 길이
  */
 @Composable
 fun ProjectThumbnail(
+    imageUrl: String,
     modifier: Modifier = Modifier,
     size: Dp = 60.dp,
 ) {
-    Box(
+    AsyncImage(
+        model = imageUrl,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
         modifier =
             modifier
                 .size(size)
                 .clip(RoundedCornerShape(8.dp))
                 .background(Color.Black),
-    ) {
-        Image(
-            painter = painterResource(Res.drawable.projectlist_thumbnail_base),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-        )
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(brush = GitItTheme.colorStyles.gradient3, alpha = 0.2f),
-        )
-        Image(
-            painter = painterResource(Res.drawable.projectlist_thumbnail_mark),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-        )
-    }
+    )
 }
 
 /**
  * 프로젝트 삭제를 확인하는 Figma 바텀시트를 표시한다.
  *
+ * @param imageUrl 서버에서 받은 썸네일 이미지 URL
  * @param onConfirm 삭제 확인 시 실행할 동작
  * @param onDismiss 취소 또는 시트 바깥 영역 선택 시 실행할 동작
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProjectDeleteSheet(
+    imageUrl: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -433,7 +421,7 @@ private fun ProjectDeleteSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(22.dp))
-            ProjectThumbnail(size = 128.dp)
+            ProjectThumbnail(imageUrl = imageUrl, size = 128.dp)
             Spacer(Modifier.height(22.dp))
             Column(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
@@ -622,6 +610,7 @@ private fun ProjectListScreenPreview() {
                             ProjectListItem(
                                 id = "preview-1",
                                 title = "Now in\nAndroid",
+                                thumbnailUrl = "",
                                 techStack = "Kotlin · Compose · Coroutines",
                                 setLabel = "Set 1",
                                 recentSetTitle = "Compose 핵심 개념",
@@ -630,6 +619,7 @@ private fun ProjectListScreenPreview() {
                             ProjectListItem(
                                 id = "preview-2",
                                 title = "Now in\nAndroid",
+                                thumbnailUrl = "",
                                 techStack = "Kotlin · Compose · Coroutines",
                                 setLabel = "Set 1",
                                 recentSetTitle = "Compose 핵심 개념",

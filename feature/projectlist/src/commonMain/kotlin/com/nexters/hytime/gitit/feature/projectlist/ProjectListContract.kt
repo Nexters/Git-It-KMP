@@ -16,6 +16,7 @@ data class ProjectListUiState(
  *
  * @property id 프로젝트 식별자
  * @property title 카드에 표시할 프로젝트 이름
+ * @property thumbnailUrl 서버에서 받은 프로젝트 썸네일 이미지 URL
  * @property techStack 프로젝트의 주요 기술 스택 요약
  * @property setLabel 최근 학습 세트 라벨
  * @property recentSetTitle 최근 학습 세트 이름
@@ -24,6 +25,7 @@ data class ProjectListUiState(
 data class ProjectListItem(
     val id: String,
     val title: String,
+    val thumbnailUrl: String,
     val techStack: String,
     val setLabel: String,
     val recentSetTitle: String,
