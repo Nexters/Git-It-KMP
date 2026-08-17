@@ -18,9 +18,12 @@ import com.nexters.hytime.gitit.domain.usecase.RegisterProjectUseCase
 import com.nexters.hytime.gitit.domain.usecase.SignInUseCase
 import com.nexters.hytime.gitit.domain.usecase.SubmitChoiceAnswerUseCase
 import com.nexters.hytime.gitit.domain.usecase.SubmitEssayAnswerUseCase
+import com.nexters.hytime.gitit.domain.usecase.UpdatePositionUseCase
 import com.nexters.hytime.gitit.feature.bookmark.BookmarkViewModel
 import com.nexters.hytime.gitit.feature.home.HomeViewModel
 import com.nexters.hytime.gitit.feature.my.MyViewModel
+import com.nexters.hytime.gitit.feature.my.SettingsPositionViewModel
+import com.nexters.hytime.gitit.feature.my.SettingsViewModel
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailViewModel
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListViewModel
 import com.nexters.hytime.gitit.feature.quiz.create.QuizCreateViewModel
@@ -61,9 +64,12 @@ val appModule: Module =
         single { SubmitEssayAnswerUseCase(repository = get<ProjectRepository>()) }
         single { GetBookmarkedQuestionsUseCase(repository = get<ProjectRepository>()) }
         single { BookmarkQuestionUseCase(repository = get<ProjectRepository>()) }
+        single { UpdatePositionUseCase(repository = get<MemberRepository>()) }
         single { RegisterProjectUseCase(repository = get<ProjectRepository>()) }
         viewModel { SplashViewModel(authRepository = get(), sessionStorage = get()) }
         viewModel { MyViewModel(getMemberProfile = get()) }
+        viewModel { SettingsViewModel(getMemberProfile = get()) }
+        viewModel { SettingsPositionViewModel(getMemberProfile = get(), updatePosition = get()) }
         viewModel { HomeViewModel(getProjects = get()) }
         viewModel { BookmarkViewModel(getBookmarkedQuestions = get(), bookmarkQuestion = get()) }
         viewModel { ProjectListViewModel(getProjects = get(), deleteProject = get()) }
