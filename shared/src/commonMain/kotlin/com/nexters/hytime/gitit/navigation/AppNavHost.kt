@@ -31,7 +31,9 @@ import com.nexters.hytime.gitit.feature.bookmark.BookmarkRoute
 import com.nexters.hytime.gitit.feature.home.HomeRoute
 import com.nexters.hytime.gitit.feature.my.AccountDeleteRoute
 import com.nexters.hytime.gitit.feature.my.MyRoute
-import com.nexters.hytime.gitit.feature.my.SettingsScreen
+import com.nexters.hytime.gitit.feature.my.SettingsCareerLevelRoute
+import com.nexters.hytime.gitit.feature.my.SettingsPositionRoute
+import com.nexters.hytime.gitit.feature.my.SettingsRoute
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
 import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailRoute
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListRoute
@@ -73,6 +75,8 @@ internal val appRouteSavedStateConfiguration =
                     subclass(AppRoute.Home.serializer())
                     subclass(AppRoute.My.serializer())
                     subclass(AppRoute.Settings.serializer())
+                    subclass(AppRoute.SettingsPosition.serializer())
+                    subclass(AppRoute.SettingsCareerLevel.serializer())
                     subclass(AppRoute.AccountDelete.serializer())
                     subclass(AppRoute.LiquidGlassExample.serializer())
                     subclass(AppRoute.Onboarding.serializer())
@@ -116,6 +120,8 @@ internal fun AppRoute.navigationMotion(): AppNavigationMotion =
         AppRoute.LiquidGlassExample,
         is AppRoute.ProjectDetail,
         AppRoute.Settings,
+        AppRoute.SettingsCareerLevel,
+        AppRoute.SettingsPosition,
         -> AppNavigationMotion.Horizontal
 
         AppRoute.ProjectLoad,
@@ -273,10 +279,22 @@ fun AppNavHost() {
                     }
                 }
                 entry<AppRoute.Settings>(metadata = AppRoute.Settings.navigationMetadata()) {
-                    SettingsScreen(
+                    SettingsRoute(
                         onBackClick = { backStack.removeLastOrNull() },
                         onPolicyClick = { uriHandler.openUri(POLICY_URL) },
                         onDeleteAccountClick = { backStack.add(AppRoute.AccountDelete) },
+                        onDevelopmentFieldClick = { backStack.add(AppRoute.SettingsPosition) },
+                        onLearningLevelClick = { backStack.add(AppRoute.SettingsCareerLevel) },
+                    )
+                }
+                entry<AppRoute.SettingsPosition>(metadata = AppRoute.SettingsPosition.navigationMetadata()) {
+                    SettingsPositionRoute(
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                    )
+                }
+                entry<AppRoute.SettingsCareerLevel>(metadata = AppRoute.SettingsCareerLevel.navigationMetadata()) {
+                    SettingsCareerLevelRoute(
+                        onNavigateBack = { backStack.removeLastOrNull() },
                     )
                 }
                 entry<AppRoute.AccountDelete>(metadata = AppRoute.AccountDelete.navigationMetadata()) {

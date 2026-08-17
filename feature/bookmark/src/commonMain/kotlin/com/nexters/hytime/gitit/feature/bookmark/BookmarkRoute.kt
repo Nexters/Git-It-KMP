@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * 저장한 문제 화면의 진입점(Route)이다.
@@ -20,7 +20,7 @@ fun BookmarkRoute(
     onNavigateToProjectList: () -> Unit,
     onNavigateToMy: () -> Unit,
 ) {
-    val viewModel = viewModel { BookmarkViewModel() }
+    val viewModel = koinViewModel<BookmarkViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {

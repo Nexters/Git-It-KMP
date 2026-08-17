@@ -33,6 +33,7 @@ internal data class AvailableProjectResponse(
  *
  * @property projectId 문제가 속한 프로젝트 식별자
  * @property projectName 저장소 이름
+ * @property setId 문제가 속한 학습 세트 식별자
  * @property setLabel 세트 라벨
  * @property problemNumber 세트 내 문제 번호
  * @property questionId 문제 식별자
@@ -42,6 +43,7 @@ internal data class AvailableProjectResponse(
 internal data class BookmarkedQuestionResponse(
     val projectId: String,
     val projectName: String = "",
+    val setId: String = "",
     val setLabel: String = "",
     val problemNumber: Int = 0,
     val questionId: String,

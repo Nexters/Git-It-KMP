@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * 마이 화면의 진입점(Route)이다.
@@ -22,7 +22,7 @@ fun MyRoute(
     onNavigateToBookmark: () -> Unit,
     onNavigateToSettings: () -> Unit,
 ) {
-    val viewModel = viewModel { MyViewModel() }
+    val viewModel = koinViewModel<MyViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {

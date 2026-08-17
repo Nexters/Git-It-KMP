@@ -1,24 +1,35 @@
 package com.nexters.hytime.gitit.feature.projectdetail
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.nexters.hytime.gitit.domain.usecase.DeleteProjectUseCase
+import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
+import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * 프로젝트 상세 화면의 단일 [ProjectDetailUiState]를 관리하는 ViewModel이다.
  *
  * 비즈니스 상태는 [setState]로만 변경하고, 일회성 부작용(네비게이션 등)은
- * [events]로 흘려보낸다. 현재는 더미 데이터를 채우기만 한다.
+ * [events]로 흘려보낸다.
  *
  * @property projectId 네비게이션 인자로 전달된 프로젝트 식별자
+ * @property getProjectDetail 프로젝트 상세 정보를 조회하는 유스케이스
+ * @property deleteProject 프로젝트를 서버에서 삭제하는 유스케이스
  */
 class ProjectDetailViewModel(
     val projectId: String,
+    private val getProjectDetail: GetProjectDetailUseCase,
+    private val deleteProject: DeleteProjectUseCase,
 ) : ViewModel() {
+    private val logger = gitItLogger()
+
     private val _uiState = MutableStateFlow(ProjectDetailUiState())
     val uiState: StateFlow<ProjectDetailUiState> = _uiState.asStateFlow()
 
@@ -26,7 +37,7 @@ class ProjectDetailViewModel(
     val events: SharedFlow<ProjectDetailEvent> = _events.asSharedFlow()
 
     init {
-        loadDummy()
+        loadProjectDetail()
     }
 
     /**
@@ -65,10 +76,16 @@ class ProjectDetailViewModel(
         emit(ProjectDetailEvent.NavigateToSavedQuestions)
     }
 
-    /** 프로젝트 삭제를 확정하고 홈 화면 이동 이벤트를 흘려보낸다. */
+    /**
+     * 프로젝트를 서버에서 삭제하고 성공하면 홈 화면 이동 이벤트를 흘려보낸다.
+     * 실패하면 화면을 유지하고 원인을 로그로 남긴다.
+     */
     fun onDeleteProjectClick() {
-        // TODO: 삭제 유스케이스 연동 후 홈 이동 전에 프로젝트를 삭제한다.
-        emit(ProjectDetailEvent.NavigateToHome)
+        viewModelScope.launch {
+            deleteProject(projectId)
+                .onSuccess { emit(ProjectDetailEvent.NavigateToHome) }
+                .onFailure { error -> logger.e(throwable = error) { "프로젝트 삭제 실패" } }
+        }
     }
 
     /**
@@ -91,26 +108,22 @@ class ProjectDetailViewModel(
         _events.tryEmit(event)
     }
 
-    private fun loadDummy() {
-        setState {
-            copy(
-                project =
-                    ProjectInfo(
-                        name = "Nexters",
-                        thumbnailUrl = "",
-                        starCount = "3.6k",
-                        techStack = "Kotlin · Compose · Coroutines",
-                    ),
-                learningSets =
-                    listOf(
-                        LearningSetItem("1", "Set 1", "아이디어 PT 핵심 내용 확인하기"),
-                        LearningSetItem("2", "Set 2", "서비스 문제와 타깃 알아보기"),
-                        LearningSetItem("3", "Set 3", "아이디어별 해결 방식 비교하기"),
-                        LearningSetItem("4", "Set 4", "주요 기능과 사용 경험 확인하기"),
-                        LearningSetItem("5", "Set 5", "발표 아이디어 종합 정리하기"),
-                    ),
-                totalProgress = 0,
-            )
+    /**
+     * 프로젝트 상세를 조회해 화면 상태를 채운다.
+     * 실패하면 로딩 상태(project = null)를 유지하고 원인을 로그로 남긴다.
+     */
+    private fun loadProjectDetail() {
+        viewModelScope.launch {
+            getProjectDetail(projectId)
+                .onSuccess { detail ->
+                    setState {
+                        copy(
+                            project = detail.toProjectInfo(),
+                            learningSets = detail.sets.map { it.toListItem() },
+                            totalProgress = detail.overallProgressPercent,
+                        )
+                    }
+                }.onFailure { error -> logger.e(throwable = error) { "프로젝트 상세 조회 실패" } }
         }
     }
 }

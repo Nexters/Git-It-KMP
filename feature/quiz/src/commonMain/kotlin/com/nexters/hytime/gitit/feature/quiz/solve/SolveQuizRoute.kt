@@ -5,8 +5,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /**
  * 문제 풀이 상태와 일회성 이벤트를 화면에 연결한다.
@@ -21,7 +22,8 @@ fun SolveQuizRoute(
     setId: String? = null,
     onBackClick: () -> Unit,
 ) {
-    val viewModel = viewModel(key = "$projectId:$setId") { SolveQuizViewModel(projectId, setId) }
+    val viewModel =
+        koinViewModel<SolveQuizViewModel>(key = "$projectId:$setId") { parametersOf(SolveQuizArgs(projectId, setId)) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
 

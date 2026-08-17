@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * 홈 기능의 상태와 이벤트를 화면에 연결하는 진입점이다.
@@ -28,7 +28,7 @@ fun HomeRoute(
     onNavigateToProjectDetail: (String) -> Unit = {},
     onNavigateToQuiz: (String) -> Unit = {},
 ) {
-    val viewModel = viewModel { HomeViewModel() }
+    val viewModel = koinViewModel<HomeViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {

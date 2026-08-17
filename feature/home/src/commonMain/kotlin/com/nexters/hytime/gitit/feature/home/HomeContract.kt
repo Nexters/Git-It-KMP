@@ -1,6 +1,7 @@
 package com.nexters.hytime.gitit.feature.home
 
 import androidx.compose.runtime.Immutable
+import com.nexters.hytime.gitit.domain.model.CareerLevel
 
 /**
  * 홈에서 이어서 학습할 프로젝트 카드 정보다.
@@ -25,13 +26,13 @@ data class HomeLearningProject(
 /**
  * 홈 화면이 표시할 상태를 정의한다.
  *
- * @property userName 상단 프로필에 표시할 사용자 이름
- * @property userRole 사용자 이름 아래에 표시할 역할
+ * @property userName 상단 프로필에 표시할 사용자 이름. 프로필 조회 전이면 빈 문자열
+ * @property careerLevel 이름 아래 역할 표기를 만들 개발 수준. 조회 전이거나 큐레이션 전이면 null
  * @property learningProjects 이어서 학습할 프로젝트 목록. 비어 있으면 빈 상태를 표시한다
  */
 data class HomeUiState(
-    val userName: String = "김이박",
-    val userRole: String = "Junior Developer",
+    val userName: String = "",
+    val careerLevel: CareerLevel? = null,
     val learningProjects: List<HomeLearningProject> = emptyList(),
 )
 

@@ -20,7 +20,8 @@ data class ProjectPage(
  * @property techStack 저장소에서 추출한 기술 스택
  * @property currentSetLabel 다음에 풀 문제가 속한 세트 라벨 (예: `"Set 1"`)
  * @property currentSetTitle 다음에 풀 문제가 속한 세트 제목
- * @property nextProblemId 이어서 풀 문제 식별자. 풀 문제가 없으면 `null`
+ * @property nextSetId 이어서 풀 문제가 속한 학습 세트 식별자. 풀 문제가 없으면 `null`
+ * @property nextQuestionId 이어서 풀 문제 식별자. 풀 문제가 없으면 `null`
  * @property overallProgressPercent 프로젝트 전체 진행률(%)
  */
 data class ProjectSummary(
@@ -30,7 +31,8 @@ data class ProjectSummary(
     val techStack: List<String>,
     val currentSetLabel: String,
     val currentSetTitle: String,
-    val nextProblemId: String?,
+    val nextSetId: String?,
+    val nextQuestionId: String?,
     val overallProgressPercent: Int,
 )
 

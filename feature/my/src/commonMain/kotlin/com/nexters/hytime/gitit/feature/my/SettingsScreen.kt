@@ -35,9 +35,7 @@ import git_it_kmp.feature.my.generated.resources.settings_delete_account
 import git_it_kmp.feature.my.generated.resources.settings_delete_icon
 import git_it_kmp.feature.my.generated.resources.settings_develop
 import git_it_kmp.feature.my.generated.resources.settings_development_field
-import git_it_kmp.feature.my.generated.resources.settings_development_field_value
 import git_it_kmp.feature.my.generated.resources.settings_development_level
-import git_it_kmp.feature.my.generated.resources.settings_development_level_value
 import git_it_kmp.feature.my.generated.resources.settings_general
 import git_it_kmp.feature.my.generated.resources.settings_learning
 import git_it_kmp.feature.my.generated.resources.settings_level
@@ -56,16 +54,24 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * 학습 환경과 계정 관련 메뉴를 표시하는 설정 화면이다.
  *
+ * @param developmentField 현재 선택한 개발 분야 표기 라벨. 큐레이션 전이면 빈 문자열
+ * @param learningLevel 현재 선택한 개발 수준 표기 라벨. 큐레이션 전이면 빈 문자열
  * @param onBackClick 이전 화면으로 돌아가는 콜백
  * @param onPolicyClick 서비스 약관 및 정책 링크를 열도록 요청하는 콜백
  * @param onDeleteAccountClick 계정 삭제 안내 화면으로 이동하는 콜백
+ * @param onDevelopmentFieldClick 개발 분야 선택 화면으로 이동하는 콜백
+ * @param onLearningLevelClick 개발 수준 선택 화면으로 이동하는 콜백
  * @param modifier 화면의 크기와 배치를 지정할 수식자
  */
 @Composable
 fun SettingsScreen(
+    developmentField: String,
+    learningLevel: String,
     onBackClick: () -> Unit,
     onPolicyClick: () -> Unit,
     onDeleteAccountClick: () -> Unit,
+    onDevelopmentFieldClick: () -> Unit,
+    onLearningLevelClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -94,13 +100,15 @@ fun SettingsScreen(
                 SettingsRow(
                     icon = SettingsIconType.Develop,
                     label = stringResource(Res.string.settings_development_field),
-                    value = stringResource(Res.string.settings_development_field_value),
+                    value = developmentField,
+                    onClick = onDevelopmentFieldClick,
                 )
                 SettingsDivider()
                 SettingsRow(
                     icon = SettingsIconType.Level,
                     label = stringResource(Res.string.settings_development_level),
-                    value = stringResource(Res.string.settings_development_level_value),
+                    value = learningLevel,
+                    onClick = onLearningLevelClick,
                 )
             }
 
@@ -314,9 +322,13 @@ private fun SettingsIcon(
 private fun SettingsScreenPreview() {
     GitItTheme {
         SettingsScreen(
+            developmentField = "Back-end",
+            learningLevel = "입문",
             onBackClick = {},
             onPolicyClick = {},
             onDeleteAccountClick = {},
+            onDevelopmentFieldClick = {},
+            onLearningLevelClick = {},
         )
     }
 }

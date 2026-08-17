@@ -1,5 +1,8 @@
 package com.nexters.hytime.gitit.feature.my
 
+import com.nexters.hytime.gitit.domain.model.CareerLevel
+import com.nexters.hytime.gitit.domain.model.Position
+
 /**
  * 마이 화면의 단일 UI 상태다.
  *
@@ -18,26 +21,40 @@ data class MyUiState(
  *
  * @property name 화면에 표시할 사용자 이름
  * @property email 사용자 계정 이메일
- * @property developmentField 사용자가 선택한 개발 분야
- * @property learningLevel 사용자가 선택한 학습 수준
+ * @property position 사용자가 선택한 개발 분야. 큐레이션 전이면 null
+ * @property careerLevel 사용자가 선택한 학습 수준. 큐레이션 전이면 null
  */
 data class MyProfile(
     val name: String = "",
     val email: String = "",
-    val developmentField: String = "",
-    val learningLevel: String = "",
+    val position: Position? = null,
+    val careerLevel: CareerLevel? = null,
 )
 
 /**
  * 학습 현황 요약 항목이다.
  *
- * @property label 항목 이름
- * @property value 항목 값
+ * 항목 이름과 값의 단위 표기는 [type]에 맞춰 화면이 만든다.
+ *
+ * @property type 항목 종류
+ * @property count 항목이 나타내는 수치
  */
 data class MyStudyStat(
-    val label: String,
-    val value: String,
+    val type: MyStudyStatType,
+    val count: Int,
 )
+
+/** 학습 현황 요약 항목의 종류다. */
+enum class MyStudyStatType {
+    /** 이번 주에 푼 문제 수. */
+    THIS_WEEK,
+
+    /** 이번 달에 푼 문제 수. */
+    THIS_MONTH,
+
+    /** 연속으로 학습한 일수. */
+    STREAK,
+}
 
 /**
  * 주간 학습량 막대 한 개를 표현한다.

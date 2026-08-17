@@ -94,7 +94,8 @@ class ProjectRepositoryImplTest {
         assertEquals(listOf("react"), page.items.map { it.repositoryName })
         assertEquals(listOf("TypeScript", "JavaScript"), page.items.first().techStack)
         assertEquals("Set 1", page.items.first().currentSetLabel)
-        assertEquals("q1", page.items.first().nextProblemId)
+        assertEquals("s1", page.items.first().nextSetId)
+        assertEquals("q1", page.items.first().nextQuestionId)
         assertEquals(40, page.items.first().overallProgressPercent)
     }
 
@@ -282,7 +283,7 @@ class ProjectRepositoryImplTest {
     /** 북마크 설정이 서버가 적용한 상태를 돌려주는지 검증한다. */
     @Test
     fun bookmarkQuestion_성공하면_적용된상태를반환한다() {
-        val networkClient = FakeNetworkClient("""{"success":true,"data":{"isBookmarked":true}}""")
+        val networkClient = FakeNetworkClient("""{"success":true,"data":{"bookmarked":true}}""")
 
         val bookmarked = runBlocking { ProjectRepositoryImpl(networkClient).bookmarkQuestion("p1", "q1", true) }.getOrThrow()
 
@@ -328,7 +329,8 @@ class ProjectRepositoryImplTest {
         private const val PROJECT_LIST_RESPONSE =
             """{"success":true,"data":{"items":[{"projectId":"p1","repositoryName":"react",""" +
                 """"repositoryImageUrl":"https://example.com/a.png","techStack":["TypeScript","JavaScript"],""" +
-                """"currentSetLabel":"Set 1","currentSetTitle":"라우팅","nextProblemId":"q1","overallProgressPercent":40}],""" +
+                """"currentSetLabel":"Set 1","currentSetTitle":"라우팅","nextSetId":"s1","nextQuestionId":"q1",""" +
+                """"overallProgressPercent":40}],""" +
                 """"hasNext":true}}"""
 
         private const val PROJECT_DETAIL_RESPONSE =
@@ -353,7 +355,7 @@ class ProjectRepositoryImplTest {
 
         private const val BOOKMARK_LIST_RESPONSE =
             """{"success":true,"data":{"totalCount":1,"availableProjects":[{"projectId":"p1","projectName":"react"}],""" +
-                """"bookmarks":[{"projectId":"p1","projectName":"react","setLabel":"Set 1","problemNumber":1,""" +
+                """"bookmarks":[{"projectId":"p1","projectName":"react","setId":"s1","setLabel":"Set 1","problemNumber":1,""" +
                 """"questionId":"q1","question":"문제1"}]}}"""
     }
 }

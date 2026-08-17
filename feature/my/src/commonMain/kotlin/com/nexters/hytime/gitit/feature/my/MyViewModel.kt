@@ -2,6 +2,8 @@ package com.nexters.hytime.gitit.feature.my
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nexters.hytime.gitit.domain.usecase.GetMemberProfileUseCase
+import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -12,9 +14,15 @@ import kotlinx.coroutines.launch
 
 /**
  * 마이 화면의 상태와 사용자 의도를 관리한다.
+ *
+ * @property getMemberProfile 회원 프로필과 학습 현황을 조회하는 유스케이스
  */
-class MyViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(dummyMyUiState)
+class MyViewModel(
+    private val getMemberProfile: GetMemberProfileUseCase,
+) : ViewModel() {
+    private val logger = gitItLogger()
+
+    private val _uiState = MutableStateFlow(MyUiState())
 
     /**
      * 마이 화면이 구독할 현재 UI 상태이다.
@@ -27,6 +35,10 @@ class MyViewModel : ViewModel() {
      * 마이 화면에서 한 번만 처리할 이벤트 스트림이다.
      */
     val sideEffects: SharedFlow<MySideEffect> = _sideEffects.asSharedFlow()
+
+    init {
+        loadProfile()
+    }
 
     /**
      * 마이 화면에서 발생한 사용자 의도를 처리한다.
@@ -43,35 +55,19 @@ class MyViewModel : ViewModel() {
         }
     }
 
+    /**
+     * 회원 프로필을 조회해 화면 상태를 채운다.
+     * 실패하면 빈 상태를 유지하고 원인을 로그로 남긴다.
+     */
+    private fun loadProfile() {
+        viewModelScope.launch {
+            getMemberProfile()
+                .onSuccess { profile -> _uiState.value = profile.toUiState() }
+                .onFailure { error -> logger.e(throwable = error) { "회원 프로필 조회 실패" } }
+        }
+    }
+
     private fun emit(sideEffect: MySideEffect) {
         viewModelScope.launch { _sideEffects.emit(sideEffect) }
     }
 }
-
-/** domain/data 연동 전까지 화면에 표시할 더미 마이 학습 상태다. */
-private val dummyMyUiState =
-    MyUiState(
-        profile =
-            MyProfile(
-                name = "김이박",
-                email = "kimlee@github.io",
-                developmentField = "Back-end",
-                learningLevel = "입문",
-            ),
-        stats =
-            listOf(
-                MyStudyStat(label = "이번 주", value = "13문제"),
-                MyStudyStat(label = "이번 달", value = "47문제"),
-                MyStudyStat(label = "연속 학습", value = "7일"),
-            ),
-        weeklyStudy =
-            listOf(
-                MyWeeklyStudy(day = "월", solvedCount = 14),
-                MyWeeklyStudy(day = "화", solvedCount = 8),
-                MyWeeklyStudy(day = "수", solvedCount = 18),
-                MyWeeklyStudy(day = "목", solvedCount = 11),
-                MyWeeklyStudy(day = "금", solvedCount = 14),
-                MyWeeklyStudy(day = "토", solvedCount = 11),
-                MyWeeklyStudy(day = "일", solvedCount = 18),
-            ),
-    )
