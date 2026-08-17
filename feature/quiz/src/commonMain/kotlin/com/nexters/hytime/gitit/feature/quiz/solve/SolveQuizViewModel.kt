@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.nexters.hytime.gitit.domain.model.LearningSetSummary
 import com.nexters.hytime.gitit.domain.usecase.GetLearningSetUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
+import com.nexters.hytime.gitit.domain.usecase.SubmitChoiceAnswerUseCase
 import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,11 +32,13 @@ data class SolveQuizArgs(
  * @property args 프로젝트·세트 식별자
  * @property getProjectDetail 세트 라벨과 이어 풀 세트를 정하기 위한 프로젝트 상세 조회 유스케이스
  * @property getLearningSet 문제 목록을 조회하는 유스케이스
+ * @property submitChoiceAnswer 4지선다 답을 서버에 제출하고 채점 결과를 받는 유스케이스
  */
 class SolveQuizViewModel(
     private val args: SolveQuizArgs,
     private val getProjectDetail: GetProjectDetailUseCase,
     private val getLearningSet: GetLearningSetUseCase,
+    private val submitChoiceAnswer: SubmitChoiceAnswerUseCase,
 ) : ViewModel() {
     private val logger = gitItLogger()
 
@@ -146,16 +149,27 @@ class SolveQuizViewModel(
         }
     }
 
+    /**
+     * 선택한 답을 서버에 제출하고 채점 결과로 정답·해설을 채운다.
+     * 실패하면 제출 전 상태를 유지해 다시 시도할 수 있게 하고 원인을 로그로 남긴다.
+     */
     private fun submitMultipleChoiceAnswer(state: SolveQuizUiState) {
         val selectedAnswerId = state.selectedAnswerId ?: return
         if (state.isMultipleChoiceSubmitted) return
+        val selectedIndex = selectedAnswerId.toIntOrNull() ?: return
 
-        // TODO: 답변 제출 API 연동 후 서버 채점 결과(정답·해설)를 반영한다.
-        setState {
-            copy(
-                isMultipleChoiceSubmitted = true,
-                expandedAnswerIds = setOf(selectedAnswerId),
-            )
+        viewModelScope.launch {
+            submitChoiceAnswer(args.projectId, state.multipleChoiceQuestion.id, selectedIndex)
+                .onSuccess { result ->
+                    val correctAnswerId = result.answerIndex.toString()
+                    setState {
+                        copy(
+                            questions = questions.withGradedCurrentQuestion(currentIndex, correctAnswerId, result.explanation),
+                            isMultipleChoiceSubmitted = true,
+                            expandedAnswerIds = setOf(selectedAnswerId, correctAnswerId),
+                        )
+                    }
+                }.onFailure { error -> logger.e(throwable = error) { "4지선다 답변 제출 실패" } }
         }
     }
 
@@ -221,6 +235,27 @@ private fun List<LearningSetSummary>.targetSummary(setId: String?): LearningSetS
         firstOrNull { it.setId == setId }
     } else {
         firstOrNull { it.completedCount < it.problemCount } ?: firstOrNull()
+    }
+
+/**
+ * 현재 객관식 문제에 서버 채점 결과를 채운 목록을 만든다.
+ *
+ * @param index 채점한 문제의 위치
+ * @param correctAnswerId 정답 답안 식별자
+ * @param explanation 채점 후 표시할 해설
+ * @return 채점 결과가 반영된 문제 목록
+ */
+private fun List<SolveQuizQuestionItem>.withGradedCurrentQuestion(
+    index: Int,
+    correctAnswerId: String,
+    explanation: String,
+): List<SolveQuizQuestionItem> =
+    mapIndexed { i, item ->
+        if (i == index && item is SolveQuizQuestionItem.MultipleChoice) {
+            item.copy(item.question.copy(correctAnswerId = correctAnswerId, explanation = explanation))
+        } else {
+            item
+        }
     }
 
 /** 문제 형식에 맞는 풀이 단계를 반환한다. */

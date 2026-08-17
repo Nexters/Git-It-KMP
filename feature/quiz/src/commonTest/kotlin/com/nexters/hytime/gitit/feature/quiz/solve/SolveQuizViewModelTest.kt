@@ -3,6 +3,7 @@
 package com.nexters.hytime.gitit.feature.quiz.solve
 
 import com.nexters.hytime.gitit.designsystem.quiz.GitItMultipleChoiceAnswerState
+import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.LearningSetSummary
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
@@ -12,6 +13,7 @@ import com.nexters.hytime.gitit.domain.model.QuestionFormat
 import com.nexters.hytime.gitit.domain.model.QuestionSource
 import com.nexters.hytime.gitit.domain.usecase.GetLearningSetUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
+import com.nexters.hytime.gitit.domain.usecase.SubmitChoiceAnswerUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -101,6 +103,7 @@ class SolveQuizViewModelTest {
             viewModel.onIntent(SolveQuizIntent.Start)
             viewModel.onIntent(SolveQuizIntent.AnswerClick("0"))
             viewModel.onIntent(SolveQuizIntent.Submit)
+            runCurrent()
 
             viewModel.onIntent(SolveQuizIntent.Next)
 
@@ -123,11 +126,13 @@ class SolveQuizViewModelTest {
             viewModel.onIntent(SolveQuizIntent.Start)
             viewModel.onIntent(SolveQuizIntent.AnswerClick("0"))
             viewModel.onIntent(SolveQuizIntent.Submit)
+            runCurrent()
             viewModel.onIntent(SolveQuizIntent.Next)
             viewModel.onIntent(SolveQuizIntent.Submit)
             viewModel.onIntent(SolveQuizIntent.Next)
             viewModel.onIntent(SolveQuizIntent.AnswerClick("1"))
             viewModel.onIntent(SolveQuizIntent.Submit)
+            runCurrent()
 
             viewModel.onIntent(SolveQuizIntent.Next)
 
@@ -172,6 +177,7 @@ class SolveQuizViewModelTest {
             viewModel.onIntent(SolveQuizIntent.BookmarkClick)
             viewModel.onIntent(SolveQuizIntent.AnswerClick("0"))
             viewModel.onIntent(SolveQuizIntent.Submit)
+            runCurrent()
             viewModel.onIntent(SolveQuizIntent.Next)
 
             viewModel.onIntent(SolveQuizIntent.BookmarkClick)
@@ -193,6 +199,58 @@ class SolveQuizViewModelTest {
             assertEquals(0, state.currentIndex)
             assertEquals("", state.essayAnswer)
             assertEquals(3, state.questions.size)
+        }
+    }
+
+    /** 제출이 성공하면 서버 채점 결과로 정답과 해설을 채우고 두 답안을 펼친다. */
+    @Test
+    fun submit_채점에성공하면_정답과해설을채운다() {
+        runTest(dispatcher) {
+            val repository =
+                FakeSolveQuizRepository(
+                    Result.success(DETAIL),
+                    Result.success(LEARNING_SET),
+                    Result.success(ChoiceAnswerResult(questionId = "q1", correct = false, answerIndex = 0, explanation = "해설")),
+                )
+            val viewModel = createViewModel(repository = repository)
+            runCurrent()
+            viewModel.onIntent(SolveQuizIntent.Start)
+            viewModel.onIntent(SolveQuizIntent.AnswerClick("1"))
+
+            viewModel.onIntent(SolveQuizIntent.Submit)
+            runCurrent()
+
+            val state = viewModel.uiState.value
+            assertEquals("q1", repository.submittedChoiceQuestionId)
+            assertEquals(1, repository.submittedChoiceIndex)
+            assertTrue(state.isMultipleChoiceSubmitted)
+            assertEquals("0", state.multipleChoiceQuestion.correctAnswerId)
+            assertEquals("해설", state.multipleChoiceQuestion.explanation)
+            assertEquals(setOf("1", "0"), state.expandedAnswerIds)
+        }
+    }
+
+    /** 제출이 실패하면 미제출 상태를 유지해 다시 시도할 수 있다. */
+    @Test
+    fun submit_제출이실패하면_미제출상태를유지한다() {
+        runTest(dispatcher) {
+            val repository =
+                FakeSolveQuizRepository(
+                    Result.success(DETAIL),
+                    Result.success(LEARNING_SET),
+                    Result.failure(IllegalStateException("네트워크 오류")),
+                )
+            val viewModel = createViewModel(repository = repository)
+            runCurrent()
+            viewModel.onIntent(SolveQuizIntent.Start)
+            viewModel.onIntent(SolveQuizIntent.AnswerClick("1"))
+
+            viewModel.onIntent(SolveQuizIntent.Submit)
+            runCurrent()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isMultipleChoiceSubmitted)
+            assertEquals("1", state.selectedAnswerId)
         }
     }
 
@@ -225,22 +283,28 @@ class SolveQuizViewModelTest {
     private fun TestScope.essayViewModel(): SolveQuizViewModel {
         val viewModel = createViewModel()
         runCurrent()
-        return viewModel.apply {
-            onIntent(SolveQuizIntent.Start)
-            onIntent(SolveQuizIntent.AnswerClick("0"))
-            onIntent(SolveQuizIntent.Submit)
-            onIntent(SolveQuizIntent.Next)
-        }
+        viewModel.onIntent(SolveQuizIntent.Start)
+        viewModel.onIntent(SolveQuizIntent.AnswerClick("0"))
+        viewModel.onIntent(SolveQuizIntent.Submit)
+        runCurrent()
+        viewModel.onIntent(SolveQuizIntent.Next)
+        return viewModel
     }
 
     private fun createViewModel(
-        repository: FakeSolveQuizRepository = FakeSolveQuizRepository(Result.success(DETAIL), Result.success(LEARNING_SET)),
+        repository: FakeSolveQuizRepository =
+            FakeSolveQuizRepository(
+                Result.success(DETAIL),
+                Result.success(LEARNING_SET),
+                Result.success(ChoiceAnswerResult(questionId = "q1", correct = true, answerIndex = 0, explanation = "해설")),
+            ),
         setId: String? = "s2",
     ): SolveQuizViewModel =
         SolveQuizViewModel(
             args = SolveQuizArgs(projectId = "project-1", setId = setId),
             getProjectDetail = GetProjectDetailUseCase(repository),
             getLearningSet = GetLearningSetUseCase(repository),
+            submitChoiceAnswer = SubmitChoiceAnswerUseCase(repository),
         )
 
     private companion object {

@@ -15,11 +15,20 @@ import com.nexters.hytime.gitit.domain.repository.ProjectRepository
  *
  * @property detailResult 상세 조회에 돌려줄 결과
  * @property learningSetResult 학습 세트 조회에 돌려줄 결과
+ * @property choiceAnswerResult 4지선다 제출에 돌려줄 결과
  */
 internal class FakeSolveQuizRepository(
     private val detailResult: Result<ProjectDetail>,
     private val learningSetResult: Result<LearningSet>,
+    private val choiceAnswerResult: Result<ChoiceAnswerResult> =
+        Result.failure(IllegalStateException("설정되지 않은 호출입니다.")),
 ) : ProjectRepository {
+    /** 마지막으로 4지선다 답을 제출한 문제 식별자다. */
+    var submittedChoiceQuestionId: String? = null
+
+    /** 마지막으로 제출한 선택지 번호다. */
+    var submittedChoiceIndex: Int? = null
+
     /** 마지막으로 학습 세트를 조회한 세트 식별자다. */
     var requestedSetId: String? = null
 
@@ -49,7 +58,11 @@ internal class FakeSolveQuizRepository(
         projectId: String,
         questionId: String,
         selectedIndex: Int,
-    ): Result<ChoiceAnswerResult> = error("호출되면 안 됩니다.")
+    ): Result<ChoiceAnswerResult> {
+        submittedChoiceQuestionId = questionId
+        submittedChoiceIndex = selectedIndex
+        return choiceAnswerResult
+    }
 
     override suspend fun submitEssayAnswer(
         projectId: String,
