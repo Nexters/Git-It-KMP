@@ -5,10 +5,12 @@ import com.nexters.hytime.gitit.network.api.NetworkException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -34,6 +36,18 @@ internal class KtorNetworkClient(
     private val backendUrl = Url(baseUrl)
 
     override suspend fun <Res : Any> get(
+        path: String,
+        queryParameters: Map<String, String>,
+        authenticated: Boolean,
+        responseSerializer: KSerializer<Res>,
+    ): Res =
+        getAbsolute(
+            url = buildBackendUrl(path, queryParameters),
+            authenticated = authenticated,
+            responseSerializer = responseSerializer,
+        )
+
+    override suspend fun <Res : Any> getAbsolute(
         url: String,
         headers: Map<String, String>,
         authenticated: Boolean,
@@ -73,6 +87,44 @@ internal class KtorNetworkClient(
             }
             json.decodeFromString(responseSerializer, response.body())
         }
+
+    override suspend fun <Res : Any> delete(
+        path: String,
+        authenticated: Boolean,
+        responseSerializer: KSerializer<Res>,
+    ): Res =
+        request {
+            val url = "$baseUrl$path"
+            val accessToken = accessToken(url, authenticated)
+            val response =
+                client.delete(url) {
+                    accessToken?.let { bearerAuth(it) }
+                }
+            if (!response.status.isSuccess()) {
+                throw NetworkException("요청 실패: ${response.status.value}")
+            }
+            json.decodeFromString(responseSerializer, response.body())
+        }
+
+    /**
+     * baseUrl과 경로, 쿼리 파라미터를 합쳐 요청 URL을 만든다.
+     *
+     * 값 인코딩은 [URLBuilder]에 맡긴다. 문자열을 직접 이어 붙이면 프로젝트 식별자에
+     * `&`나 공백이 들어왔을 때 쿼리가 깨진다.
+     *
+     * @param path baseUrl 뒤에 붙는 요청 경로
+     * @param queryParameters 쿼리 문자열로 붙일 값
+     * @return 쿼리까지 붙은 전체 요청 URL
+     */
+    private fun buildBackendUrl(
+        path: String,
+        queryParameters: Map<String, String>,
+    ): String {
+        if (queryParameters.isEmpty()) return "$baseUrl$path"
+        return URLBuilder("$baseUrl$path")
+            .apply { queryParameters.forEach { (name, value) -> parameters.append(name, value) } }
+            .buildString()
+    }
 
     /**
      * 인증 대상 백엔드 요청에 사용할 액세스 토큰을 반환한다.

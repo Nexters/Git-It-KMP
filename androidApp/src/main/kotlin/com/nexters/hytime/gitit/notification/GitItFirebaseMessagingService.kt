@@ -15,7 +15,7 @@ import com.nexters.hytime.gitit.MainActivity
 import com.nexters.hytime.gitit.R
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
-import com.nexters.hytime.gitit.domain.repository.AccountRepository
+import com.nexters.hytime.gitit.domain.repository.MemberRepository
 import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStore
 import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +30,7 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
     private val logger by lazy { gitItLogger(tag = "FCM") }
 
     /** 회원 기기 정보를 등록하는 저장소다. */
-    private val accountRepository by inject<AccountRepository>()
+    private val memberRepository by inject<MemberRepository>()
 
     /** API 호출 가능 여부를 확인할 로그인 세션 저장소다. */
     private val sessionStorage by inject<LoginSessionStorage>()
@@ -107,7 +107,7 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
                 osVersion = Build.VERSION.RELEASE.ifBlank { Build.VERSION.SDK_INT.toString() },
                 notificationsEnabled = getSystemService(NotificationManager::class.java).areNotificationsEnabled(),
             ) ?: return
-        accountRepository
+        memberRepository
             .registerDevice(deviceInfo)
             .onFailure { error -> logger.w(throwable = error) { "회원 기기 정보 등록 실패" } }
     }

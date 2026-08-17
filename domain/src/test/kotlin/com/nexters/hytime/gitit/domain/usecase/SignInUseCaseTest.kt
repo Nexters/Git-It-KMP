@@ -2,9 +2,8 @@ package com.nexters.hytime.gitit.domain.usecase
 
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
-import com.nexters.hytime.gitit.domain.model.DeviceInfo
 import com.nexters.hytime.gitit.domain.model.LoginSession
-import com.nexters.hytime.gitit.domain.repository.AccountRepository
+import com.nexters.hytime.gitit.domain.repository.AuthRepository
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,12 +21,7 @@ class SignInUseCaseTest {
                     object : AuthTokenProvider {
                         override suspend fun obtainToken(): String = "google-token"
                     },
-                accountRepository =
-                    object : AccountRepository {
-                        override suspend fun signInWithGoogle(idToken: String): Result<LoginSession> = Result.success(session)
-
-                        override suspend fun registerDevice(deviceInfo: DeviceInfo): Result<Unit> = Result.success(Unit)
-                    },
+                authRepository = FakeAuthRepository(session),
                 sessionStorage = storage,
             )
 
@@ -39,6 +33,13 @@ class SignInUseCaseTest {
         assertEquals(Unit, result.getOrThrow())
         assertEquals(session, storedSession)
     }
+}
+
+/** 로그인 성공 세션을 그대로 돌려주는 테스트용 리포지토리다. */
+private class FakeAuthRepository(
+    private val session: LoginSession,
+) : AuthRepository {
+    override suspend fun signInWithGoogle(idToken: String): Result<LoginSession> = Result.success(session)
 }
 
 /** 테스트 중 메모리에만 세션을 보관한다. */
