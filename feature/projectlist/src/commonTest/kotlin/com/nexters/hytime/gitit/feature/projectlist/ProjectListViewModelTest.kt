@@ -1,20 +1,79 @@
+@file:Suppress("ktlint:standard:function-naming")
+
 package com.nexters.hytime.gitit.feature.projectlist
 
+import com.nexters.hytime.gitit.domain.model.ProjectPage
+import com.nexters.hytime.gitit.domain.model.ProjectSummary
+import com.nexters.hytime.gitit.domain.usecase.GetProjectsUseCase
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
-/** 프로젝트 리스트 ViewModel의 화면 이동 이벤트를 검증한다. */
+/** 프로젝트 리스트 ViewModel의 목록 조회와 화면 이동 이벤트를 검증한다. */
+@OptIn(ExperimentalCoroutinesApi::class)
 class ProjectListViewModelTest {
+    private val dispatcher = StandardTestDispatcher()
+
+    /** ViewModel의 Main dispatcher를 테스트 dispatcher로 교체한다. */
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(dispatcher)
+    }
+
+    /** 테스트 이후 Main dispatcher를 복원한다. */
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    /** 목록 조회가 성공하면 카드 모델로 변환해 화면 상태를 채운다. */
+    @Test
+    fun init_목록조회에성공하면_카드목록을채운다() {
+        runTest(dispatcher) {
+            val viewModel = createViewModel()
+            runCurrent()
+
+            val projects = viewModel.uiState.value.projects
+            assertEquals(listOf("p1", "p2", "p3"), projects.map(ProjectListItem::id))
+            assertEquals("react", projects.first().title)
+            assertEquals("TypeScript · JavaScript", projects.first().techStack)
+            assertEquals("Set 1", projects.first().setLabel)
+            assertEquals(40, projects.first().progress)
+        }
+    }
+
+    /** 목록 조회가 실패하면 빈 목록을 유지한다. */
+    @Test
+    fun init_목록조회에실패하면_빈목록을유지한다() {
+        runTest(dispatcher) {
+            val viewModel =
+                ProjectListViewModel(
+                    getProjects = GetProjectsUseCase(FakeProjectListRepository(Result.failure(IllegalStateException("오류")))),
+                )
+            runCurrent()
+
+            assertEquals(emptyList(), viewModel.uiState.value.projects)
+        }
+    }
+
     /** 삭제 메뉴와 뒤로가기가 백스택 이동 이벤트를 발행하는지 검증한다. */
     @Test
-    fun deleteModeIntent_clickAndBack_emitsNavigationEvents() =
-        runBlocking {
-            val viewModel = ProjectListViewModel()
+    fun deleteModeIntent_clickAndBack_emitsNavigationEvents() {
+        runTest(dispatcher) {
+            val viewModel = createViewModel()
+            runCurrent()
             val navigateToDelete = async(start = CoroutineStart.UNDISPATCHED) { viewModel.sideEffects.first() }
 
             viewModel.onIntent(ProjectListIntent.DeleteMenuClick)
@@ -24,68 +83,105 @@ class ProjectListViewModelTest {
             viewModel.onIntent(ProjectListIntent.DeleteModeBackClick)
             assertEquals(ProjectListSideEffect.NavigateBack, navigateBack.await())
         }
+    }
 
     /** 삭제 확인 모달에서 확인해야 선택한 프로젝트가 목록에서 제거되는지 검증한다. */
     @Test
     fun confirmDeleteClick_projectSelected_removesOnlySelectedProject() {
-        val viewModel = ProjectListViewModel()
-        val deletedProjectId =
-            viewModel.uiState.value.projects
-                .first()
-                .id
+        runTest(dispatcher) {
+            val viewModel = createViewModel()
+            runCurrent()
+            val deletedProjectId =
+                viewModel.uiState.value.projects
+                    .first()
+                    .id
 
-        viewModel.onIntent(ProjectListIntent.DeleteProjectClick(deletedProjectId))
+            viewModel.onIntent(ProjectListIntent.DeleteProjectClick(deletedProjectId))
 
-        assertEquals(deletedProjectId, viewModel.uiState.value.pendingDeleteProjectId)
-        assertEquals(3, viewModel.uiState.value.projects.size)
+            assertEquals(deletedProjectId, viewModel.uiState.value.pendingDeleteProjectId)
+            assertEquals(3, viewModel.uiState.value.projects.size)
 
-        viewModel.onIntent(ProjectListIntent.ConfirmDeleteClick)
+            viewModel.onIntent(ProjectListIntent.ConfirmDeleteClick)
+            runCurrent()
 
-        assertFalse(
-            viewModel.uiState.value.projects
-                .any { it.id == deletedProjectId },
-        )
-        assertEquals(2, viewModel.uiState.value.projects.size)
-        assertEquals(null, viewModel.uiState.value.pendingDeleteProjectId)
+            assertFalse(
+                viewModel.uiState.value.projects
+                    .any { it.id == deletedProjectId },
+            )
+            assertEquals(2, viewModel.uiState.value.projects.size)
+            assertEquals(null, viewModel.uiState.value.pendingDeleteProjectId)
+        }
     }
 
     /** 삭제 확인 모달을 취소하면 프로젝트 목록을 유지하는지 검증한다. */
     @Test
     fun dismissDeleteClick_projectSelected_keepsProjects() {
-        val viewModel = ProjectListViewModel()
-        val deletedProjectId =
-            viewModel.uiState.value.projects
-                .first()
-                .id
+        runTest(dispatcher) {
+            val viewModel = createViewModel()
+            runCurrent()
+            val deletedProjectId =
+                viewModel.uiState.value.projects
+                    .first()
+                    .id
 
-        viewModel.onIntent(ProjectListIntent.DeleteProjectClick(deletedProjectId))
-        viewModel.onIntent(ProjectListIntent.DismissDeleteClick)
+            viewModel.onIntent(ProjectListIntent.DeleteProjectClick(deletedProjectId))
+            viewModel.onIntent(ProjectListIntent.DismissDeleteClick)
 
-        assertEquals(3, viewModel.uiState.value.projects.size)
-        assertEquals(null, viewModel.uiState.value.pendingDeleteProjectId)
+            assertEquals(3, viewModel.uiState.value.projects.size)
+            assertEquals(null, viewModel.uiState.value.pendingDeleteProjectId)
+        }
     }
 
     /** 프로젝트 카드의 플레이 버튼이 문제 풀이 이동 이벤트를 발행하는지 검증한다. */
     @Test
-    fun playProjectClick_emitsNavigateToQuiz() =
-        runBlocking {
-            val viewModel = ProjectListViewModel()
+    fun playProjectClick_emitsNavigateToQuiz() {
+        runTest(dispatcher) {
+            val viewModel = createViewModel()
+            runCurrent()
             val sideEffect = async(start = CoroutineStart.UNDISPATCHED) { viewModel.sideEffects.first() }
 
             viewModel.onIntent(ProjectListIntent.PlayProjectClick("project-1"))
 
             assertEquals(ProjectListSideEffect.NavigateToQuiz("project-1"), sideEffect.await())
         }
+    }
 
     /** 프로젝트 카드를 선택하면 프로젝트 상세 이동 이벤트를 발행하는지 검증한다. */
     @Test
-    fun projectClick_emitsNavigateToProjectDetail() =
-        runBlocking {
-            val viewModel = ProjectListViewModel()
+    fun projectClick_emitsNavigateToProjectDetail() {
+        runTest(dispatcher) {
+            val viewModel = createViewModel()
+            runCurrent()
             val sideEffect = async(start = CoroutineStart.UNDISPATCHED) { viewModel.sideEffects.first() }
 
             viewModel.onIntent(ProjectListIntent.ProjectClick("project-1"))
 
             assertEquals(ProjectListSideEffect.NavigateToProjectDetail("project-1"), sideEffect.await())
         }
+    }
+
+    private fun createViewModel(): ProjectListViewModel =
+        ProjectListViewModel(
+            getProjects = GetProjectsUseCase(FakeProjectListRepository(Result.success(PAGE))),
+        )
+
+    private companion object {
+        private val PAGE =
+            ProjectPage(
+                items =
+                    listOf("p1", "p2", "p3").map { id ->
+                        ProjectSummary(
+                            projectId = id,
+                            repositoryName = "react",
+                            repositoryImageUrl = "https://example.com/a.png",
+                            techStack = listOf("TypeScript", "JavaScript"),
+                            currentSetLabel = "Set 1",
+                            currentSetTitle = "라우팅 흐름 따라가기",
+                            nextProblemId = "q1",
+                            overallProgressPercent = 40,
+                        )
+                    },
+                hasNext = false,
+            )
+    }
 }

@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * 프로젝트 리스트 화면의 진입점(Route)이다.
@@ -30,7 +30,7 @@ fun ProjectListRoute(
     onNavigateToProjectDetail: (String) -> Unit,
     onNavigateToQuiz: (String) -> Unit,
 ) {
-    val viewModel = viewModel { ProjectListViewModel() }
+    val viewModel = koinViewModel<ProjectListViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {

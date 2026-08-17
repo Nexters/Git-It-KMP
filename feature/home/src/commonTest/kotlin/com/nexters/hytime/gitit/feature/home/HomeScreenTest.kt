@@ -2,15 +2,39 @@ package com.nexters.hytime.gitit.feature.home
 
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import com.nexters.hytime.gitit.domain.model.ProjectPage
+import com.nexters.hytime.gitit.domain.usecase.GetProjectsUseCase
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** 홈 화면의 카드 배치와 입력 처리를 검증한다. */
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeScreenTest {
+    private val dispatcher = StandardTestDispatcher()
+
+    /** ViewModel의 Main dispatcher를 테스트 dispatcher로 교체한다. */
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(dispatcher)
+    }
+
+    /** 테스트 이후 Main dispatcher를 복원한다. */
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
     /** 화면 높이에 따라 카드 크기가 Figma의 최소·최대 범위로 제한된다. */
     @Test
     fun learningCardSize_viewportHeight_returnsMinAndMaxSize() {
@@ -43,8 +67,8 @@ class HomeScreenTest {
     /** 홈 카드의 재생 버튼이 문제 풀이 이동 이벤트를 발행하는지 검증한다. */
     @Test
     fun learningPlayClick_emitsNavigateToQuiz() =
-        runBlocking {
-            val viewModel = HomeViewModel()
+        runTest(dispatcher) {
+            val viewModel = createViewModel()
             val sideEffect = async(start = CoroutineStart.UNDISPATCHED) { viewModel.sideEffects.first() }
 
             viewModel.onIntent(HomeIntent.LearningPlayClick("project-1"))
@@ -55,12 +79,20 @@ class HomeScreenTest {
     /** 홈 카드를 선택하면 프로젝트 상세 이동 이벤트를 발행하는지 검증한다. */
     @Test
     fun learningCardClick_emitsNavigateToProjectDetail() =
-        runBlocking {
-            val viewModel = HomeViewModel()
+        runTest(dispatcher) {
+            val viewModel = createViewModel()
             val sideEffect = async(start = CoroutineStart.UNDISPATCHED) { viewModel.sideEffects.first() }
 
             viewModel.onIntent(HomeIntent.LearningCardClick("project-1"))
 
             assertEquals(HomeSideEffect.NavigateToProjectDetail("project-1"), sideEffect.await())
         }
+
+    private fun createViewModel(): HomeViewModel =
+        HomeViewModel(
+            getProjects =
+                GetProjectsUseCase(
+                    FakeHomeProjectRepository(Result.success(ProjectPage(items = emptyList(), hasNext = false))),
+                ),
+        )
 }

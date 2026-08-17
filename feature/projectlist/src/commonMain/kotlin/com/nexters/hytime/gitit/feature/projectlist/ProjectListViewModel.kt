@@ -1,6 +1,9 @@
 package com.nexters.hytime.gitit.feature.projectlist
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.nexters.hytime.gitit.domain.usecase.GetProjectsUseCase
+import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -8,12 +11,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * 프로젝트 리스트 화면의 상태와 사용자 의도를 관리한다.
+ *
+ * @property getProjects 등록한 프로젝트 목록을 조회하는 유스케이스
  */
-class ProjectListViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(ProjectListUiState(projects = dummyProjects))
+class ProjectListViewModel(
+    private val getProjects: GetProjectsUseCase,
+) : ViewModel() {
+    private val logger = gitItLogger()
+
+    private val _uiState = MutableStateFlow(ProjectListUiState())
 
     /**
      * 프로젝트 리스트 화면이 구독할 현재 UI 상태이다.
@@ -26,6 +36,10 @@ class ProjectListViewModel : ViewModel() {
      * 프로젝트 리스트 화면에서 한 번만 처리할 이벤트 스트림이다.
      */
     val sideEffects: SharedFlow<ProjectListSideEffect> = _sideEffects.asSharedFlow()
+
+    init {
+        loadProjects()
+    }
 
     /**
      * 프로젝트 리스트 화면에서 발생한 사용자 의도를 처리한다.
@@ -70,33 +84,16 @@ class ProjectListViewModel : ViewModel() {
     private fun emit(sideEffect: ProjectListSideEffect) {
         _sideEffects.tryEmit(sideEffect)
     }
-}
 
-/** domain/data 연동 전까지 화면에 표시할 더미 프로젝트 목록이다. */
-private val dummyProjects =
-    listOf(
-        ProjectListItem(
-            id = "now-in-android-1",
-            title = "Now in\nAndroid",
-            techStack = "Kotlin · Compose · Coroutines",
-            setLabel = "Set 1",
-            recentSetTitle = "Compose 핵심 개념",
-            progress = 65,
-        ),
-        ProjectListItem(
-            id = "now-in-android-2",
-            title = "Now in\nAndroid",
-            techStack = "Kotlin · Compose · Coroutines",
-            setLabel = "Set 1",
-            recentSetTitle = "Compose 핵심 개념",
-            progress = 65,
-        ),
-        ProjectListItem(
-            id = "now-in-android-3",
-            title = "Now in\nAndroid",
-            techStack = "Kotlin · Compose · Coroutines",
-            setLabel = "Set 1",
-            recentSetTitle = "Compose 핵심 개념",
-            progress = 65,
-        ),
-    )
+    /**
+     * 프로젝트 목록을 조회해 화면 상태를 채운다.
+     * 실패하면 빈 목록을 유지하고 원인을 로그로 남긴다.
+     */
+    private fun loadProjects() {
+        viewModelScope.launch {
+            getProjects()
+                .onSuccess { page -> setState { copy(projects = page.items.map { it.toListItem() }) } }
+                .onFailure { error -> logger.e(throwable = error) { "프로젝트 목록 조회 실패" } }
+        }
+    }
+}
