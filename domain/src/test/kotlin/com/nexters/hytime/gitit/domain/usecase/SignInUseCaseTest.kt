@@ -30,7 +30,7 @@ class SignInUseCaseTest {
                 useCase() to storage.load()
             }
 
-        assertEquals(Unit, result.getOrThrow())
+        assertEquals(session, result.getOrThrow())
         assertEquals(session, storedSession)
     }
 }

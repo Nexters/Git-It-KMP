@@ -9,5 +9,5 @@ import org.koin.dsl.module
  */
 val onboardingModule: Module =
     module {
-        viewModel { OnboardingViewModel(get()) }
+        viewModel { OnboardingViewModel(signInUseCase = get(), memberRepository = get()) }
     }

@@ -220,7 +220,7 @@ fun AppNavHost() {
     val backStack =
         rememberNavBackStack(
             appRouteSavedStateConfiguration,
-            AppRoute.Home,
+            AppRoute.Onboarding,
         )
 
     fun navigateToMainRoute(route: AppRoute) {
@@ -240,10 +240,13 @@ fun AppNavHost() {
         entryProvider =
             entryProvider {
                 entry<AppRoute.Onboarding>(metadata = AppRoute.Onboarding.navigationMetadata()) {
-                    OnboardingRoute(onNavigateToHome = { backStack[0] = AppRoute.Home })
+                    OnboardingRoute(
+                        onNavigateToHome = { backStack[0] = AppRoute.Home },
+                        onNavigateToIntermediateSplash = { backStack[0] = AppRoute.IntermediateSplash },
+                    )
                 }
                 entry<AppRoute.IntermediateSplash>(metadata = AppRoute.IntermediateSplash.navigationMetadata()) {
-                    IntermediateSplashScreen(onFinished = { navigateToMainRoute(AppRoute.Home) })
+                    IntermediateSplashScreen(onFinished = { backStack[0] = AppRoute.Home })
                 }
                 entry<AppRoute.Home>(metadata = AppRoute.Home.navigationMetadata()) {
                     QuizCreateHomeHost(

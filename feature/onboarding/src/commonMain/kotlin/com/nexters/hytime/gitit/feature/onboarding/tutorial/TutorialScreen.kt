@@ -71,6 +71,7 @@ data class TutorialOption(
  * @param onNextClick 활성화된 진행 버튼을 누르면 호출할 이벤트
  * @param modifier 화면의 크기와 외부 배치를 지정할 수식자
  * @param helperText 진행 버튼 위에 표시할 선택적 한 줄 안내문
+ * @param nextButtonEnabled 선택값 외의 조건을 포함한 진행 버튼 활성화 여부
  */
 @Composable
 fun TutorialScreen(
@@ -83,6 +84,7 @@ fun TutorialScreen(
     onNextClick: () -> Unit,
     modifier: Modifier = Modifier,
     helperText: String? = null,
+    nextButtonEnabled: Boolean = selectedOptionId != null,
 ) {
     Column(
         modifier =
@@ -163,7 +165,7 @@ fun TutorialScreen(
                     .padding(horizontal = 20.dp),
             style = GitItButtonStyle.Primary,
             state =
-                if (selectedOptionId == null) {
+                if (!nextButtonEnabled) {
                     GitItButtonState.Disabled
                 } else {
                     GitItButtonState.Default
