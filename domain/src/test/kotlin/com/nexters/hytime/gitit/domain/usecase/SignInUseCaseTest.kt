@@ -39,6 +39,8 @@ class SignInUseCaseTest {
 private class FakeAuthRepository(
     private val session: LoginSession,
 ) : AuthRepository {
+    override suspend fun verifyAccessToken(): Result<Unit> = error("호출되면 안 됩니다.")
+
     override suspend fun signInWithGoogle(idToken: String): Result<LoginSession> = Result.success(session)
 }
 

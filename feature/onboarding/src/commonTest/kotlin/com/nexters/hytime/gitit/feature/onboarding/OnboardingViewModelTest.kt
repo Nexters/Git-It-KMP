@@ -158,6 +158,8 @@ class OnboardingViewModelTest {
                         },
                     authRepository =
                         object : AuthRepository {
+                            override suspend fun verifyAccessToken(): Result<Unit> = error("호출되면 안 됩니다.")
+
                             override suspend fun signInWithGoogle(idToken: String): Result<LoginSession> = Result.success(session)
                         },
                     sessionStorage = FakeLoginSessionStorage(),
