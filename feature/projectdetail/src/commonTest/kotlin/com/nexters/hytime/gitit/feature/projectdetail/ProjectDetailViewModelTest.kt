@@ -4,6 +4,7 @@ package com.nexters.hytime.gitit.feature.projectdetail
 
 import com.nexters.hytime.gitit.domain.model.LearningSetSummary
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
+import com.nexters.hytime.gitit.domain.usecase.DeleteProjectUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -64,11 +65,12 @@ class ProjectDetailViewModelTest {
     @Test
     fun init_상세조회에실패하면_로딩상태를유지한다() {
         runTest(dispatcher) {
+            val repository = FakeProjectDetailRepository(Result.failure(IllegalStateException("오류")))
             val viewModel =
                 ProjectDetailViewModel(
                     projectId = "project-1",
-                    getProjectDetail =
-                        GetProjectDetailUseCase(FakeProjectDetailRepository(Result.failure(IllegalStateException("오류")))),
+                    getProjectDetail = GetProjectDetailUseCase(repository),
+                    deleteProject = DeleteProjectUseCase(repository),
                 )
             runCurrent()
 
@@ -105,16 +107,24 @@ class ProjectDetailViewModelTest {
         }
     }
 
-    /** 삭제 확인 시 홈 이동 이벤트를 발행하는지 검증한다. */
+    /** 서버 삭제가 성공해야 홈 이동 이벤트를 발행하는지 검증한다. */
     @Test
-    fun onDeleteProjectClick_emitsNavigateToHome() {
+    fun onDeleteProjectClick_삭제에성공하면_홈이동이벤트를발행한다() {
         runTest(dispatcher) {
-            val viewModel = createViewModel()
+            val repository = FakeProjectDetailRepository(Result.success(DETAIL))
+            val viewModel =
+                ProjectDetailViewModel(
+                    projectId = "project-1",
+                    getProjectDetail = GetProjectDetailUseCase(repository),
+                    deleteProject = DeleteProjectUseCase(repository),
+                )
             runCurrent()
             val event = async(start = CoroutineStart.UNDISPATCHED) { viewModel.events.first() }
 
             viewModel.onDeleteProjectClick()
+            runCurrent()
 
+            assertEquals("project-1", repository.deletedProjectId)
             assertEquals(ProjectDetailEvent.NavigateToHome, event.await())
         }
     }
@@ -142,11 +152,14 @@ class ProjectDetailViewModelTest {
         assertEquals("12.3k", formatStarCount(12_345))
     }
 
-    private fun createViewModel(): ProjectDetailViewModel =
-        ProjectDetailViewModel(
+    private fun createViewModel(): ProjectDetailViewModel {
+        val repository = FakeProjectDetailRepository(Result.success(DETAIL))
+        return ProjectDetailViewModel(
             projectId = "project-1",
-            getProjectDetail = GetProjectDetailUseCase(FakeProjectDetailRepository(Result.success(DETAIL))),
+            getProjectDetail = GetProjectDetailUseCase(repository),
+            deleteProject = DeleteProjectUseCase(repository),
         )
+    }
 
     private companion object {
         private val DETAIL =

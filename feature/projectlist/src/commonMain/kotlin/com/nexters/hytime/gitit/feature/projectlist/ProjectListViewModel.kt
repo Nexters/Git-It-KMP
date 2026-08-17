@@ -2,6 +2,7 @@ package com.nexters.hytime.gitit.feature.projectlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nexters.hytime.gitit.domain.usecase.DeleteProjectUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectsUseCase
 import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,9 +18,11 @@ import kotlinx.coroutines.launch
  * 프로젝트 리스트 화면의 상태와 사용자 의도를 관리한다.
  *
  * @property getProjects 등록한 프로젝트 목록을 조회하는 유스케이스
+ * @property deleteProject 프로젝트를 서버에서 삭제하는 유스케이스
  */
 class ProjectListViewModel(
     private val getProjects: GetProjectsUseCase,
+    private val deleteProject: DeleteProjectUseCase,
 ) : ViewModel() {
     private val logger = gitItLogger()
 
@@ -58,14 +61,7 @@ class ProjectListViewModel(
                 setState { copy(pendingDeleteProjectId = intent.projectId) }
             }
             ProjectListIntent.ConfirmDeleteClick ->
-                _uiState.value.pendingDeleteProjectId?.let { projectId ->
-                    setState {
-                        copy(
-                            projects = projects.filterNot { it.id == projectId },
-                            pendingDeleteProjectId = null,
-                        )
-                    }
-                }
+                _uiState.value.pendingDeleteProjectId?.let(::deleteProjectOnServer)
             ProjectListIntent.DismissDeleteClick -> setState { copy(pendingDeleteProjectId = null) }
             is ProjectListIntent.ProjectClick -> emit(ProjectListSideEffect.NavigateToProjectDetail(intent.projectId))
             is ProjectListIntent.PlayProjectClick -> emit(ProjectListSideEffect.NavigateToQuiz(intent.projectId))
@@ -83,6 +79,29 @@ class ProjectListViewModel(
 
     private fun emit(sideEffect: ProjectListSideEffect) {
         _sideEffects.tryEmit(sideEffect)
+    }
+
+    /**
+     * 서버에서 프로젝트를 삭제하고 성공하면 목록에서도 제거한다.
+     * 실패하면 목록을 유지하고 원인을 로그로 남긴다.
+     *
+     * @param projectId 삭제할 프로젝트 식별자
+     */
+    private fun deleteProjectOnServer(projectId: String) {
+        viewModelScope.launch {
+            deleteProject(projectId)
+                .onSuccess {
+                    setState {
+                        copy(
+                            projects = projects.filterNot { it.id == projectId },
+                            pendingDeleteProjectId = null,
+                        )
+                    }
+                }.onFailure { error ->
+                    setState { copy(pendingDeleteProjectId = null) }
+                    logger.e(throwable = error) { "프로젝트 삭제 실패" }
+                }
+        }
     }
 
     /**

@@ -4,6 +4,7 @@ package com.nexters.hytime.gitit.feature.projectlist
 
 import com.nexters.hytime.gitit.domain.model.ProjectPage
 import com.nexters.hytime.gitit.domain.model.ProjectSummary
+import com.nexters.hytime.gitit.domain.usecase.DeleteProjectUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectsUseCase
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -58,9 +59,11 @@ class ProjectListViewModelTest {
     @Test
     fun init_목록조회에실패하면_빈목록을유지한다() {
         runTest(dispatcher) {
+            val repository = FakeProjectListRepository(Result.failure(IllegalStateException("오류")))
             val viewModel =
                 ProjectListViewModel(
-                    getProjects = GetProjectsUseCase(FakeProjectListRepository(Result.failure(IllegalStateException("오류")))),
+                    getProjects = GetProjectsUseCase(repository),
+                    deleteProject = DeleteProjectUseCase(repository),
                 )
             runCurrent()
 
@@ -160,10 +163,35 @@ class ProjectListViewModelTest {
         }
     }
 
-    private fun createViewModel(): ProjectListViewModel =
-        ProjectListViewModel(
-            getProjects = GetProjectsUseCase(FakeProjectListRepository(Result.success(PAGE))),
+    /** 삭제 요청이 실패하면 목록을 유지하고 모달만 닫는다. */
+    @Test
+    fun confirmDeleteClick_삭제요청이실패하면_목록을유지한다() {
+        runTest(dispatcher) {
+            val repository = FakeProjectListRepository(Result.success(PAGE), Result.failure(IllegalStateException("오류")))
+            val viewModel =
+                ProjectListViewModel(
+                    getProjects = GetProjectsUseCase(repository),
+                    deleteProject = DeleteProjectUseCase(repository),
+                )
+            runCurrent()
+
+            viewModel.onIntent(ProjectListIntent.DeleteProjectClick("p1"))
+            viewModel.onIntent(ProjectListIntent.ConfirmDeleteClick)
+            runCurrent()
+
+            assertEquals("p1", repository.deletedProjectId)
+            assertEquals(3, viewModel.uiState.value.projects.size)
+            assertEquals(null, viewModel.uiState.value.pendingDeleteProjectId)
+        }
+    }
+
+    private fun createViewModel(): ProjectListViewModel {
+        val repository = FakeProjectListRepository(Result.success(PAGE))
+        return ProjectListViewModel(
+            getProjects = GetProjectsUseCase(repository),
+            deleteProject = DeleteProjectUseCase(repository),
         )
+    }
 
     private companion object {
         private val PAGE =

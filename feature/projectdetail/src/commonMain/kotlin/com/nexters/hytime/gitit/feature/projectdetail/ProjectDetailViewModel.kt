@@ -2,6 +2,7 @@ package com.nexters.hytime.gitit.feature.projectdetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nexters.hytime.gitit.domain.usecase.DeleteProjectUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
 import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,10 +21,12 @@ import kotlinx.coroutines.launch
  *
  * @property projectId 네비게이션 인자로 전달된 프로젝트 식별자
  * @property getProjectDetail 프로젝트 상세 정보를 조회하는 유스케이스
+ * @property deleteProject 프로젝트를 서버에서 삭제하는 유스케이스
  */
 class ProjectDetailViewModel(
     val projectId: String,
     private val getProjectDetail: GetProjectDetailUseCase,
+    private val deleteProject: DeleteProjectUseCase,
 ) : ViewModel() {
     private val logger = gitItLogger()
 
@@ -73,10 +76,16 @@ class ProjectDetailViewModel(
         emit(ProjectDetailEvent.NavigateToSavedQuestions)
     }
 
-    /** 프로젝트 삭제를 확정하고 홈 화면 이동 이벤트를 흘려보낸다. */
+    /**
+     * 프로젝트를 서버에서 삭제하고 성공하면 홈 화면 이동 이벤트를 흘려보낸다.
+     * 실패하면 화면을 유지하고 원인을 로그로 남긴다.
+     */
     fun onDeleteProjectClick() {
-        // TODO: 삭제 유스케이스 연동 후 홈 이동 전에 프로젝트를 삭제한다.
-        emit(ProjectDetailEvent.NavigateToHome)
+        viewModelScope.launch {
+            deleteProject(projectId)
+                .onSuccess { emit(ProjectDetailEvent.NavigateToHome) }
+                .onFailure { error -> logger.e(throwable = error) { "프로젝트 삭제 실패" } }
+        }
     }
 
     /**

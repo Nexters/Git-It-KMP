@@ -14,10 +14,15 @@ import com.nexters.hytime.gitit.domain.repository.ProjectRepository
  * 상세 조회에 지정한 결과만 돌려주는 테스트용 프로젝트 리포지토리다.
  *
  * @property detailResult 상세 조회에 돌려줄 결과
+ * @property deleteResult 삭제 요청에 돌려줄 결과
  */
 internal class FakeProjectDetailRepository(
     private val detailResult: Result<ProjectDetail>,
+    private val deleteResult: Result<Unit> = Result.success(Unit),
 ) : ProjectRepository {
+    /** 마지막으로 삭제 요청한 프로젝트 식별자다. */
+    var deletedProjectId: String? = null
+
     override suspend fun registerProject(
         githubRepoUrl: String,
         quizLevel: ProjectQuizLevel,
@@ -30,7 +35,10 @@ internal class FakeProjectDetailRepository(
 
     override suspend fun getProjectDetail(projectId: String): Result<ProjectDetail> = detailResult
 
-    override suspend fun deleteProject(projectId: String): Result<Unit> = error("호출되면 안 됩니다.")
+    override suspend fun deleteProject(projectId: String): Result<Unit> {
+        deletedProjectId = projectId
+        return deleteResult
+    }
 
     override suspend fun getLearningSet(
         projectId: String,
