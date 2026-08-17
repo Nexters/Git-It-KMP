@@ -62,6 +62,7 @@ import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.absoluteValue
 
 /**
@@ -152,7 +153,7 @@ private fun HomeProfile(
     GitItTopBar(
         type = GitItTopBarType.InlineUser,
         userName = uiState.userName,
-        userSubtitle = uiState.userRole,
+        userSubtitle = uiState.careerLevel?.let { stringResource(it.toRoleLabelResource()) }.orEmpty(),
         userAvatar = {
             Box(
                 modifier =

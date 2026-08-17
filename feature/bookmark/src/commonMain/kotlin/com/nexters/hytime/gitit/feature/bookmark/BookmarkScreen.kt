@@ -35,6 +35,10 @@ import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
 import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
+import git_it_kmp.feature.bookmark.generated.resources.Res
+import git_it_kmp.feature.bookmark.generated.resources.bookmark_filter_all
+import git_it_kmp.feature.bookmark.generated.resources.bookmark_question_meta
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * 저장한 문제 화면의 순수 UI 영역이다.
@@ -210,7 +214,7 @@ private fun BookmarkFilterChip(
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = filter.label,
+            text = filter.label ?: stringResource(Res.string.bookmark_filter_all),
             color = if (selected) GitItTheme.colors.grey700 else GitItTheme.colors.grey300,
             style = GitItTheme.typography.body2,
             maxLines = 1,
@@ -245,7 +249,13 @@ private fun BookmarkedQuestionCard(
                 .padding(start = 16.dp, top = 17.dp, end = 16.dp, bottom = 14.dp),
     ) {
         Text(
-            text = question.meta,
+            text =
+                stringResource(
+                    Res.string.bookmark_question_meta,
+                    question.projectName,
+                    question.setLabel,
+                    question.problemNumber,
+                ),
             color = GitItTheme.colors.grey400,
             style = GitItTheme.typography.caption1,
             maxLines = 1,
@@ -340,7 +350,7 @@ private fun BookmarkScreenPreview() {
                 BookmarkUiState(
                     filters =
                         listOf(
-                            BookmarkFilter(id = "all", label = "전체"),
+                            BookmarkFilter(id = "all", label = null),
                             BookmarkFilter(id = "flask", label = "Flask"),
                             BookmarkFilter(id = "android", label = "Now in Android"),
                         ),
@@ -349,7 +359,9 @@ private fun BookmarkScreenPreview() {
                         List(4) { index ->
                             BookmarkedQuestion(
                                 id = "bookmark-$index",
-                                meta = "Android · Set2 · 문제 1",
+                                projectName = "Android",
+                                setLabel = "Set2",
+                                problemNumber = 1,
                                 title = "sansio/blueprints.py에 정의된 BlueprintSetupState 클래스는 어떤 목적을 가진 개체인가?",
                             )
                         },

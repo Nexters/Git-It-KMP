@@ -47,17 +47,21 @@ class MyViewModelTest {
             val state = viewModel.uiState.value
             assertEquals("김이박", state.profile.name)
             assertEquals("gitit@example.com", state.profile.email)
-            assertEquals("Back-end", state.profile.developmentField)
-            assertEquals("주니어", state.profile.learningLevel)
-            assertEquals(listOf("13문제", "47문제", "7일"), state.stats.map(MyStudyStat::value))
+            assertEquals(Position.BACKEND, state.profile.position)
+            assertEquals(CareerLevel.JUNIOR, state.profile.careerLevel)
+            assertEquals(
+                listOf(MyStudyStatType.THIS_WEEK, MyStudyStatType.THIS_MONTH, MyStudyStatType.STREAK),
+                state.stats.map(MyStudyStat::type),
+            )
+            assertEquals(listOf(13, 47, 7), state.stats.map(MyStudyStat::count))
             assertEquals(listOf("월", "화"), state.weeklyStudy.map(MyWeeklyStudy::day))
             assertEquals(listOf(3, 0), state.weeklyStudy.map(MyWeeklyStudy::solvedCount))
         }
     }
 
-    /** 큐레이션 전이라 프로필 값이 비어 있으면 빈 라벨로 표시한다. */
+    /** 큐레이션 전이라 프로필 값이 비어 있으면 선택 값 없이 표시한다. */
     @Test
-    fun init_큐레이션전프로필이면_빈라벨로표시한다() {
+    fun init_큐레이션전프로필이면_선택값없이표시한다() {
         val emptyProfile =
             PROFILE.copy(name = null, email = null, position = null, careerLevel = null)
 
@@ -67,8 +71,8 @@ class MyViewModelTest {
 
             val profile = viewModel.uiState.value.profile
             assertEquals("", profile.name)
-            assertEquals("", profile.developmentField)
-            assertEquals("", profile.learningLevel)
+            assertEquals(null, profile.position)
+            assertEquals(null, profile.careerLevel)
         }
     }
 

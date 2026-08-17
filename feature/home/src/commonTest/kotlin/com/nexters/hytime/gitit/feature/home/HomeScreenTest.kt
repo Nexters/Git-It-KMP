@@ -103,7 +103,7 @@ class HomeScreenTest {
             runCurrent()
 
             assertEquals("김이박", viewModel.uiState.value.userName)
-            assertEquals("Junior Developer", viewModel.uiState.value.userRole)
+            assertEquals(CareerLevel.JUNIOR, viewModel.uiState.value.careerLevel)
         }
     }
 

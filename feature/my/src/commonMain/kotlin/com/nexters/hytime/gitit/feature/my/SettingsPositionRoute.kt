@@ -44,7 +44,7 @@ fun SettingsPositionRoute(onNavigateBack: () -> Unit) {
         title = stringResource(Res.string.settings_development_field),
         options =
             positionOptions.map { position ->
-                SettingsSelectionOption(id = position.name, title = position.toDisplayLabel())
+                SettingsSelectionOption(id = position.name, title = stringResource(position.toDisplayLabelResource()))
             },
         selectedOptionId = uiState.selected?.name,
         onOptionClick = { option -> viewModel.onPositionClick(Position.valueOf(option.id)) },

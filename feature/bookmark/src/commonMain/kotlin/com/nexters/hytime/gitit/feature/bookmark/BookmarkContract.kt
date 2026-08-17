@@ -19,25 +19,31 @@ data class BookmarkUiState(
  * 저장한 문제 필터 항목이다.
  *
  * @property id 필터 식별자
- * @property label 화면에 표시할 필터 이름
+ * @property label 화면에 표시할 프로젝트 이름. 전체 필터면 null이며 화면이 고정 문구를 표시한다
  */
 data class BookmarkFilter(
     val id: String,
-    val label: String,
+    val label: String?,
 )
 
 /**
  * 저장한 문제 카드 한 개를 표현한다.
  *
+ * 카드 상단의 메타 문구는 화면이 [projectName]·[setLabel]·[problemNumber]로 만든다.
+ *
  * @property id 문제 식별자
  * @property projectId 문제가 속한 프로젝트 식별자
- * @property meta 프로젝트·세트·문제 번호 정보
+ * @property projectName 문제가 속한 프로젝트 이름
+ * @property setLabel 문제가 속한 학습 세트 라벨
+ * @property problemNumber 세트 안에서의 문제 번호
  * @property title 문제 제목
  */
 data class BookmarkedQuestion(
     val id: String,
     val projectId: String = "",
-    val meta: String,
+    val projectName: String,
+    val setLabel: String,
+    val problemNumber: Int,
     val title: String,
 )
 

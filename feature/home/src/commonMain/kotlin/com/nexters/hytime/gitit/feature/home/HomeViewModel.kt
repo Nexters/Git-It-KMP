@@ -81,7 +81,7 @@ class HomeViewModel(
                     _uiState.value =
                         _uiState.value.copy(
                             userName = profile.name.orEmpty(),
-                            userRole = profile.careerLevel.toRoleLabel(),
+                            careerLevel = profile.careerLevel,
                         )
                 }.onFailure { error -> logger.e(throwable = error) { "홈 프로필 조회 실패" } }
         }

@@ -6,23 +6,27 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexters.hytime.gitit.domain.model.CareerLevel
 import git_it_kmp.feature.my.generated.resources.Res
+import git_it_kmp.feature.my.generated.resources.settings_career_level_entry_description
+import git_it_kmp.feature.my.generated.resources.settings_career_level_junior_description
+import git_it_kmp.feature.my.generated.resources.settings_career_level_middle_description
+import git_it_kmp.feature.my.generated.resources.settings_career_level_senior_description
 import git_it_kmp.feature.my.generated.resources.settings_development_level
 import kotlinx.coroutines.flow.collectLatest
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * 개발 수준 카드에 표시할 수준별 설명이다. Figma 시안의 문구를 그대로 쓴다.
+ * 개발 수준 카드에 표시할 수준별 설명 리소스다. Figma 시안의 문구를 그대로 쓴다.
  *
- * @param careerLevel 설명을 찾을 개발 수준
- * @return 카드 제목 아래에 표시할 한 줄 설명
+ * @return 카드 제목 아래에 표시할 한 줄 설명 리소스
  */
-private fun careerLevelDescription(careerLevel: CareerLevel): String =
-    when (careerLevel) {
-        CareerLevel.ENTRY -> "프로젝트 코드를 처음 살펴봐요."
-        CareerLevel.JUNIOR -> "작은 기능 단위로 코드를 이해할 수 있어요."
-        CareerLevel.MIDDLE -> "프로젝트 구조와 흐름을 함께 살펴봐요."
-        CareerLevel.SENIOR -> "설계 의도와 변경 영향을 분석할 수 있어요."
+private fun CareerLevel.toDescriptionResource(): StringResource =
+    when (this) {
+        CareerLevel.ENTRY -> Res.string.settings_career_level_entry_description
+        CareerLevel.JUNIOR -> Res.string.settings_career_level_junior_description
+        CareerLevel.MIDDLE -> Res.string.settings_career_level_middle_description
+        CareerLevel.SENIOR -> Res.string.settings_career_level_senior_description
     }
 
 /**
@@ -51,8 +55,8 @@ fun SettingsCareerLevelRoute(onNavigateBack: () -> Unit) {
             CareerLevel.entries.map { careerLevel ->
                 SettingsSelectionOption(
                     id = careerLevel.name,
-                    title = careerLevel.toDisplayLabel(),
-                    description = careerLevelDescription(careerLevel),
+                    title = stringResource(careerLevel.toDisplayLabelResource()),
+                    description = stringResource(careerLevel.toDescriptionResource()),
                 )
             },
         selectedOptionId = uiState.selected?.name,

@@ -36,10 +36,17 @@ import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavBar
 import com.nexters.hytime.gitit.designsystem.navigation.GitItMainNavDestination
 import com.nexters.hytime.gitit.designsystem.navigation.gitItMainNavSky
 import com.nexters.hytime.gitit.designsystem.navigation.rememberGitItMainNavSky
+import com.nexters.hytime.gitit.domain.model.CareerLevel
+import com.nexters.hytime.gitit.domain.model.Position
 import git_it_kmp.feature.my.generated.resources.Res
 import git_it_kmp.feature.my.generated.resources.my_default_avatar
 import git_it_kmp.feature.my.generated.resources.my_settings
 import git_it_kmp.feature.my.generated.resources.my_settings_content_description
+import git_it_kmp.feature.my.generated.resources.my_stat_solved_count
+import git_it_kmp.feature.my.generated.resources.my_stat_streak
+import git_it_kmp.feature.my.generated.resources.my_stat_streak_days
+import git_it_kmp.feature.my.generated.resources.my_stat_this_month
+import git_it_kmp.feature.my.generated.resources.my_stat_this_week
 import git_it_kmp.feature.my.generated.resources.my_weekly_study_complete
 import git_it_kmp.feature.my.generated.resources.my_weekly_study_empty
 import git_it_kmp.feature.my.generated.resources.my_weekly_study_in_progress
@@ -187,11 +194,11 @@ private fun MyProfileHeader(
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 MyProfileTag(
-                    text = profile.developmentField,
+                    text = profile.position?.let { stringResource(it.toDisplayLabelResource()) }.orEmpty(),
                     backgroundColor = GitItTheme.colors.blue400,
                 )
                 MyProfileTag(
-                    text = profile.learningLevel,
+                    text = profile.careerLevel?.let { stringResource(it.toDisplayLabelResource()) }.orEmpty(),
                     backgroundColor = GitItTheme.colors.grey500,
                 )
             }
@@ -291,14 +298,14 @@ private fun MyStatItem(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = stat.label,
+            text = stringResource(stat.type.toLabelResource()),
             color = GitItTheme.colors.grey300,
             style = GitItTheme.typography.caption2,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = stat.value,
+            text = stringResource(stat.type.toCountResource(), stat.count),
             color = GitItTheme.colors.blue100,
             style = GitItTheme.typography.subtitle3,
             textAlign = TextAlign.Center,
@@ -450,6 +457,29 @@ internal fun weeklyStudyMessageResource(items: List<MyWeeklyStudy>): StringResou
         else -> Res.string.my_weekly_study_in_progress
     }
 
+/**
+ * 학습 현황 항목의 이름 문구 리소스를 찾는다.
+ *
+ * @return 수치 위에 표시할 항목 이름 리소스
+ */
+private fun MyStudyStatType.toLabelResource(): StringResource =
+    when (this) {
+        MyStudyStatType.THIS_WEEK -> Res.string.my_stat_this_week
+        MyStudyStatType.THIS_MONTH -> Res.string.my_stat_this_month
+        MyStudyStatType.STREAK -> Res.string.my_stat_streak
+    }
+
+/**
+ * 학습 현황 항목의 수치를 단위와 함께 표시할 문구 리소스를 찾는다.
+ *
+ * @return 수치 하나를 인자로 받는 문구 리소스
+ */
+private fun MyStudyStatType.toCountResource(): StringResource =
+    when (this) {
+        MyStudyStatType.THIS_WEEK, MyStudyStatType.THIS_MONTH -> Res.string.my_stat_solved_count
+        MyStudyStatType.STREAK -> Res.string.my_stat_streak_days
+    }
+
 @Preview
 @Composable
 private fun MyScreenPreview() {
@@ -461,14 +491,14 @@ private fun MyScreenPreview() {
                         MyProfile(
                             name = "김이박",
                             email = "kimlee@github.io",
-                            developmentField = "Back-end",
-                            learningLevel = "입문",
+                            position = Position.BACKEND,
+                            careerLevel = CareerLevel.ENTRY,
                         ),
                     stats =
                         listOf(
-                            MyStudyStat(label = "이번 주", value = "13문제"),
-                            MyStudyStat(label = "이번 달", value = "47문제"),
-                            MyStudyStat(label = "연속 학습", value = "7일"),
+                            MyStudyStat(type = MyStudyStatType.THIS_WEEK, count = 13),
+                            MyStudyStat(type = MyStudyStatType.THIS_MONTH, count = 47),
+                            MyStudyStat(type = MyStudyStatType.STREAK, count = 7),
                         ),
                     weeklyStudy =
                         listOf(

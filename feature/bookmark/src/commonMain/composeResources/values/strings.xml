@@ -1,0 +1,4 @@
+<resources>
+  <string name="bookmark_filter_all">전체</string>
+  <string name="bookmark_question_meta">%1$s · %2$s · 문제 %3$d</string>
+</resources>

@@ -47,10 +47,12 @@ class BookmarkViewModelTest {
             val state = viewModel.uiState.value
             assertEquals(null, repository.requestedProjectId)
             assertEquals(listOf("all", "p1"), state.filters.map(BookmarkFilter::id))
-            assertEquals(listOf("전체", "flask"), state.filters.map(BookmarkFilter::label))
+            assertEquals(listOf(null, "flask"), state.filters.map(BookmarkFilter::label))
             assertEquals("all", state.selectedFilterId)
             assertEquals(listOf("q1"), state.questions.map(BookmarkedQuestion::id))
-            assertEquals("flask · Set 1 · 문제 3", state.questions.first().meta)
+            assertEquals("flask", state.questions.first().projectName)
+            assertEquals("Set 1", state.questions.first().setLabel)
+            assertEquals(3, state.questions.first().problemNumber)
             assertEquals("블루프린트의 목적은?", state.questions.first().title)
         }
     }

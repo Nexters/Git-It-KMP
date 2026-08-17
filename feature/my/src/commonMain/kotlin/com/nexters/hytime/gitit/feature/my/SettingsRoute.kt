@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -33,8 +34,8 @@ fun SettingsRoute(
     }
 
     SettingsScreen(
-        developmentField = uiState.developmentField,
-        learningLevel = uiState.learningLevel,
+        developmentField = uiState.position?.let { stringResource(it.toDisplayLabelResource()) }.orEmpty(),
+        learningLevel = uiState.careerLevel?.let { stringResource(it.toDisplayLabelResource()) }.orEmpty(),
         onBackClick = onBackClick,
         onPolicyClick = onPolicyClick,
         onDeleteAccountClick = onDeleteAccountClick,
