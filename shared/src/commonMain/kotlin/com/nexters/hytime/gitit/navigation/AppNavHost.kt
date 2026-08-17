@@ -31,6 +31,7 @@ import com.nexters.hytime.gitit.feature.bookmark.BookmarkRoute
 import com.nexters.hytime.gitit.feature.home.HomeRoute
 import com.nexters.hytime.gitit.feature.my.AccountDeleteRoute
 import com.nexters.hytime.gitit.feature.my.MyRoute
+import com.nexters.hytime.gitit.feature.my.SettingsCareerLevelRoute
 import com.nexters.hytime.gitit.feature.my.SettingsPositionRoute
 import com.nexters.hytime.gitit.feature.my.SettingsRoute
 import com.nexters.hytime.gitit.feature.onboarding.OnboardingRoute
@@ -75,6 +76,7 @@ internal val appRouteSavedStateConfiguration =
                     subclass(AppRoute.My.serializer())
                     subclass(AppRoute.Settings.serializer())
                     subclass(AppRoute.SettingsPosition.serializer())
+                    subclass(AppRoute.SettingsCareerLevel.serializer())
                     subclass(AppRoute.AccountDelete.serializer())
                     subclass(AppRoute.LiquidGlassExample.serializer())
                     subclass(AppRoute.Onboarding.serializer())
@@ -118,6 +120,7 @@ internal fun AppRoute.navigationMotion(): AppNavigationMotion =
         AppRoute.LiquidGlassExample,
         is AppRoute.ProjectDetail,
         AppRoute.Settings,
+        AppRoute.SettingsCareerLevel,
         AppRoute.SettingsPosition,
         -> AppNavigationMotion.Horizontal
 
@@ -281,10 +284,16 @@ fun AppNavHost() {
                         onPolicyClick = { uriHandler.openUri(POLICY_URL) },
                         onDeleteAccountClick = { backStack.add(AppRoute.AccountDelete) },
                         onDevelopmentFieldClick = { backStack.add(AppRoute.SettingsPosition) },
+                        onLearningLevelClick = { backStack.add(AppRoute.SettingsCareerLevel) },
                     )
                 }
                 entry<AppRoute.SettingsPosition>(metadata = AppRoute.SettingsPosition.navigationMetadata()) {
                     SettingsPositionRoute(
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                    )
+                }
+                entry<AppRoute.SettingsCareerLevel>(metadata = AppRoute.SettingsCareerLevel.navigationMetadata()) {
+                    SettingsCareerLevelRoute(
                         onNavigateBack = { backStack.removeLastOrNull() },
                     )
                 }

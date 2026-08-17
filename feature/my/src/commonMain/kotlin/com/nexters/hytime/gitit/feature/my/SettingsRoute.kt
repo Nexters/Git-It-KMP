@@ -15,6 +15,7 @@ import org.koin.compose.viewmodel.koinViewModel
  * @param onPolicyClick 서비스 약관 및 정책 링크를 열도록 요청하는 콜백
  * @param onDeleteAccountClick 계정 삭제 안내 화면으로 이동하는 콜백
  * @param onDevelopmentFieldClick 개발 분야 선택 화면으로 이동하는 콜백
+ * @param onLearningLevelClick 개발 수준 선택 화면으로 이동하는 콜백
  */
 @Composable
 fun SettingsRoute(
@@ -22,6 +23,7 @@ fun SettingsRoute(
     onPolicyClick: () -> Unit,
     onDeleteAccountClick: () -> Unit,
     onDevelopmentFieldClick: () -> Unit,
+    onLearningLevelClick: () -> Unit,
 ) {
     val viewModel = koinViewModel<SettingsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -37,5 +39,6 @@ fun SettingsRoute(
         onPolicyClick = onPolicyClick,
         onDeleteAccountClick = onDeleteAccountClick,
         onDevelopmentFieldClick = onDevelopmentFieldClick,
+        onLearningLevelClick = onLearningLevelClick,
     )
 }

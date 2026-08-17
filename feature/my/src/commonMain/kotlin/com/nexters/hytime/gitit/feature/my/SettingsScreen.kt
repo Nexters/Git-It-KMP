@@ -60,6 +60,7 @@ import org.jetbrains.compose.resources.stringResource
  * @param onPolicyClick 서비스 약관 및 정책 링크를 열도록 요청하는 콜백
  * @param onDeleteAccountClick 계정 삭제 안내 화면으로 이동하는 콜백
  * @param onDevelopmentFieldClick 개발 분야 선택 화면으로 이동하는 콜백
+ * @param onLearningLevelClick 개발 수준 선택 화면으로 이동하는 콜백
  * @param modifier 화면의 크기와 배치를 지정할 수식자
  */
 @Composable
@@ -70,6 +71,7 @@ fun SettingsScreen(
     onPolicyClick: () -> Unit,
     onDeleteAccountClick: () -> Unit,
     onDevelopmentFieldClick: () -> Unit,
+    onLearningLevelClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -106,6 +108,7 @@ fun SettingsScreen(
                     icon = SettingsIconType.Level,
                     label = stringResource(Res.string.settings_development_level),
                     value = learningLevel,
+                    onClick = onLearningLevelClick,
                 )
             }
 
@@ -325,6 +328,7 @@ private fun SettingsScreenPreview() {
             onPolicyClick = {},
             onDeleteAccountClick = {},
             onDevelopmentFieldClick = {},
+            onLearningLevelClick = {},
         )
     }
 }

@@ -50,6 +50,10 @@ sealed interface AppRoute : NavKey {
     @Serializable
     data object SettingsPosition : AppRoute
 
+    /** 설정에서 개발 수준을 변경하는 선택 화면이다. */
+    @Serializable
+    data object SettingsCareerLevel : AppRoute
+
     /** 계정 삭제 전 주의사항을 안내하는 화면이다. */
     @Serializable
     data object AccountDelete : AppRoute
