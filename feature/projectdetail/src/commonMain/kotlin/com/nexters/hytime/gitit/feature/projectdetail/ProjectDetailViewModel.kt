@@ -36,10 +36,6 @@ class ProjectDetailViewModel(
     private val _events = MutableSharedFlow<ProjectDetailEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<ProjectDetailEvent> = _events.asSharedFlow()
 
-    init {
-        loadProjectDetail()
-    }
-
     /**
      * [reducer] 블록으로 [ProjectDetailUiState]를 복사해 갱신한다.
      */
@@ -112,7 +108,7 @@ class ProjectDetailViewModel(
      * 프로젝트 상세를 조회해 화면 상태를 채운다.
      * 실패하면 로딩 상태(project = null)를 유지하고 원인을 로그로 남긴다.
      */
-    private fun loadProjectDetail() {
+    fun refresh() {
         viewModelScope.launch {
             getProjectDetail(projectId)
                 .onSuccess { detail ->

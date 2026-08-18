@@ -43,7 +43,7 @@ class ProjectDetailViewModelTest {
 
     /** 상세 조회가 성공하면 프로젝트 정보와 세트 목록을 화면 상태로 변환한다. */
     @Test
-    fun init_상세조회에성공하면_화면상태를채운다() {
+    fun refresh_상세조회에성공하면_화면상태를채운다() {
         runTest(dispatcher) {
             val viewModel = createViewModel()
             runCurrent()
@@ -63,7 +63,7 @@ class ProjectDetailViewModelTest {
 
     /** 상세 조회가 실패하면 로딩 상태를 유지한다. */
     @Test
-    fun init_상세조회에실패하면_로딩상태를유지한다() {
+    fun refresh_상세조회에실패하면_로딩상태를유지한다() {
         runTest(dispatcher) {
             val repository = FakeProjectDetailRepository(Result.failure(IllegalStateException("오류")))
             val viewModel =
@@ -72,9 +72,44 @@ class ProjectDetailViewModelTest {
                     getProjectDetail = GetProjectDetailUseCase(repository),
                     deleteProject = DeleteProjectUseCase(repository),
                 )
+            viewModel.refresh()
             runCurrent()
 
             assertNull(viewModel.uiState.value.project)
+        }
+    }
+
+    /** 화면에 다시 진입하면 서버의 최신 진행률로 상세 정보를 갱신한다. */
+    @Test
+    fun refresh_다시호출하면_최신진행률로갱신한다() {
+        runTest(dispatcher) {
+            val repository = FakeProjectDetailRepository(Result.success(DETAIL))
+            val viewModel =
+                ProjectDetailViewModel(
+                    projectId = "project-1",
+                    getProjectDetail = GetProjectDetailUseCase(repository),
+                    deleteProject = DeleteProjectUseCase(repository),
+                )
+            viewModel.refresh()
+            runCurrent()
+
+            repository.detailResult =
+                Result.success(
+                    DETAIL.copy(
+                        overallProgressPercent = 80,
+                        sets = DETAIL.sets.map { it.copy(completedCount = 4) },
+                    ),
+                )
+            viewModel.refresh()
+            runCurrent()
+
+            assertEquals(80, viewModel.uiState.value.totalProgress)
+            assertEquals(
+                80,
+                viewModel.uiState.value.learningSets
+                    .single()
+                    .progress,
+            )
         }
     }
 
@@ -158,7 +193,7 @@ class ProjectDetailViewModelTest {
             projectId = "project-1",
             getProjectDetail = GetProjectDetailUseCase(repository),
             deleteProject = DeleteProjectUseCase(repository),
-        )
+        ).also(ProjectDetailViewModel::refresh)
     }
 
     private companion object {

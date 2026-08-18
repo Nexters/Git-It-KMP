@@ -41,7 +41,7 @@ class ProjectListViewModelTest {
 
     /** 목록 조회가 성공하면 카드 모델로 변환해 화면 상태를 채운다. */
     @Test
-    fun init_목록조회에성공하면_카드목록을채운다() {
+    fun refresh_목록조회에성공하면_카드목록을채운다() {
         runTest(dispatcher) {
             val viewModel = createViewModel()
             runCurrent()
@@ -58,7 +58,7 @@ class ProjectListViewModelTest {
 
     /** 목록 조회가 실패하면 빈 목록을 유지한다. */
     @Test
-    fun init_목록조회에실패하면_빈목록을유지한다() {
+    fun refresh_목록조회에실패하면_빈목록을유지한다() {
         runTest(dispatcher) {
             val repository = FakeProjectListRepository(Result.failure(IllegalStateException("오류")))
             val viewModel =
@@ -66,9 +66,35 @@ class ProjectListViewModelTest {
                     getProjects = GetProjectsUseCase(repository),
                     deleteProject = DeleteProjectUseCase(repository),
                 )
+            viewModel.refresh()
             runCurrent()
 
             assertEquals(emptyList(), viewModel.uiState.value.projects)
+        }
+    }
+
+    /** 화면에 다시 진입하면 서버의 최신 진행률로 목록을 갱신한다. */
+    @Test
+    fun refresh_다시호출하면_최신진행률로갱신한다() {
+        runTest(dispatcher) {
+            val repository = FakeProjectListRepository(Result.success(PAGE))
+            val viewModel =
+                ProjectListViewModel(
+                    getProjects = GetProjectsUseCase(repository),
+                    deleteProject = DeleteProjectUseCase(repository),
+                )
+            viewModel.refresh()
+            runCurrent()
+
+            repository.pageResult = Result.success(PAGE.copy(items = PAGE.items.map { it.copy(overallProgressPercent = 80) }))
+            viewModel.refresh()
+            runCurrent()
+
+            assertEquals(
+                listOf(80, 80, 80),
+                viewModel.uiState.value.projects
+                    .map(ProjectListItem::progress),
+            )
         }
     }
 
@@ -174,6 +200,7 @@ class ProjectListViewModelTest {
                     getProjects = GetProjectsUseCase(repository),
                     deleteProject = DeleteProjectUseCase(repository),
                 )
+            viewModel.refresh()
             runCurrent()
 
             viewModel.onIntent(ProjectListIntent.DeleteProjectClick("p1"))
@@ -191,7 +218,7 @@ class ProjectListViewModelTest {
         return ProjectListViewModel(
             getProjects = GetProjectsUseCase(repository),
             deleteProject = DeleteProjectUseCase(repository),
-        )
+        ).also(ProjectListViewModel::refresh)
     }
 
     private companion object {

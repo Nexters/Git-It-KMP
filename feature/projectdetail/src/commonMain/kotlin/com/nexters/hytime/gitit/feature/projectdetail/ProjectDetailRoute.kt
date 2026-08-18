@@ -36,6 +36,7 @@ fun ProjectDetailRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
+        viewModel.refresh()
         viewModel.events.collectLatest { event ->
             when (event) {
                 ProjectDetailEvent.NavigateBack -> onBackClick()
