@@ -13,6 +13,9 @@ import com.nexters.hytime.gitit.feature.quiz.create.QuizKnowledgeLevel
 import com.nexters.hytime.gitit.feature.quiz.create.component.QuizCreateSelectionScaffold
 import com.nexters.hytime.gitit.feature.quiz.create.component.QuizCreateSelectionThumbnail
 import git_it_kmp.feature.quiz.generated.resources.Res
+import git_it_kmp.feature.quiz.generated.resources.illust_knowledge_advanced
+import git_it_kmp.feature.quiz.generated.resources.illust_knowledge_basic
+import git_it_kmp.feature.quiz.generated.resources.illust_knowledge_intermediate
 import git_it_kmp.feature.quiz.generated.resources.quiz_create_knowledge_concepts_description
 import git_it_kmp.feature.quiz.generated.resources.quiz_create_knowledge_concepts_title
 import git_it_kmp.feature.quiz.generated.resources.quiz_create_knowledge_experienced_description
@@ -20,6 +23,7 @@ import git_it_kmp.feature.quiz.generated.resources.quiz_create_knowledge_experie
 import git_it_kmp.feature.quiz.generated.resources.quiz_create_knowledge_some_code_description
 import git_it_kmp.feature.quiz.generated.resources.quiz_create_knowledge_some_code_title
 import git_it_kmp.feature.quiz.generated.resources.quiz_create_knowledge_title
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -52,7 +56,7 @@ internal fun QuizCreateKnowledgeScreen(
                     selected = selected == level,
                     onClick = { onSelect(level) },
                     modifier = Modifier.fillMaxWidth(),
-                    thumbnail = { QuizCreateSelectionThumbnail() },
+                    thumbnail = { QuizCreateSelectionThumbnail(resource = level.thumbnailResource()) },
                 )
             }
         }
@@ -81,6 +85,18 @@ private fun QuizKnowledgeLevel.descriptionResource(): StringResource =
         QuizKnowledgeLevel.Concepts -> Res.string.quiz_create_knowledge_concepts_description
         QuizKnowledgeLevel.SomeCode -> Res.string.quiz_create_knowledge_some_code_description
         QuizKnowledgeLevel.Experienced -> Res.string.quiz_create_knowledge_experienced_description
+    }
+
+/**
+ * 이해도 선택 카드 왼쪽에 표시할 일러스트 리소스를 반환한다.
+ *
+ * @return 현재 이해도 단계에 대응하는 일러스트 리소스
+ */
+private fun QuizKnowledgeLevel.thumbnailResource(): DrawableResource =
+    when (this) {
+        QuizKnowledgeLevel.Concepts -> Res.drawable.illust_knowledge_basic
+        QuizKnowledgeLevel.SomeCode -> Res.drawable.illust_knowledge_intermediate
+        QuizKnowledgeLevel.Experienced -> Res.drawable.illust_knowledge_advanced
     }
 
 @Preview(widthDp = 360, heightDp = 800)

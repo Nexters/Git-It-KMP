@@ -22,19 +22,32 @@ import com.nexters.hytime.gitit.designsystem.selectcard.GitItSelectCard
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
 import git_it_kmp.feature.my.generated.resources.Res
-import git_it_kmp.feature.my.generated.resources.settings_select_thumbnail
+import git_it_kmp.feature.my.generated.resources.illust_levels_beginner
+import git_it_kmp.feature.my.generated.resources.illust_levels_junior
+import git_it_kmp.feature.my.generated.resources.my_career_level_entry
+import git_it_kmp.feature.my.generated.resources.my_career_level_junior
+import git_it_kmp.feature.my.generated.resources.my_position_backend
+import git_it_kmp.feature.my.generated.resources.my_position_frontend
+import git_it_kmp.feature.my.generated.resources.settings_career_level_entry_description
+import git_it_kmp.feature.my.generated.resources.settings_career_level_junior_description
+import git_it_kmp.feature.my.generated.resources.settings_development_field
+import git_it_kmp.feature.my.generated.resources.settings_development_level
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * 설정 선택 화면의 카드 한 장을 표현한다.
  *
  * @property id 선택 상태와 목록 key에 사용하는 화면 내 고유 식별자
  * @property title 선택지를 한 줄로 설명하는 제목
+ * @property thumbnail 카드 왼쪽 52dp 영역을 채울 선택적 일러스트 리소스. null이면 썸네일 영역을 표시하지 않는다
  * @property description 제목 아래에 표시할 선택적 한 줄 설명
  */
 data class SettingsSelectionOption(
     val id: String,
     val title: String,
+    val thumbnail: DrawableResource? = null,
     val description: String? = null,
 )
 
@@ -93,17 +106,38 @@ fun SettingsSelectionScreen(
                     selected = option.id == selectedOptionId,
                     onClick = { onOptionClick(option) },
                     modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.settings_select_thumbnail),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
-                }
+                    thumbnail =
+                        option.thumbnail?.let { resource ->
+                            { SettingsSelectionThumbnail(resource = resource) }
+                        },
+                )
             }
         }
     }
+}
+
+/**
+ * 선택 카드의 썸네일 영역을 Figma 시안대로 채운다.
+ *
+ * 일러스트 리소스는 배경이 없는 벡터이므로 grey500 배경 위에 겹쳐 그린다.
+ *
+ * @param resource 52dp 영역에 그릴 일러스트 리소스
+ * @param modifier 외부 배치와 추가 수식자
+ */
+@Composable
+private fun SettingsSelectionThumbnail(
+    resource: DrawableResource,
+    modifier: Modifier = Modifier,
+) {
+    Image(
+        painter = painterResource(resource),
+        contentDescription = null,
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(GitItTheme.colors.grey500),
+        contentScale = ContentScale.Crop,
+    )
 }
 
 @Preview
@@ -111,13 +145,17 @@ fun SettingsSelectionScreen(
 private fun SettingsSelectionScreenPreview() {
     GitItTheme {
         SettingsSelectionScreen(
-            title = "개발 분야",
+            title = stringResource(Res.string.settings_development_field),
             options =
                 listOf(
-                    SettingsSelectionOption(id = "FRONTEND", title = "Front-end"),
-                    SettingsSelectionOption(id = "BACKEND", title = "Back-end"),
-                    SettingsSelectionOption(id = "IOS", title = "iOS"),
-                    SettingsSelectionOption(id = "ANDROID", title = "Android"),
+                    SettingsSelectionOption(
+                        id = "FRONTEND",
+                        title = stringResource(Res.string.my_position_frontend),
+                    ),
+                    SettingsSelectionOption(
+                        id = "BACKEND",
+                        title = stringResource(Res.string.my_position_backend),
+                    ),
                 ),
             selectedOptionId = "BACKEND",
             onOptionClick = {},
@@ -131,11 +169,21 @@ private fun SettingsSelectionScreenPreview() {
 private fun SettingsSelectionScreenWithDescriptionPreview() {
     GitItTheme {
         SettingsSelectionScreen(
-            title = "개발 수준",
+            title = stringResource(Res.string.settings_development_level),
             options =
                 listOf(
-                    SettingsSelectionOption(id = "ENTRY", title = "입문", description = "프로젝트 코드를 처음 살펴봐요."),
-                    SettingsSelectionOption(id = "JUNIOR", title = "주니어", description = "작은 기능 단위로 코드를 이해할 수 있어요."),
+                    SettingsSelectionOption(
+                        id = "ENTRY",
+                        title = stringResource(Res.string.my_career_level_entry),
+                        thumbnail = Res.drawable.illust_levels_beginner,
+                        description = stringResource(Res.string.settings_career_level_entry_description),
+                    ),
+                    SettingsSelectionOption(
+                        id = "JUNIOR",
+                        title = stringResource(Res.string.my_career_level_junior),
+                        thumbnail = Res.drawable.illust_levels_junior,
+                        description = stringResource(Res.string.settings_career_level_junior_description),
+                    ),
                 ),
             selectedOptionId = "JUNIOR",
             onOptionClick = {},

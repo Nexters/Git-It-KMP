@@ -1,5 +1,6 @@
 package com.nexters.hytime.gitit.feature.quiz.create.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
@@ -22,6 +24,8 @@ import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBar
 import com.nexters.hytime.gitit.designsystem.toolbar.GitItTopBarType
 import git_it_kmp.feature.quiz.generated.resources.Res
 import git_it_kmp.feature.quiz.generated.resources.quiz_create_next
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -83,11 +87,23 @@ internal fun QuizCreateSelectionScaffold(
     }
 }
 
-/** 선택 카드의 프로젝트 이미지 영역에 임시 placeholder를 표시한다. */
+/**
+ * 선택 카드의 썸네일 영역을 Figma 시안대로 채운다.
+ *
+ * 일러스트 리소스는 배경이 없는 벡터이므로 grey500 배경 위에 겹쳐 그린다.
+ *
+ * @param resource 52dp 영역에 그릴 일러스트 리소스
+ */
 @Composable
-internal fun QuizCreateSelectionThumbnail() {
-    QuizCreateImagePlaceholder(
-        modifier = Modifier.fillMaxSize(),
+internal fun QuizCreateSelectionThumbnail(resource: DrawableResource) {
+    Image(
+        painter = painterResource(resource),
+        contentDescription = null,
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(GitItTheme.colors.grey500),
+        contentScale = ContentScale.Crop,
     )
 }
 

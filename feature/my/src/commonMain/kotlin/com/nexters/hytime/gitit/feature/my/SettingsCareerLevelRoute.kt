@@ -6,12 +6,17 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexters.hytime.gitit.domain.model.CareerLevel
 import git_it_kmp.feature.my.generated.resources.Res
+import git_it_kmp.feature.my.generated.resources.illust_levels_beginner
+import git_it_kmp.feature.my.generated.resources.illust_levels_junior
+import git_it_kmp.feature.my.generated.resources.illust_levels_mid
+import git_it_kmp.feature.my.generated.resources.illust_levels_senior
 import git_it_kmp.feature.my.generated.resources.settings_career_level_entry_description
 import git_it_kmp.feature.my.generated.resources.settings_career_level_junior_description
 import git_it_kmp.feature.my.generated.resources.settings_career_level_middle_description
 import git_it_kmp.feature.my.generated.resources.settings_career_level_senior_description
 import git_it_kmp.feature.my.generated.resources.settings_development_level
 import kotlinx.coroutines.flow.collectLatest
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -27,6 +32,19 @@ private fun CareerLevel.toDescriptionResource(): StringResource =
         CareerLevel.JUNIOR -> Res.string.settings_career_level_junior_description
         CareerLevel.MIDDLE -> Res.string.settings_career_level_middle_description
         CareerLevel.SENIOR -> Res.string.settings_career_level_senior_description
+    }
+
+/**
+ * 개발 수준 카드 왼쪽에 표시할 수준별 일러스트 리소스다.
+ *
+ * @return 카드 썸네일 영역에 그릴 일러스트 리소스
+ */
+private fun CareerLevel.toThumbnailResource(): DrawableResource =
+    when (this) {
+        CareerLevel.ENTRY -> Res.drawable.illust_levels_beginner
+        CareerLevel.JUNIOR -> Res.drawable.illust_levels_junior
+        CareerLevel.MIDDLE -> Res.drawable.illust_levels_mid
+        CareerLevel.SENIOR -> Res.drawable.illust_levels_senior
     }
 
 /**
@@ -56,6 +74,7 @@ fun SettingsCareerLevelRoute(onNavigateBack: () -> Unit) {
                 SettingsSelectionOption(
                     id = careerLevel.name,
                     title = stringResource(careerLevel.toDisplayLabelResource()),
+                    thumbnail = careerLevel.toThumbnailResource(),
                     description = stringResource(careerLevel.toDescriptionResource()),
                 )
             },
