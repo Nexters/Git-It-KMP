@@ -37,7 +37,7 @@ fun main() {
     application {
         Window(
             onCloseRequest = ::exitApplication,
-            title = "Git-It-Android",
+            title = "Git-It",
         ) {
             App()
         }
