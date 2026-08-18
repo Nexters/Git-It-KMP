@@ -219,7 +219,7 @@ private fun ProjectImport(
             )
             Spacer(Modifier.height(5.dp))
             Text(
-                text = "오픈소스를 불러오고\n퀴즈로 익혀보세요",
+                text = "오픈소스를 불러오고\n문제로 익혀보세요",
                 color = GitItTheme.colors.grey100,
                 style = GitItTheme.typography.subtitle3,
             )
