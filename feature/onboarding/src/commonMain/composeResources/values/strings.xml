@@ -5,7 +5,7 @@
   <string name="onboarding_title_3">다시보고 싶은 문제는\n저장하고 나중에 확인해요</string>
   <string name="onboarding_google_login">Google로 시작하기</string>
   <string name="onboarding_login_error">로그인에 실패했습니다. 다시 시도해 주세요.</string>
-  <string name="onboarding_version">버전 0.0.0</string>
+  <string name="onboarding_version">버전 %1$s</string>
   <string name="onboarding_signup_tooltip">3초만에 가입하기</string>
   <string name="terms_agreement_title">약관 동의</string>
   <string name="terms_agreement_all">전체 동의</string>

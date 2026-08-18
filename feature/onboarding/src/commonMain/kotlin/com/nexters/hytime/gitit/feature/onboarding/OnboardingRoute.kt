@@ -10,14 +10,17 @@ import androidx.compose.runtime.Composable
  *
  * @param onNavigateToHome 로그인 성공 후 홈 화면으로 이동하는 콜백
  * @param onNavigateToIntermediateSplash 큐레이션 완료 후 중간 스플래시로 이동하는 콜백
+ * @param appVersion 실행 중인 앱의 버전 이름
  */
 @Composable
 fun OnboardingRoute(
     onNavigateToHome: () -> Unit,
     onNavigateToIntermediateSplash: () -> Unit,
+    appVersion: String,
 ) {
     OnboardingScreen(
         onNavigateToHome = onNavigateToHome,
         onNavigateToIntermediateSplash = onNavigateToIntermediateSplash,
+        appVersion = appVersion,
     )
 }

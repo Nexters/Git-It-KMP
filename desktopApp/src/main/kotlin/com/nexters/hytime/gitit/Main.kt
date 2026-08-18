@@ -39,7 +39,7 @@ fun main() {
             onCloseRequest = ::exitApplication,
             title = "Git-It",
         ) {
-            App()
+            App(appVersion = AuthConfig.APP_VERSION)
         }
     }
 }
