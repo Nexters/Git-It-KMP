@@ -25,6 +25,7 @@ internal fun BookmarkedQuestions.toUiState(selectedFilterId: String): BookmarkUi
                 BookmarkedQuestion(
                     id = bookmark.questionId,
                     projectId = bookmark.projectId,
+                    setId = bookmark.setId,
                     projectName = bookmark.projectName,
                     setLabel = bookmark.setLabel,
                     problemNumber = bookmark.problemNumber,

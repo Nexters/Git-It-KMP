@@ -33,6 +33,7 @@ data class BookmarkFilter(
  *
  * @property id 문제 식별자
  * @property projectId 문제가 속한 프로젝트 식별자
+ * @property setId 문제가 속한 학습 세트 식별자
  * @property projectName 문제가 속한 프로젝트 이름
  * @property setLabel 문제가 속한 학습 세트 라벨
  * @property problemNumber 세트 안에서의 문제 번호
@@ -41,6 +42,7 @@ data class BookmarkFilter(
 data class BookmarkedQuestion(
     val id: String,
     val projectId: String = "",
+    val setId: String = "",
     val projectName: String,
     val setLabel: String,
     val problemNumber: Int,
@@ -103,4 +105,17 @@ sealed interface BookmarkSideEffect {
 
     /** 마이 화면으로 이동. */
     data object NavigateToMy : BookmarkSideEffect
+
+    /**
+     * 저장한 문제 하나를 푸는 화면으로 이동한다.
+     *
+     * @property projectId 문제가 속한 프로젝트 식별자
+     * @property setId 문제가 속한 학습 세트 식별자
+     * @property questionId 풀 문제 식별자
+     */
+    data class NavigateToQuiz(
+        val projectId: String,
+        val setId: String,
+        val questionId: String,
+    ) : BookmarkSideEffect
 }

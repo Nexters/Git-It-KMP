@@ -22,10 +22,12 @@ import kotlinx.coroutines.launch
  *
  * @property projectId 문제를 불러올 프로젝트 식별자
  * @property setId 특정 학습 세트로 제한할 때 사용하는 선택적 식별자
+ * @property questionId 북마크에서 특정 문제 하나만 풀 때 사용하는 선택적 식별자
  */
 data class SolveQuizArgs(
     val projectId: String,
     val setId: String? = null,
+    val questionId: String? = null,
 )
 
 /**
@@ -100,10 +102,19 @@ class SolveQuizViewModel(
                     }
                     getLearningSet(args.projectId, target.setId)
                         .onSuccess { learningSet ->
+                            val questions =
+                                learningSet
+                                    .toQuestionItems(detail.repositoryName)
+                                    .filter { args.questionId == null || it.questionId == args.questionId }
+                            if (args.questionId != null && questions.isEmpty()) {
+                                logger.e { "북마크 문제를 찾을 수 없습니다: questionId=${args.questionId}" }
+                                return@onSuccess
+                            }
                             setState {
                                 copy(
                                     setInfo = learningSet.toSetInfo(target.label),
-                                    questions = learningSet.toQuestionItems(detail.repositoryName),
+                                    questions = questions,
+                                    step = questions.firstOrNull()?.toStep()?.takeIf { args.questionId != null } ?: QuizStep.Intro,
                                 )
                             }
                         }.onFailure { error -> logger.e(throwable = error) { "학습 세트 조회 실패" } }

@@ -95,11 +95,13 @@ sealed interface AppRoute : NavKey {
      *
      * @property projectId 문제를 불러올 프로젝트 식별자
      * @property setId 문제를 특정 학습 세트로 제한할 때 사용하는 식별자
+     * @property questionId 북마크에서 특정 문제 하나만 풀 때 사용하는 식별자
      */
     @Serializable
     data class Quiz(
         val projectId: String,
         val setId: String? = null,
+        val questionId: String? = null,
     ) : AppRoute
 
     /**

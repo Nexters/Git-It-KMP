@@ -14,16 +14,20 @@ import org.koin.core.parameter.parametersOf
  *
  * @param projectId 문제를 불러올 프로젝트 식별자
  * @param setId 문제를 특정 학습 세트로 제한할 때 사용하는 식별자
+ * @param questionId 북마크에서 특정 문제 하나만 풀 때 사용하는 식별자
  * @param onBackClick 이전 화면으로 이동하는 콜백
  */
 @Composable
 fun SolveQuizRoute(
     projectId: String,
     setId: String? = null,
+    questionId: String? = null,
     onBackClick: () -> Unit,
 ) {
     val viewModel =
-        koinViewModel<SolveQuizViewModel>(key = "$projectId:$setId") { parametersOf(SolveQuizArgs(projectId, setId)) }
+        koinViewModel<SolveQuizViewModel>(key = "$projectId:$setId:$questionId") {
+            parametersOf(SolveQuizArgs(projectId, setId, questionId))
+        }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
 
