@@ -5,6 +5,7 @@ import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
 import com.nexters.hytime.gitit.domain.model.EssayAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
+import com.nexters.hytime.gitit.domain.model.ProjectGenerationStatus
 import com.nexters.hytime.gitit.domain.model.ProjectPage
 import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
 import com.nexters.hytime.gitit.domain.model.ProjectRegistration
@@ -26,6 +27,15 @@ interface ProjectRepository {
         githubRepoUrl: String,
         quizLevel: ProjectQuizLevel,
     ): Result<ProjectRegistration>
+
+    /**
+     * 등록 직후 비동기로 진행되는 문제 생성 상태를 조회한다.
+     *
+     * @param projectId 생성 상태를 확인할 프로젝트 식별자
+     * @return 서버가 보관한 최신 생성 상태 또는 조회 실패
+     */
+    suspend fun getProjectGenerationStatus(projectId: String): Result<ProjectGenerationStatus> =
+        Result.failure(UnsupportedOperationException("프로젝트 생성 상태 조회를 지원하지 않습니다."))
 
     /**
      * 등록한 프로젝트 목록을 페이지 단위로 조회한다.

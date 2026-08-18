@@ -7,6 +7,7 @@ import com.nexters.hytime.gitit.data.dto.BookmarkedQuestionListResponse
 import com.nexters.hytime.gitit.data.dto.EmptyApiResponse
 import com.nexters.hytime.gitit.data.dto.LearningSetResponse
 import com.nexters.hytime.gitit.data.dto.ProjectDetailResponse
+import com.nexters.hytime.gitit.data.dto.ProjectGenerationStatusResponse
 import com.nexters.hytime.gitit.data.dto.ProjectListResponse
 import com.nexters.hytime.gitit.data.dto.RegisterProjectRequest
 import com.nexters.hytime.gitit.data.dto.RegisterProjectResponse
@@ -15,11 +16,13 @@ import com.nexters.hytime.gitit.data.dto.SubmitChoiceAnswerResponse
 import com.nexters.hytime.gitit.data.dto.SubmitEssayAnswerRequest
 import com.nexters.hytime.gitit.data.dto.SubmitEssayAnswerResponse
 import com.nexters.hytime.gitit.data.mapping.toDomain
+import com.nexters.hytime.gitit.data.mapping.toProjectGenerationStatus
 import com.nexters.hytime.gitit.domain.model.BookmarkedQuestions
 import com.nexters.hytime.gitit.domain.model.ChoiceAnswerResult
 import com.nexters.hytime.gitit.domain.model.EssayAnswerResult
 import com.nexters.hytime.gitit.domain.model.LearningSet
 import com.nexters.hytime.gitit.domain.model.ProjectDetail
+import com.nexters.hytime.gitit.domain.model.ProjectGenerationStatus
 import com.nexters.hytime.gitit.domain.model.ProjectPage
 import com.nexters.hytime.gitit.domain.model.ProjectQuizLevel
 import com.nexters.hytime.gitit.domain.model.ProjectRegistration
@@ -52,6 +55,16 @@ class ProjectRepositoryImpl(
                     ),
                 ).requireData("프로젝트 등록 응답이 올바르지 않습니다.")
                 .toDomain()
+        }
+
+    override suspend fun getProjectGenerationStatus(projectId: String): Result<ProjectGenerationStatus> =
+        runCatchingResult {
+            requireProjectId(projectId)
+            networkClient
+                .get<ApiResponse<ProjectGenerationStatusResponse>>("$PATH_PROJECTS/$projectId/status")
+                .requireData("프로젝트 생성 상태 조회 응답이 올바르지 않습니다.")
+                .status
+                .toProjectGenerationStatus()
         }
 
     override suspend fun getProjects(

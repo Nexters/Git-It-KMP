@@ -39,7 +39,9 @@ class ProjectRepositoryImplTest {
         val statuses =
             mapOf(
                 "READY" to ProjectGenerationStatus.Ready,
-                "ANCHORED" to ProjectGenerationStatus.Anchored,
+                "STARTED" to ProjectGenerationStatus.Started,
+                "ANCHORED" to ProjectGenerationStatus.Started,
+                "REJECTED" to ProjectGenerationStatus.Rejected,
                 "FAILED" to ProjectGenerationStatus.Failed,
                 "COMPLETED" to ProjectGenerationStatus.Completed,
             )
@@ -64,7 +66,7 @@ class ProjectRepositoryImplTest {
                 """{"success":false,"message":"등록 실패"}""",
                 """{"success":true,"data":null}""",
                 """{"success":true,"data":{"projectId":"","status":"READY"}}""",
-                """{"success":true,"data":{"projectId":"project-127","status":"REJECTED"}}""",
+                """{"success":true,"data":{"projectId":"project-127","status":"UNKNOWN"}}""",
             )
 
         invalidResponses.forEach { response ->
@@ -76,6 +78,33 @@ class ProjectRepositoryImplTest {
 
             assertTrue(result.isFailure, response)
         }
+    }
+
+    /** 생성 상태 조회가 전용 경로를 호출하고 서버 상태를 매핑하는지 검증한다. */
+    @Test
+    fun getProjectGenerationStatus_successUsesStatusPathAndMapsStatus() {
+        val networkClient = FakeNetworkClient("""{"success":true,"data":{"status":"STARTED"}}""")
+
+        val status = runBlocking { ProjectRepositoryImpl(networkClient).getProjectGenerationStatus("project-127") }.getOrThrow()
+
+        assertEquals("GET", networkClient.requestedMethod)
+        assertEquals("/api/v1/projects/project-127/status", networkClient.requestedPath)
+        assertTrue(networkClient.requestedAuthenticated)
+        assertEquals(ProjectGenerationStatus.Started, status)
+    }
+
+    /** 생성 상태 조회는 빈 식별자와 알 수 없는 상태를 실패로 반환한다. */
+    @Test
+    fun getProjectGenerationStatus_invalidInputOrStatusReturnsFailure() {
+        val emptyIdClient = FakeNetworkClient("""{"success":true,"data":{"status":"READY"}}""")
+        val unknownStatusClient = FakeNetworkClient("""{"success":true,"data":{"status":"UNKNOWN"}}""")
+
+        val emptyIdResult = runBlocking { ProjectRepositoryImpl(emptyIdClient).getProjectGenerationStatus(" ") }
+        val unknownStatusResult = runBlocking { ProjectRepositoryImpl(unknownStatusClient).getProjectGenerationStatus("project-127") }
+
+        assertTrue(emptyIdResult.isFailure)
+        assertEquals("", emptyIdClient.requestedMethod)
+        assertTrue(unknownStatusResult.isFailure)
     }
 
     /** 목록 조회가 페이지 정보를 쿼리 파라미터로 보내고 응답을 매핑하는지 검증한다. */

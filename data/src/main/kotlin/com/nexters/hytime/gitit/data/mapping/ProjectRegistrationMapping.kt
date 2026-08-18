@@ -12,16 +12,24 @@ import com.nexters.hytime.gitit.domain.model.ProjectRegistration
  */
 internal fun RegisterProjectResponse.toDomain(): ProjectRegistration {
     require(projectId.isNotBlank()) { "프로젝트 ID가 비어 있습니다." }
-    val generationStatus =
-        when (status) {
-            "READY" -> ProjectGenerationStatus.Ready
-            "ANCHORED" -> ProjectGenerationStatus.Anchored
-            "FAILED" -> ProjectGenerationStatus.Failed
-            "COMPLETED" -> ProjectGenerationStatus.Completed
-            else -> throw IllegalArgumentException("지원하지 않는 프로젝트 생성 상태입니다: $status")
-        }
     return ProjectRegistration(
         projectId = projectId,
-        status = generationStatus,
+        status = status.toProjectGenerationStatus(),
     )
 }
+
+/**
+ * 서버 생성 상태 문자열을 도메인 상태로 변환한다.
+ *
+ * @return 앱에서 처리할 프로젝트 생성 상태
+ * @throws IllegalArgumentException 서버 상태가 지원 범위를 벗어난 경우
+ */
+internal fun String.toProjectGenerationStatus(): ProjectGenerationStatus =
+    when (this) {
+        "READY" -> ProjectGenerationStatus.Ready
+        "STARTED", "ANCHORED" -> ProjectGenerationStatus.Started
+        "REJECTED" -> ProjectGenerationStatus.Rejected
+        "FAILED" -> ProjectGenerationStatus.Failed
+        "COMPLETED" -> ProjectGenerationStatus.Completed
+        else -> throw IllegalArgumentException("지원하지 않는 프로젝트 생성 상태입니다: $this")
+    }

@@ -55,6 +55,7 @@ fun QuizCreateHomeModal(
         QuizCreateStatus.InProgress,
         QuizCreateStatus.Completing,
         QuizCreateStatus.Idle,
+        QuizCreateStatus.Rejected,
         -> Unit
         QuizCreateStatus.Completed ->
             QuizCreateResultModal(

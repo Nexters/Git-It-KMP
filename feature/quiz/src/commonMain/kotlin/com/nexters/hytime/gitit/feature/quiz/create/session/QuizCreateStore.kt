@@ -67,6 +67,9 @@ enum class QuizCreateStatus {
 
     /** 서버가 생성 실패를 전달해 사용자 선택을 기다리고 있다. */
     Failed,
+
+    /** 저장소가 문제 생성 대상으로 적합하지 않아 재시도 없이 종료됐다. */
+    Rejected,
 }
 
 /**
@@ -93,11 +96,13 @@ data class QuizCreateProgressState(
  * @param nowMillis 현재 Unix epoch millisecond를 반환하는 함수
  * @param scope 화면 생명주기와 독립적으로 상태 변경과 진행률 갱신을 실행할 앱 범위 코루틴 스코프
  * @param durationMillisProvider 새 생성 세션의 전체 시간을 결정하는 함수
+ * @param storage 생성 결과를 기다리는 프로젝트 식별자를 보관하는 저장소
  */
 class QuizCreateStore(
     private val nowMillis: () -> Long = ::currentEpochMillis,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
     private val durationMillisProvider: () -> Long = QuizCreateTimeline::randomDurationMillis,
+    private val storage: PendingQuizCreationStorage = InMemoryPendingQuizCreationStorage(),
 ) {
     /** 외부 상태 구독자에게 전달할 현재 생성 상태다. */
     private val mutableState = MutableStateFlow(QuizCreateProgressState())
@@ -149,10 +154,33 @@ class QuizCreateStore(
         startSession(registration.projectId, request)
         when (registration.status) {
             ProjectGenerationStatus.Ready,
-            ProjectGenerationStatus.Anchored,
+            ProjectGenerationStatus.Started,
             -> Unit
             ProjectGenerationStatus.Failed -> failSession(registration.projectId)
             ProjectGenerationStatus.Completed -> completeSession(registration.projectId)
+            ProjectGenerationStatus.Rejected -> rejectSession(registration.projectId)
+        }
+    }
+
+    /**
+     * 상태 API가 반환한 최신 생성 상태를 현재 세션에 반영한다.
+     *
+     * @param projectId 조회한 프로젝트 식별자
+     * @param status 서버가 반환한 최신 생성 상태
+     */
+    suspend fun updateFromServer(
+        projectId: String,
+        status: ProjectGenerationStatus,
+    ) = mutate {
+        when (status) {
+            ProjectGenerationStatus.Ready,
+            ProjectGenerationStatus.Started,
+            -> resumeSession(projectId)
+            ProjectGenerationStatus.Completed -> completeSession(projectId)
+            ProjectGenerationStatus.Failed -> {
+                if (session?.request == null) cancelSession(projectId) else failSession(projectId)
+            }
+            ProjectGenerationStatus.Rejected -> rejectSession(projectId)
         }
     }
 
@@ -198,11 +226,7 @@ class QuizCreateStore(
     /** 현재 프로세스에서 실행 중인 생성 세션을 제거한다. */
     suspend fun cancel() =
         mutate {
-            updateJob?.cancel()
-            updateJob = null
-            session = null
-            retryInProgress = false
-            mutableState.value = QuizCreateProgressState()
+            cancelSession(session?.projectId)
         }
 
     /**
@@ -237,8 +261,15 @@ class QuizCreateStore(
                 request = request,
             )
         session = newSession
+        storage.projectId = projectId
         retryInProgress = false
         runSession(newSession)
+    }
+
+    /** 저장된 프로젝트가 현재 프로세스에 없으면 표시용 생성 세션을 복원한다. */
+    private fun resumeSession(projectId: String) {
+        if (storage.projectId != projectId || session != null) return
+        startSession(projectId, request = null)
     }
 
     /**
@@ -247,6 +278,7 @@ class QuizCreateStore(
      * @param projectId 완료된 프로젝트 식별자
      */
     private fun completeSession(projectId: String) {
+        clearStoredProject(projectId)
         val currentSession = session ?: return
         if (currentSession.projectId != projectId || currentSession.completionReceivedAtMillis != null || currentSession.failed) return
 
@@ -265,12 +297,46 @@ class QuizCreateStore(
      * @param projectId 생성에 실패한 프로젝트 식별자
      */
     private fun failSession(projectId: String) {
+        clearStoredProject(projectId)
         val currentSession = session ?: return
         if (currentSession.projectId != projectId || currentSession.completionReceivedAtMillis != null || currentSession.failed) return
 
         val failedSession = currentSession.copy(failed = true)
         session = failedSession
         runSession(failedSession)
+    }
+
+    /** 재시도할 수 없는 거절 상태로 현재 세션을 종료한다. */
+    private fun rejectSession(projectId: String) {
+        clearStoredProject(projectId)
+        val currentSession = session ?: return
+        if (currentSession.projectId != projectId) return
+        updateJob?.cancel()
+        updateJob = null
+        session = null
+        retryInProgress = false
+        mutableState.value =
+            QuizCreateProgressState(
+                projectId = projectId,
+                status = QuizCreateStatus.Rejected,
+            )
+    }
+
+    /** 지정한 프로젝트가 현재 세션이면 진행 상태와 저장된 식별자를 제거한다. */
+    private fun cancelSession(projectId: String?) {
+        if (projectId == null || session == null || session?.projectId == projectId) {
+            projectId?.let(::clearStoredProject)
+            updateJob?.cancel()
+            updateJob = null
+            session = null
+            retryInProgress = false
+            mutableState.value = QuizCreateProgressState()
+        }
+    }
+
+    /** 저장된 값이 같은 프로젝트일 때만 제거한다. */
+    private fun clearStoredProject(projectId: String) {
+        if (storage.projectId == projectId) storage.projectId = null
     }
 
     /**
@@ -353,7 +419,8 @@ class QuizCreateStore(
     }
 
     /** @return 상태 갱신 작업을 종료해야 하는 완료 또는 실패 상태인지 여부 */
-    private fun QuizCreateStatus.isTerminal(): Boolean = this == QuizCreateStatus.Completed || this == QuizCreateStatus.Failed
+    private fun QuizCreateStatus.isTerminal(): Boolean =
+        this == QuizCreateStatus.Completed || this == QuizCreateStatus.Failed || this == QuizCreateStatus.Rejected
 
     private companion object {
         const val UPDATE_INTERVAL_MILLIS = 1_000L

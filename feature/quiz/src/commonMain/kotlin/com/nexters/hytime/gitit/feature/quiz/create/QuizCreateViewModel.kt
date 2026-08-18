@@ -54,6 +54,7 @@ class QuizCreateViewModel(
                                 QuizCreateStatus.Completing,
                                 QuizCreateStatus.Completed,
                                 QuizCreateStatus.Failed,
+                                QuizCreateStatus.Rejected,
                                 -> QuizCreateStage.Create
                             },
                         createStep = createState.step,
@@ -62,7 +63,8 @@ class QuizCreateViewModel(
                 }
                 val isTerminal =
                     createState.status == QuizCreateStatus.Completed ||
-                        createState.status == QuizCreateStatus.Failed
+                        createState.status == QuizCreateStatus.Failed ||
+                        createState.status == QuizCreateStatus.Rejected
                 if (isTerminal && !hasNavigatedHome) {
                     navigateHome(showPermissionRequest = false)
                 }
