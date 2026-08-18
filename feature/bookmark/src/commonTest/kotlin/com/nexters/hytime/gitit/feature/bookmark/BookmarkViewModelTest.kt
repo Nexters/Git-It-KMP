@@ -74,6 +74,24 @@ class BookmarkViewModelTest {
         }
     }
 
+    /** 상세 화면에서 프로젝트 ID를 전달하면 그 프로젝트로 북마크를 조회한다. */
+    @Test
+    fun init_프로젝트식별자가있으면_해당프로젝트로조회한다() {
+        runTest(dispatcher) {
+            val repository = FakeBookmarkRepository(Result.success(BOOKMARKS))
+            val viewModel =
+                BookmarkViewModel(
+                    getBookmarkedQuestions = GetBookmarkedQuestionsUseCase(repository),
+                    bookmarkQuestion = BookmarkQuestionUseCase(repository),
+                    initialProjectId = "p1",
+                )
+            runCurrent()
+
+            assertEquals("p1", repository.requestedProjectId)
+            assertEquals("p1", viewModel.uiState.value.selectedFilterId)
+        }
+    }
+
     /** 저장된 문제를 반복 선택하면 해제 상태와 저장 상태를 차례로 반영한다. */
     @Test
     fun onIntent_bookmarkClick_togglesBookmarkState() {

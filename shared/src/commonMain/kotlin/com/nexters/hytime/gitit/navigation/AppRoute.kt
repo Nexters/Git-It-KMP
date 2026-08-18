@@ -16,7 +16,10 @@ sealed interface AppRoute : NavKey {
      * 사용자가 저장한 문제 목록 화면이다.
      */
     @Serializable
-    data object Bookmark : AppRoute
+    data class Bookmark(
+        /** 상세 화면에서 선택한 프로젝트 필터 식별자. null이면 전체 프로젝트를 표시한다. */
+        val projectId: String? = null,
+    ) : AppRoute
 
     /**
      * 앱을 시작할 때 표시하는 온보딩 화면이다.

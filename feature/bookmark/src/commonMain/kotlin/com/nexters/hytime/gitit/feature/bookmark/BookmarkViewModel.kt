@@ -18,10 +18,12 @@ import kotlinx.coroutines.launch
  *
  * @property getBookmarkedQuestions 북마크한 문제 목록을 조회하는 유스케이스
  * @property bookmarkQuestion 문제의 북마크 상태를 서버에 설정하는 유스케이스
+ * @property initialProjectId 상세 화면에서 전달받은 초기 프로젝트 필터
  */
 class BookmarkViewModel(
     private val getBookmarkedQuestions: GetBookmarkedQuestionsUseCase,
     private val bookmarkQuestion: BookmarkQuestionUseCase,
+    initialProjectId: String? = null,
 ) : ViewModel() {
     private val logger = gitItLogger()
 
@@ -40,7 +42,7 @@ class BookmarkViewModel(
     val sideEffects: SharedFlow<BookmarkSideEffect> = _sideEffects.asSharedFlow()
 
     init {
-        loadBookmarks(BOOKMARK_FILTER_ALL_ID)
+        loadBookmarks(initialProjectId ?: BOOKMARK_FILTER_ALL_ID)
     }
 
     /**
