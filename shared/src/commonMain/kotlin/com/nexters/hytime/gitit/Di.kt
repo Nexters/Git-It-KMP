@@ -12,6 +12,7 @@ import com.nexters.hytime.gitit.domain.usecase.GetBookmarkedQuestionsUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetLearningSetUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetMemberProfileUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectDetailUseCase
+import com.nexters.hytime.gitit.domain.usecase.GetProjectGenerationStatusUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetProjectsUseCase
 import com.nexters.hytime.gitit.domain.usecase.LoadGitHubRepositoryUseCase
 import com.nexters.hytime.gitit.domain.usecase.RegisterProjectUseCase
@@ -30,6 +31,7 @@ import com.nexters.hytime.gitit.feature.projectdetail.ProjectDetailViewModel
 import com.nexters.hytime.gitit.feature.projectlist.ProjectListViewModel
 import com.nexters.hytime.gitit.feature.quiz.create.QuizCreateViewModel
 import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateRetryHandler
+import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStatusSynchronizer
 import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStore
 import com.nexters.hytime.gitit.feature.quiz.load.ProjectLoadViewModel
 import com.nexters.hytime.gitit.feature.quiz.solve.SolveQuizArgs
@@ -59,6 +61,7 @@ val appModule: Module =
         single { LoadGitHubRepositoryUseCase(repository = get<GitHubRepositoryRepository>()) }
         single { GetMemberProfileUseCase(repository = get<MemberRepository>()) }
         single { GetProjectsUseCase(repository = get<ProjectRepository>()) }
+        single { GetProjectGenerationStatusUseCase(repository = get<ProjectRepository>()) }
         single { GetProjectDetailUseCase(repository = get<ProjectRepository>()) }
         single { DeleteProjectUseCase(repository = get<ProjectRepository>()) }
         single { GetLearningSetUseCase(repository = get<ProjectRepository>()) }
@@ -91,7 +94,8 @@ val appModule: Module =
                 bookmarkQuestion = get(),
             )
         }
-        single { QuizCreateStore() }
+        single { QuizCreateStore(storage = get()) }
+        single { QuizCreateStatusSynchronizer(getProjectGenerationStatus = get(), createStore = get(), storage = get()) }
         single { QuizCreateRetryHandler(registerProject = get(), createStore = get()) }
         viewModel { params ->
             QuizCreateViewModel(

@@ -12,6 +12,7 @@ import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.domain.model.LoginSession
 import com.nexters.hytime.gitit.feature.onboarding.onboardingModule
+import com.nexters.hytime.gitit.feature.quiz.create.session.PendingQuizCreationStorage
 import com.nexters.hytime.gitit.logging.AppLogger
 import com.nexters.hytime.gitit.logging.gitItLogger
 import com.nexters.hytime.gitit.logging.initLogger
@@ -70,6 +71,7 @@ private fun platformModule(sessionStorage: LoginSessionStorage) =
         }
         single<AuthTokenProvider> { GoogleAuthTokenProvider(get()) }
         single<LoginSessionStorage> { sessionStorage }
+        single<PendingQuizCreationStorage> { PendingQuizCreationPreferences(get<Context>()) }
     }
 
 /**

@@ -4,13 +4,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexters.hytime.gitit.feature.quiz.create.component.QuizCreateHomeModal
 import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateRetryHandler
 import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStatus
+import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStatusSynchronizer
 import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStore
+import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -28,10 +33,20 @@ internal fun QuizCreateHomeHost(
     content: @Composable (isQuizCreating: Boolean) -> Unit,
 ) {
     val createStore = koinInject<QuizCreateStore>()
+    val statusSynchronizer = koinInject<QuizCreateStatusSynchronizer>()
     val retryHandler = koinInject<QuizCreateRetryHandler>()
     val state by createStore.state.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
+    val logger = remember { gitItLogger(tag = "QuizCreateSync") }
     val isQuizCreating = state.status == QuizCreateStatus.InProgress || state.status == QuizCreateStatus.Completing
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        coroutineScope.launch {
+            statusSynchronizer
+                .syncPending()
+                .onFailure { error -> logger.w(throwable = error) { "홈 문제 생성 상태 동기화 실패" } }
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         content(isQuizCreating)
