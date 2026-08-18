@@ -61,6 +61,7 @@ import org.jetbrains.compose.resources.stringResource
  * @param onDeleteAccountClick 계정 삭제 안내 화면으로 이동하는 콜백
  * @param onDevelopmentFieldClick 개발 분야 선택 화면으로 이동하는 콜백
  * @param onLearningLevelClick 개발 수준 선택 화면으로 이동하는 콜백
+ * @param onLogoutClick 로그인 세션을 지우고 온보딩으로 나가도록 요청하는 콜백
  * @param modifier 화면의 크기와 배치를 지정할 수식자
  */
 @Composable
@@ -72,6 +73,7 @@ fun SettingsScreen(
     onDeleteAccountClick: () -> Unit,
     onDevelopmentFieldClick: () -> Unit,
     onLearningLevelClick: () -> Unit,
+    onLogoutClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -131,6 +133,7 @@ fun SettingsScreen(
                     icon = SettingsIconType.Logout,
                     label = stringResource(Res.string.settings_logout),
                     labelColor = GitItTheme.colors.error,
+                    onClick = onLogoutClick,
                 )
                 SettingsDivider()
                 SettingsRow(
@@ -329,6 +332,7 @@ private fun SettingsScreenPreview() {
             onDeleteAccountClick = {},
             onDevelopmentFieldClick = {},
             onLearningLevelClick = {},
+            onLogoutClick = {},
         )
     }
 }

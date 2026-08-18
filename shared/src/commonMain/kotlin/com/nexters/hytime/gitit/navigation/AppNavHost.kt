@@ -274,6 +274,13 @@ fun AppNavHost(
         }
     }
 
+    fun navigateToOnboarding() {
+        while (backStack.size > 1) {
+            backStack.removeLastOrNull()
+        }
+        backStack[0] = AppRoute.Onboarding
+    }
+
     LaunchedEffect(sharedRepositoryUrl, backStack.lastOrNull()) {
         val repositoryUrl = sharedRepositoryUrl ?: return@LaunchedEffect
         val currentRoute = backStack.lastOrNull() as? AppRoute ?: return@LaunchedEffect
@@ -337,6 +344,7 @@ fun AppNavHost(
                         onDeleteAccountClick = { backStack.add(AppRoute.AccountDelete) },
                         onDevelopmentFieldClick = { backStack.add(AppRoute.SettingsPosition) },
                         onLearningLevelClick = { backStack.add(AppRoute.SettingsCareerLevel) },
+                        onNavigateToOnboarding = { navigateToOnboarding() },
                     )
                 }
                 entry<AppRoute.SettingsPosition>(metadata = AppRoute.SettingsPosition.navigationMetadata()) {

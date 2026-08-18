@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -17,6 +18,7 @@ import org.koin.compose.viewmodel.koinViewModel
  * @param onDeleteAccountClick 계정 삭제 안내 화면으로 이동하는 콜백
  * @param onDevelopmentFieldClick 개발 분야 선택 화면으로 이동하는 콜백
  * @param onLearningLevelClick 개발 수준 선택 화면으로 이동하는 콜백
+ * @param onNavigateToOnboarding 로그아웃을 마친 뒤 백스택을 비우고 온보딩으로 보내는 콜백
  */
 @Composable
 fun SettingsRoute(
@@ -25,12 +27,21 @@ fun SettingsRoute(
     onDeleteAccountClick: () -> Unit,
     onDevelopmentFieldClick: () -> Unit,
     onLearningLevelClick: () -> Unit,
+    onNavigateToOnboarding: () -> Unit,
 ) {
     val viewModel = koinViewModel<SettingsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.refresh()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.sideEffects.collectLatest { sideEffect ->
+            when (sideEffect) {
+                SettingsSideEffect.NavigateToOnboarding -> onNavigateToOnboarding()
+            }
+        }
     }
 
     SettingsScreen(
@@ -41,5 +52,6 @@ fun SettingsRoute(
         onDeleteAccountClick = onDeleteAccountClick,
         onDevelopmentFieldClick = onDevelopmentFieldClick,
         onLearningLevelClick = onLearningLevelClick,
+        onLogoutClick = viewModel::onLogoutClick,
     )
 }
