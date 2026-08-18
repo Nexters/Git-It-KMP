@@ -16,7 +16,7 @@ class SubmitEssayAnswerUseCase(
      *
      * @param projectId 문제가 속한 프로젝트 식별자
      * @param questionId 답을 낼 문제 식별자
-     * @param text 서술형 답안. 비어 있으면 서버가 거부한다
+     * @param text 서술형 답안. 작성하지 않은 경우 빈 문자열을 전달한다
      * @return 해설과 자가채점 기준 또는 실패 원인
      */
     suspend operator fun invoke(

@@ -122,7 +122,6 @@ class ProjectRepositoryImpl(
     ): Result<EssayAnswerResult> =
         runCatchingResult {
             requireQuestion(projectId, questionId)
-            require(text.isNotBlank()) { "답안이 비어 있습니다." }
             require(text.length <= ProjectRepository.MAX_ESSAY_TEXT_LENGTH) {
                 "답안은 ${ProjectRepository.MAX_ESSAY_TEXT_LENGTH}자를 넘을 수 없습니다."
             }

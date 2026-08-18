@@ -261,22 +261,28 @@ class ProjectRepositoryImplTest {
         assertEquals("만점 예시", result.rubric.fullMarkExample)
     }
 
-    /** 서술형 답안이 비었거나 서버 상한을 넘으면 요청하지 않고 실패로 처리하는지 검증한다. */
+    /** 빈 서술형 답안을 그대로 서버에 전달하는지 검증한다. */
     @Test
-    fun submitEssayAnswer_답안이비었거나상한을넘으면_요청하지않고실패한다() {
-        val blankClient = FakeNetworkClient(ESSAY_ANSWER_RESPONSE)
+    fun submitEssayAnswer_답안이비었으면_빈문자열을전달한다() {
+        val networkClient = FakeNetworkClient(ESSAY_ANSWER_RESPONSE)
+
+        runBlocking { ProjectRepositoryImpl(networkClient).submitEssayAnswer("p1", "q2", "") }.getOrThrow()
+
+        assertEquals("""{"text":""}""", networkClient.requestBody)
+    }
+
+    /** 서술형 답안이 서버 상한을 넘으면 요청하지 않고 실패로 처리하는지 검증한다. */
+    @Test
+    fun submitEssayAnswer_답안이상한을넘으면_요청하지않고실패한다() {
         val tooLongClient = FakeNetworkClient(ESSAY_ANSWER_RESPONSE)
 
-        val blankResult = runBlocking { ProjectRepositoryImpl(blankClient).submitEssayAnswer("p1", "q2", " ") }
         val tooLongResult =
             runBlocking {
                 ProjectRepositoryImpl(tooLongClient)
                     .submitEssayAnswer("p1", "q2", "가".repeat(ProjectRepository.MAX_ESSAY_TEXT_LENGTH + 1))
             }
 
-        assertTrue(blankResult.isFailure)
         assertTrue(tooLongResult.isFailure)
-        assertEquals("", blankClient.requestedMethod)
         assertEquals("", tooLongClient.requestedMethod)
     }
 

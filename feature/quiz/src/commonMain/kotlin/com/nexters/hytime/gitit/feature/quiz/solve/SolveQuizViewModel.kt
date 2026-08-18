@@ -184,7 +184,7 @@ class SolveQuizViewModel(
      * 실패하면 제출 전 상태를 유지해 다시 시도할 수 있게 하고 원인을 로그로 남긴다.
      */
     private fun submitEssayAnswerToServer(state: SolveQuizUiState) {
-        if (state.isEssaySubmitted || state.essayAnswer.isBlank()) return
+        if (state.isEssaySubmitted) return
 
         viewModelScope.launch {
             submitEssayAnswer(args.projectId, state.essayQuestion.id, state.essayAnswer)
