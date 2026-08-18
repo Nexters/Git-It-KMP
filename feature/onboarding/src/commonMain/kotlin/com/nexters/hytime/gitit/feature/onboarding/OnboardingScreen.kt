@@ -91,11 +91,13 @@ private val onboardingPages: List<OnboardingPage> =
  *
  * @param onNavigateToHome 로그인 성공 후 홈 화면으로 이동하는 콜백
  * @param onNavigateToIntermediateSplash 큐레이션 완료 후 중간 스플래시로 이동하는 콜백
+ * @param appVersion 실행 중인 앱의 버전 이름
  */
 @Composable
 fun OnboardingScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToIntermediateSplash: () -> Unit,
+    appVersion: String,
 ) {
     val viewModel = koinViewModel<OnboardingViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -114,6 +116,7 @@ fun OnboardingScreen(
     if (curation == null) {
         OnboardingContent(
             uiState = uiState,
+            appVersion = appVersion,
             showTermsSheet = showTermsSheet,
             onGoogleLoginClick = { showTermsSheet = true },
             onToggleAllTerms = { viewModel.onIntent(OnboardingIntent.ToggleAllTerms) },
@@ -141,6 +144,7 @@ fun OnboardingScreen(
  * 온보딩 화면의 순수 UI 렌더링을 담당한다. 상태와 콜백만 주입받아 상태를 소유하지 않는다.
  *
  * @param uiState 온보딩 단일 UI 상태
+ * @param appVersion 실행 중인 앱의 버전 이름
  * @param showTermsSheet 약관 동의 시트 노출 여부
  * @param onGoogleLoginClick 구글 로그인 버튼 클릭 콜백 (약관 시트 오픈)
  * @param onToggleAllTerms 전체 동의 토글 콜백
@@ -153,6 +157,7 @@ fun OnboardingScreen(
 @Composable
 private fun OnboardingContent(
     uiState: OnboardingUiState,
+    appVersion: String,
     showTermsSheet: Boolean,
     onGoogleLoginClick: () -> Unit,
     onToggleAllTerms: () -> Unit,
@@ -187,6 +192,7 @@ private fun OnboardingContent(
                 showTooltip = pagerState.currentPage == onboardingPages.lastIndex,
                 isLoginLoading = uiState.loginStep is LoginStep.Loading,
                 onGoogleLoginClick = onGoogleLoginClick,
+                appVersion = appVersion,
             )
             if (uiState.loginStep == LoginStep.Error) {
                 Text(
@@ -248,6 +254,7 @@ private fun OnboardingPage(page: OnboardingPage) {
  * @param showTooltip 가입 유도 툴팁 표시 여부
  * @param isLoginLoading 로그인 진행 중 여부
  * @param onGoogleLoginClick 구글 로그인 버튼 클릭 콜백
+ * @param appVersion 실행 중인 앱의 버전 이름
  */
 @Composable
 private fun OnboardingBottomSection(
@@ -256,6 +263,7 @@ private fun OnboardingBottomSection(
     showTooltip: Boolean,
     isLoginLoading: Boolean,
     onGoogleLoginClick: () -> Unit,
+    appVersion: String,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -280,7 +288,7 @@ private fun OnboardingBottomSection(
         )
         Spacer(Modifier.height(21.dp))
         Text(
-            text = stringResource(Res.string.onboarding_version),
+            text = stringResource(Res.string.onboarding_version, appVersion),
             modifier = Modifier.padding(top = 12.dp),
             color = GitItTheme.colors.grey500,
             style = GitItTheme.typography.body2,
@@ -406,6 +414,7 @@ private fun OnboardingContentPreview() {
     GitItTheme {
         OnboardingContent(
             uiState = OnboardingUiState(),
+            appVersion = "1.0.0",
             showTermsSheet = false,
             onGoogleLoginClick = {},
             onToggleAllTerms = {},

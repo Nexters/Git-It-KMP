@@ -30,6 +30,7 @@ fun localProperty(
 val googleDesktopClientId = localProperty("google.desktopClientId")
 val googleDesktopClientSecret = localProperty("google.desktopClientSecret")
 val backendBaseUrl = localProperty("api.baseUrl")
+val appVersion = "1.0.0"
 
 compose.desktop {
     application {
@@ -38,7 +39,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.nexters.hytime.gitit"
-            packageVersion = "1.0.0"
+            packageVersion = appVersion
 
             macOS {
                 bundleID = "com.nexters.hytime.gitit"
@@ -57,9 +58,11 @@ val generateAuthConfig =
         val clientId = googleDesktopClientId
         val secret = googleDesktopClientSecret
         val url = backendBaseUrl
+        val version = appVersion
         inputs.property("clientId", clientId)
         inputs.property("secret", secret)
         inputs.property("url", url)
+        inputs.property("version", version)
         outputs.dir(outputDir)
         doLast {
             val targetFile = outputDir.get().asFile.resolve("com/nexters/hytime/gitit/AuthConfig.kt")
@@ -72,6 +75,7 @@ val generateAuthConfig =
                     const val GOOGLE_DESKTOP_CLIENT_ID = "$clientId"
                      const val GOOGLE_DESKTOP_CLIENT_SECRET = "$secret"
                      const val BACKEND_BASE_URL = "$url"
+                     const val APP_VERSION = "$version"
                 }
                 """.trimIndent(),
             )

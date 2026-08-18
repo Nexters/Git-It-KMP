@@ -251,11 +251,13 @@ private fun rememberAppNavEntryDecorators(): List<NavEntryDecorator<NavKey>> =
  *
  * @param sharedRepositoryUrl 외부 공유로 전달되어 아직 처리하지 않은 저장소 URL
  * @param onSharedRepositoryUrlConsumed 공유 URL을 이동하거나 폐기한 뒤 호출하는 콜백
+ * @param appVersion 실행 중인 앱의 버전 이름
  */
 @Composable
 fun AppNavHost(
     sharedRepositoryUrl: String? = null,
     onSharedRepositoryUrlConsumed: () -> Unit = {},
+    appVersion: String,
 ) {
     val uriHandler = LocalUriHandler.current
     val notificationPermissionState = rememberNotificationPermissionState()
@@ -317,6 +319,7 @@ fun AppNavHost(
                     OnboardingRoute(
                         onNavigateToHome = { backStack[0] = AppRoute.Home },
                         onNavigateToIntermediateSplash = { backStack[0] = AppRoute.IntermediateSplash },
+                        appVersion = appVersion,
                     )
                 }
                 entry<AppRoute.IntermediateSplash>(metadata = AppRoute.IntermediateSplash.navigationMetadata()) {

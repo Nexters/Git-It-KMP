@@ -65,8 +65,8 @@ android {
 
     defaultConfig {
         applicationId = "com.nexters.hytime.gitit"
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.0"
 
         // local.properties에서 주입되는 설정 값들
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProperty("google.webClientId")}\"")

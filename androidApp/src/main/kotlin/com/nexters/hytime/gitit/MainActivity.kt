@@ -61,6 +61,7 @@ class MainActivity : ComponentActivity() {
             App(
                 sharedRepositoryUrl = sharedRepositoryUrl,
                 onSharedRepositoryUrlConsumed = { sharedRepositoryUrl = null },
+                appVersion = BuildConfig.VERSION_NAME,
             )
         }
     }

@@ -10,20 +10,23 @@ import com.nexters.hytime.gitit.navigation.AppNavHost
  *
  * @param sharedRepositoryUrl Android 공유로 전달되어 아직 처리하지 않은 저장소 URL
  * @param onSharedRepositoryUrlConsumed 공유 URL을 이동하거나 폐기한 뒤 호출하는 콜백
+ * @param appVersion 실행 중인 앱의 버전 이름
  */
 @Composable
 fun App(
     sharedRepositoryUrl: String? = null,
     onSharedRepositoryUrlConsumed: () -> Unit = {},
+    appVersion: String,
 ) {
     GitItTheme {
         AppNavHost(
             sharedRepositoryUrl = sharedRepositoryUrl,
             onSharedRepositoryUrlConsumed = onSharedRepositoryUrlConsumed,
+            appVersion = appVersion,
         )
     }
 }
 
 @Preview
 @Composable
-fun AppPreview() = App()
+fun AppPreview() = App(appVersion = "1.0.0")
