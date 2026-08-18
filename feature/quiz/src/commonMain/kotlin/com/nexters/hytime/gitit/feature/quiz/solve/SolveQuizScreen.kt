@@ -10,14 +10,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -409,7 +411,7 @@ private fun QuizQuestionHeader(
 }
 
 /**
- * 정답 확인 버튼 위에 고정되는 북마크와 하단 그라디언트를 표시한다.
+ * 북마크와 정답 확인 버튼을 하단 그라디언트 위에 표시한다.
  *
  * @param isBookmarked 현재 문제의 저장 상태
  * @param onBookmarkClick 저장 상태를 전환하는 콜백
@@ -494,20 +496,33 @@ private fun QuizEssayScreen(
     Box(modifier = modifier.fillMaxSize().background(GitItTheme.colors.grey700)) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().captureSky(measuredSky),
-            contentPadding = PaddingValues(start = 20.dp, top = headerHeight + 20.dp, end = 20.dp, bottom = 164.dp),
+            contentPadding = PaddingValues(top = headerHeight + 20.dp),
         ) {
             item {
-                if (uiState.isEssaySubmitted) {
-                    QuizEssayResult(
-                        answer = uiState.essayAnswer,
-                        modelAnswer = uiState.essayQuestion.modelAnswer,
-                    )
-                } else {
-                    QuizEssayInput(
-                        answer = uiState.essayAnswer,
-                        onAnswerChange = { onIntent(SolveQuizIntent.EssayAnswerChange(it)) },
-                    )
+                Box(Modifier.padding(horizontal = 20.dp)) {
+                    if (uiState.isEssaySubmitted) {
+                        QuizEssayResult(
+                            answer = uiState.essayAnswer,
+                            modelAnswer = uiState.essayQuestion.modelAnswer,
+                        )
+                    } else {
+                        QuizEssayInput(
+                            answer = uiState.essayAnswer,
+                            onAnswerChange = { onIntent(SolveQuizIntent.EssayAnswerChange(it)) },
+                        )
+                    }
                 }
+            }
+            item {
+                QuizBottomBar(
+                    isBookmarked = uiState.essayQuestion.number in uiState.bookmarkedQuestionNumbers,
+                    buttonText = stringResource(if (uiState.isEssaySubmitted) Res.string.quiz_next else Res.string.quiz_submit),
+                    onBookmarkClick = { onIntent(SolveQuizIntent.BookmarkClick) },
+                    onButtonClick = { onIntent(if (uiState.isEssaySubmitted) SolveQuizIntent.Next else SolveQuizIntent.Submit) },
+                )
+            }
+            item {
+                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.ime))
             }
         }
         QuizQuestionHeader(
@@ -519,13 +534,6 @@ private fun QuizEssayScreen(
                 Modifier
                     .align(Alignment.TopCenter)
                     .onSizeChanged { headerHeightPx = it.height },
-        )
-        QuizBottomBar(
-            isBookmarked = uiState.essayQuestion.number in uiState.bookmarkedQuestionNumbers,
-            buttonText = stringResource(if (uiState.isEssaySubmitted) Res.string.quiz_next else Res.string.quiz_submit),
-            onBookmarkClick = { onIntent(SolveQuizIntent.BookmarkClick) },
-            onButtonClick = { onIntent(if (uiState.isEssaySubmitted) SolveQuizIntent.Next else SolveQuizIntent.Submit) },
-            modifier = Modifier.align(Alignment.BottomCenter).imePadding(),
         )
     }
 }
