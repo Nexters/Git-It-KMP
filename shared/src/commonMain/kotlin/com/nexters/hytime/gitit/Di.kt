@@ -71,7 +71,7 @@ val appModule: Module =
         single { RegisterProjectUseCase(repository = get<ProjectRepository>()) }
         viewModel { SplashViewModel(authRepository = get(), sessionStorage = get()) }
         viewModel { MyViewModel(getMemberProfile = get()) }
-        viewModel { SettingsViewModel(getMemberProfile = get()) }
+        viewModel { SettingsViewModel(getMemberProfile = get(), sessionStorage = get()) }
         viewModel { SettingsPositionViewModel(getMemberProfile = get(), updatePosition = get()) }
         viewModel { SettingsCareerLevelViewModel(getMemberProfile = get(), updateCareerLevel = get()) }
         viewModel { HomeViewModel(getProjects = get(), getMemberProfile = get()) }
