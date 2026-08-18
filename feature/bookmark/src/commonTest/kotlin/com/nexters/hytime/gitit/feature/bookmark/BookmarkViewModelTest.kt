@@ -8,6 +8,8 @@ import com.nexters.hytime.gitit.domain.usecase.BookmarkQuestionUseCase
 import com.nexters.hytime.gitit.domain.usecase.GetBookmarkedQuestionsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -114,6 +116,22 @@ class BookmarkViewModelTest {
             runCurrent()
 
             assertEquals(emptyMap(), viewModel.uiState.value.bookmarkChanges)
+        }
+    }
+
+    /** 저장한 문제 풀이를 선택하면 해당 프로젝트·세트·문제 식별자로 이동을 요청한다. */
+    @Test
+    fun solveClick_저장한문제를선택하면_단건풀이이동을요청한다() {
+        runTest(dispatcher) {
+            val repository = FakeBookmarkRepository(Result.success(BOOKMARKS))
+            val viewModel = createViewModel(repository)
+            runCurrent()
+            val sideEffect = async { viewModel.sideEffects.first() }
+            runCurrent()
+
+            viewModel.onIntent(BookmarkIntent.SolveClick("q1"))
+
+            assertEquals(BookmarkSideEffect.NavigateToQuiz("p1", "s1", "q1"), sideEffect.await())
         }
     }
 

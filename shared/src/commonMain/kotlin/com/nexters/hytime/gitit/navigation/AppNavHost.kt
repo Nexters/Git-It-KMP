@@ -360,6 +360,9 @@ fun AppNavHost(
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                         onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
+                        onNavigateToQuiz = { projectId, setId, questionId ->
+                            backStack.add(AppRoute.Quiz(projectId, setId, questionId))
+                        },
                     )
                 }
                 entry<AppRoute.My>(metadata = AppRoute.My.navigationMetadata()) {
@@ -424,6 +427,7 @@ fun AppNavHost(
                     SolveQuizRoute(
                         projectId = route.projectId,
                         setId = route.setId,
+                        questionId = route.questionId,
                         onBackClick = { backStack.removeLastOrNull() },
                     )
                 }

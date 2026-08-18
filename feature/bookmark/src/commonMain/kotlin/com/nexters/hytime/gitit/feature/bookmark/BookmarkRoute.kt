@@ -13,12 +13,14 @@ import org.koin.compose.viewmodel.koinViewModel
  * @param onNavigateToHome 홈 화면으로 이동하는 콜백
  * @param onNavigateToProjectList 프로젝트 리스트 화면으로 이동하는 콜백
  * @param onNavigateToMy 마이 화면으로 이동하는 콜백
+ * @param onNavigateToQuiz 저장한 문제 하나를 푸는 화면으로 이동하는 콜백
  */
 @Composable
 fun BookmarkRoute(
     onNavigateToHome: () -> Unit,
     onNavigateToProjectList: () -> Unit,
     onNavigateToMy: () -> Unit,
+    onNavigateToQuiz: (projectId: String, setId: String, questionId: String) -> Unit,
 ) {
     val viewModel = koinViewModel<BookmarkViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -29,6 +31,8 @@ fun BookmarkRoute(
                 BookmarkSideEffect.NavigateToHome -> onNavigateToHome()
                 BookmarkSideEffect.NavigateToProjectList -> onNavigateToProjectList()
                 BookmarkSideEffect.NavigateToMy -> onNavigateToMy()
+                is BookmarkSideEffect.NavigateToQuiz ->
+                    onNavigateToQuiz(sideEffect.projectId, sideEffect.setId, sideEffect.questionId)
             }
         }
     }

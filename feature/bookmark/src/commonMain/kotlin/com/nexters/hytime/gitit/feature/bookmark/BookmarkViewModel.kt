@@ -56,9 +56,7 @@ class BookmarkViewModel(
             BookmarkIntent.MyTabClick -> emit(BookmarkSideEffect.NavigateToMy)
             is BookmarkIntent.FilterClick -> loadBookmarks(intent.filterId)
             is BookmarkIntent.BookmarkClick -> toggleBookmark(intent.questionId)
-            is BookmarkIntent.SolveClick -> {
-                // TODO: 문제풀이 화면 route 추가 후 연결한다.
-            }
+            is BookmarkIntent.SolveClick -> navigateToQuiz(intent.questionId)
         }
     }
 
@@ -68,6 +66,16 @@ class BookmarkViewModel(
 
     private fun setState(reducer: BookmarkUiState.() -> BookmarkUiState) {
         _uiState.value = _uiState.value.reducer()
+    }
+
+    /**
+     * 선택한 저장 문제의 프로젝트·세트·문제 식별자로 단건 풀이 화면 이동을 요청한다.
+     *
+     * @param questionId 풀 문제 식별자
+     */
+    private fun navigateToQuiz(questionId: String) {
+        val question = _uiState.value.questions.firstOrNull { it.id == questionId } ?: return
+        emit(BookmarkSideEffect.NavigateToQuiz(question.projectId, question.setId, questionId))
     }
 
     /**
