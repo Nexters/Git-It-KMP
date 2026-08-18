@@ -81,6 +81,21 @@ class SolveQuizViewModelTest {
         }
     }
 
+    /** 북마크 문제로 진입하면 해당 문제 하나를 소개 화면 없이 바로 표시한다. */
+    @Test
+    fun init_북마크문제로진입하면_해당문제만바로표시한다() {
+        runTest(dispatcher) {
+            val viewModel = createViewModel(questionId = "q3")
+            runCurrent()
+
+            val state = viewModel.uiState.value
+            assertEquals(listOf("q3"), state.questions.map(SolveQuizQuestionItem::questionId))
+            assertEquals(listOf(3), state.questions.map(SolveQuizQuestionItem::number))
+            assertEquals(QuizStep.MultipleChoice, state.step)
+            assertEquals("객관식 둘째 문제", state.multipleChoiceQuestion.text)
+        }
+    }
+
     /** 시작하면 첫 문제 형식에 맞는 단계로 이동한다. */
     @Test
     fun start_첫문제가객관식이면_객관식단계로이동한다() {
@@ -385,9 +400,10 @@ class SolveQuizViewModelTest {
                 Result.success(ChoiceAnswerResult(questionId = "q1", correct = true, answerIndex = 0, explanation = "해설")),
             ),
         setId: String? = "s2",
+        questionId: String? = null,
     ): SolveQuizViewModel =
         SolveQuizViewModel(
-            args = SolveQuizArgs(projectId = "project-1", setId = setId),
+            args = SolveQuizArgs(projectId = "project-1", setId = setId, questionId = questionId),
             getProjectDetail = GetProjectDetailUseCase(repository),
             getLearningSet = GetLearningSetUseCase(repository),
             submitChoiceAnswer = SubmitChoiceAnswerUseCase(repository),
