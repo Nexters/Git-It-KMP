@@ -302,9 +302,9 @@ class SolveQuizViewModelTest {
         }
     }
 
-    /** 빈 답안은 서버가 거부하므로 제출하지 않는다. */
+    /** 빈 답안도 서버에 제출하고 모범 답안을 확인한다. */
     @Test
-    fun submit_빈서술형답안이면_제출하지않는다() {
+    fun submit_빈서술형답안이면_그대로제출한다() {
         runTest(dispatcher) {
             val repository = repositoryWithEssayResult()
             val viewModel = essayViewModel(repository)
@@ -312,8 +312,9 @@ class SolveQuizViewModelTest {
             viewModel.onIntent(SolveQuizIntent.Submit)
             runCurrent()
 
-            assertEquals(null, repository.submittedEssayQuestionId)
-            assertFalse(viewModel.uiState.value.isEssaySubmitted)
+            assertEquals("q2", repository.submittedEssayQuestionId)
+            assertEquals("", repository.submittedEssayText)
+            assertTrue(viewModel.uiState.value.isEssaySubmitted)
         }
     }
 
