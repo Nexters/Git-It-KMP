@@ -80,7 +80,7 @@ class GitItButtonTest {
                     0x26FFFFFFu,
                     0xFFFF3721u,
                     0x26FFFFFFu,
-                    0x26FFFFFFu,
+                    0x46FFFFFFu,
                     0x26FFFFFFu,
                     0x26FFFFFFu,
                     0x00000000u,
@@ -94,6 +94,30 @@ class GitItButtonTest {
                 ),
             actual = actual,
         )
+    }
+
+    /** 모든 스타일이 눌림 상태에서 기본 상태와 다른 배경을 보여 주는지 검증한다. */
+    @Test
+    fun containerColor_모든스타일_눌리면기본상태와다른배경이된다() {
+        val stylesWithoutPressFeedback =
+            GitItButtonStyle.entries.filter { style ->
+                val default =
+                    resolveButtonColors(
+                        style = style,
+                        state = GitItButtonState.Default,
+                        colors = defaultGitItColors,
+                    ).containerColor
+                val active =
+                    resolveButtonColors(
+                        style = style,
+                        state = GitItButtonState.Active,
+                        colors = defaultGitItColors,
+                    ).containerColor
+
+                default == active
+            }
+
+        assertEquals(expected = emptyList(), actual = stylesWithoutPressFeedback)
     }
 
     /** 모든 스타일과 상태 조합의 콘텐츠 색상이 Figma 변수와 일치하는지 검증한다. */

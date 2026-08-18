@@ -1,6 +1,5 @@
 package com.nexters.hytime.gitit.designsystem.button
 
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -85,7 +84,7 @@ enum class GitItButtonState {
     /** 클릭할 수 있는 기본 상태다. */
     Default,
 
-    /** 버튼을 누르는 동안 Figma의 active 시각 피드백을 표시하는 상태다. */
+    /** 버튼을 누르는 동안 Figma Pressing 변형의 시각 피드백을 표시하는 상태다. */
     Active,
 
     /** 클릭할 수 없고 낮은 대비로 표시되는 상태다. */
@@ -100,7 +99,8 @@ enum class GitItButtonState {
  *
  * 아이콘 슬롯에는 현재 버튼의 콘텐츠 색상을 [LocalContentColor]로 제공한다. 버튼 너비는 별도 옵션 없이 [modifier]를 따르므로,
  * 단독 전체 너비는 `Modifier.fillMaxWidth()`, Row 안의 균등 너비는 `Modifier.weight(1f)`로 지정한다.
- * [GitItButtonState.Default]에서 버튼을 누르면 Figma의 [GitItButtonState.Active] 색상으로 자동 전환하고 기본 리플을 함께 표시한다.
+ * [GitItButtonState.Default]에서 버튼을 누르면 Figma Pressing 변형처럼 기본 배경 위에 흰색 오버레이를 덧칠한다. Figma가 이 전환에
+ * 애니메이션을 지정하지 않으므로 리플 없이 색상만 곧바로 바뀐다.
  * [GitItButtonState.Disabled]일 때는 클릭 이벤트가 전달되지 않는다.
  *
  * @param text 버튼에 한 줄로 표시할 레이블
@@ -136,7 +136,7 @@ fun GitItButton(
                 .background(colors.containerColor)
                 .clickable(
                     interactionSource = interactionSource,
-                    indication = LocalIndication.current,
+                    indication = null,
                     enabled = state != GitItButtonState.Disabled,
                     role = Role.Button,
                     onClick = onClick,
@@ -255,6 +255,9 @@ internal fun resolveButtonColors(
 /**
  * 버튼 스타일 및 상태에 맞는 배경색을 반환한다.
  *
+ * Figma의 Pressing 변형은 기본 채우기를 그대로 둔 채 그 위에 흰색 오버레이 채우기를 하나 더 얹는다. 여기서도 같은 방식으로
+ * [pressOverlayColor]를 기본 배경 위에 합성하므로, 배경 자체가 반투명한 Secondary도 눌림 피드백을 얻는다.
+ *
  * @param style 배경 강조 방식
  * @param state 기본, 눌림, 비활성, 오류 상태
  * @param colors 매핑에 사용할 Git-it 원시 색상 토큰
@@ -263,13 +266,38 @@ internal fun resolveButtonColors(
 private fun resolveContainerColor(
     style: GitItButtonStyle,
     state: GitItButtonState,
-    colors: com.nexters.hytime.gitit.designsystem.GitItColors,
+    colors: GitItColors,
+): Color {
+    val base = baseContainerColor(style = style, state = state, colors = colors)
+
+    return if (state == GitItButtonState.Active) {
+        pressOverlayColor(style = style, colors = colors).compositeOver(base)
+    } else {
+        base
+    }
+}
+
+/**
+ * 눌림 오버레이를 얹기 전의 기본 배경색을 반환한다.
+ *
+ * Figma에서 Pressing 변형의 기본 채우기는 Default와 같으므로 두 상태를 한 갈래로 묶는다.
+ *
+ * @param style 배경 강조 방식
+ * @param state 기본, 눌림, 비활성, 오류 상태
+ * @param colors 매핑에 사용할 Git-it 원시 색상 토큰
+ * @return 오버레이를 제외한 배경색
+ */
+private fun baseContainerColor(
+    style: GitItButtonStyle,
+    state: GitItButtonState,
+    colors: GitItColors,
 ): Color =
     when (style) {
         GitItButtonStyle.Primary ->
             when (state) {
-                GitItButtonState.Default -> colors.blue100
-                GitItButtonState.Active -> colors.white30.compositeOver(colors.blue100)
+                GitItButtonState.Default,
+                GitItButtonState.Active,
+                -> colors.blue100
                 GitItButtonState.Disabled -> colors.white15
                 GitItButtonState.Error -> colors.error
             }
@@ -277,14 +305,26 @@ private fun resolveContainerColor(
         GitItButtonStyle.Secondary -> colors.white15
         GitItButtonStyle.PrimaryText,
         GitItButtonStyle.Text,
-        ->
-            when (state) {
-                GitItButtonState.Active -> colors.white15
-                GitItButtonState.Default,
-                GitItButtonState.Disabled,
-                GitItButtonState.Error,
-                -> Color.Transparent
-            }
+        -> Color.Transparent
+    }
+
+/**
+ * Figma Pressing 변형이 기본 배경 위에 덧칠하는 흰색 오버레이를 반환한다.
+ *
+ * @param style 오버레이 농도를 결정할 강조 방식
+ * @param colors 매핑에 사용할 Git-it 원시 색상 토큰
+ * @return Primary는 30%, 나머지 스타일은 15% 불투명도의 흰색
+ */
+private fun pressOverlayColor(
+    style: GitItButtonStyle,
+    colors: GitItColors,
+): Color =
+    when (style) {
+        GitItButtonStyle.Primary -> colors.white30
+        GitItButtonStyle.Secondary,
+        GitItButtonStyle.PrimaryText,
+        GitItButtonStyle.Text,
+        -> colors.white15
     }
 
 /**
@@ -298,7 +338,7 @@ private fun resolveContainerColor(
 private fun resolveContentColor(
     style: GitItButtonStyle,
     state: GitItButtonState,
-    colors: com.nexters.hytime.gitit.designsystem.GitItColors,
+    colors: GitItColors,
 ): Color =
     when (style) {
         GitItButtonStyle.Primary ->
