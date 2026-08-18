@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.nexters.hytime.gitit.designsystem.GitItTheme
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
@@ -213,7 +214,7 @@ fun ProjectDetailScreen(
 
         if (showDeleteSheet) {
             ProjectDeleteSheet(
-                projectName = uiState.project?.name.orEmpty(),
+                imageUrl = uiState.project?.thumbnailUrl.orEmpty(),
                 onConfirm = {
                     showDeleteSheet = false
                     onDeleteProjectClick()
@@ -274,7 +275,7 @@ private fun ProjectHeader(
 ) {
     val project = uiState.project ?: return
 
-    ProjectThumbnail(projectName = project.name, size = 99.dp)
+    ProjectThumbnail(imageUrl = project.thumbnailUrl, size = 99.dp)
 
     Spacer(Modifier.height(31.dp))
 
@@ -462,14 +463,14 @@ private fun ProjectDetailMoreMenu(
 /**
  * 프로젝트 삭제를 확인하는 바텀시트를 표시한다.
  *
- * @param projectName 썸네일 대체 문자로 사용할 프로젝트 이름
+ * @param imageUrl 서버에서 받은 썸네일 이미지 URL
  * @param onConfirm 삭제 확인 시 실행할 동작
  * @param onDismiss 취소 또는 시트 바깥 영역 선택 시 실행할 동작
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProjectDeleteSheet(
-    projectName: String,
+    imageUrl: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -491,7 +492,7 @@ private fun ProjectDeleteSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(22.dp))
-            ProjectThumbnail(projectName = projectName, size = 128.dp)
+            ProjectThumbnail(imageUrl = imageUrl, size = 128.dp)
             Spacer(Modifier.height(22.dp))
             Column(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
@@ -547,14 +548,14 @@ private fun ProjectDeleteSheetDragHandle() {
 }
 
 /**
- * 프로젝트 이름의 첫 글자를 썸네일 대체 이미지로 표시한다.
+ * 서버에서 받은 프로젝트 썸네일을 표시한다.
  *
- * @param projectName 첫 글자를 표시할 프로젝트 이름
+ * @param imageUrl 서버에서 받은 썸네일 이미지 URL
  * @param size 썸네일의 가로·세로 크기
  */
 @Composable
 private fun ProjectThumbnail(
-    projectName: String,
+    imageUrl: String,
     size: Dp,
 ) {
     Box(
@@ -565,11 +566,11 @@ private fun ProjectThumbnail(
                 .background(GitItTheme.colors.grey600),
         contentAlignment = Alignment.Center,
     ) {
-        // TODO: data 연동 후 AsyncImage로 교체한다.
-        Text(
-            text = projectName.take(1),
-            color = GitItTheme.colors.grey100,
-            style = GitItTheme.typography.headline2,
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = null,
+            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }

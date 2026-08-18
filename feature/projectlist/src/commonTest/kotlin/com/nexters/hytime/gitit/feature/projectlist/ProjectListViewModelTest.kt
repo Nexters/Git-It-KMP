@@ -49,6 +49,7 @@ class ProjectListViewModelTest {
             val projects = viewModel.uiState.value.projects
             assertEquals(listOf("p1", "p2", "p3"), projects.map(ProjectListItem::id))
             assertEquals("react", projects.first().title)
+            assertEquals("https://example.com/a.png", projects.first().thumbnailUrl)
             assertEquals("TypeScript · JavaScript", projects.first().techStack)
             assertEquals("Set 1", projects.first().setLabel)
             assertEquals(40, projects.first().progress)

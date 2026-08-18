@@ -11,6 +11,7 @@ internal fun ProjectSummary.toListItem(): ProjectListItem =
     ProjectListItem(
         id = projectId,
         title = repositoryName,
+        thumbnailUrl = repositoryImageUrl,
         techStack = techStack.joinToString(" · "),
         setLabel = currentSetLabel,
         recentSetTitle = currentSetTitle,
