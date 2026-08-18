@@ -34,6 +34,7 @@ fun ProjectListRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
+        viewModel.refresh()
         viewModel.sideEffects.collectLatest { sideEffect ->
             when (sideEffect) {
                 ProjectListSideEffect.NavigateToProjectDelete -> onNavigateToProjectDelete()

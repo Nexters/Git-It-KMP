@@ -17,7 +17,7 @@ import com.nexters.hytime.gitit.domain.repository.ProjectRepository
  * @property deleteResult 삭제 요청에 돌려줄 결과
  */
 internal class FakeProjectListRepository(
-    private val pageResult: Result<ProjectPage>,
+    var pageResult: Result<ProjectPage>,
     private val deleteResult: Result<Unit> = Result.success(Unit),
 ) : ProjectRepository {
     /** 마지막으로 삭제 요청한 프로젝트 식별자다. */

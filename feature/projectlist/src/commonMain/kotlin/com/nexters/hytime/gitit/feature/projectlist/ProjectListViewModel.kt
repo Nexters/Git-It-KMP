@@ -40,10 +40,6 @@ class ProjectListViewModel(
      */
     val sideEffects: SharedFlow<ProjectListSideEffect> = _sideEffects.asSharedFlow()
 
-    init {
-        loadProjects()
-    }
-
     /**
      * 프로젝트 리스트 화면에서 발생한 사용자 의도를 처리한다.
      *
@@ -108,7 +104,7 @@ class ProjectListViewModel(
      * 프로젝트 목록을 조회해 화면 상태를 채운다.
      * 실패하면 빈 목록을 유지하고 원인을 로그로 남긴다.
      */
-    private fun loadProjects() {
+    fun refresh() {
         viewModelScope.launch {
             getProjects()
                 .onSuccess { page -> setState { copy(projects = page.items.map { it.toListItem() }) } }
