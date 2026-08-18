@@ -62,6 +62,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.animation.GitItAnimation
+import com.nexters.hytime.gitit.designsystem.animation.GitItLottieAnimation
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
 import com.nexters.hytime.gitit.designsystem.liquidglass.gitItTopGradientBlur
@@ -78,7 +80,6 @@ import git_it_kmp.feature.quiz.generated.resources.quiz_ai_answer
 import git_it_kmp.feature.quiz.generated.resources.quiz_bookmark
 import git_it_kmp.feature.quiz.generated.resources.quiz_bookmark_remove
 import git_it_kmp.feature.quiz.generated.resources.quiz_close
-import git_it_kmp.feature.quiz.generated.resources.quiz_completion
 import git_it_kmp.feature.quiz.generated.resources.quiz_completion_close
 import git_it_kmp.feature.quiz.generated.resources.quiz_completion_count
 import git_it_kmp.feature.quiz.generated.resources.quiz_completion_description
@@ -665,11 +666,9 @@ private fun QuizCompletionScreen(
                 style = GitItTheme.typography.subtitle1,
             )
             Spacer(Modifier.height(20.dp))
-            Image(
-                painter = painterResource(Res.drawable.quiz_completion),
-                contentDescription = null,
+            GitItLottieAnimation(
+                animation = GitItAnimation.Complete,
                 modifier = Modifier.size(145.dp),
-                contentScale = ContentScale.Fit,
             )
             Spacer(Modifier.height(40.dp))
             Text(

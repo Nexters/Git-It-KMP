@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.animation.GitItAnimation
+import com.nexters.hytime.gitit.designsystem.animation.GitItLottieAnimation
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonState
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonStyle
@@ -261,15 +263,20 @@ private val DELETE_MODE_TOP_BLUR_HEIGHT = 151.dp
 private fun ProjectListEmptyState(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        GitItLottieAnimation(
+            animation = GitItAnimation.ProjectEmpty,
+            modifier = Modifier.size(128.dp),
+        )
+        Spacer(Modifier.height(24.dp))
         Text(
             text = stringResource(Res.string.project_list_empty_title),
             color = GitItTheme.colors.grey200,
             style = GitItTheme.typography.subtitle1,
             textAlign = TextAlign.Center,
         )
+        Spacer(Modifier.height(8.dp))
         Text(
             text = stringResource(Res.string.project_list_empty_description),
             color = GitItTheme.colors.grey400,

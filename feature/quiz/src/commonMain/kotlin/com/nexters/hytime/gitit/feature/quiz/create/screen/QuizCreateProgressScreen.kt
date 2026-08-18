@@ -32,10 +32,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.animation.GitItAnimation
+import com.nexters.hytime.gitit.designsystem.animation.GitItLottieAnimation
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonStyle
 import com.nexters.hytime.gitit.feature.quiz.create.QuizCreateStep
-import com.nexters.hytime.gitit.feature.quiz.create.component.QuizCreateImagePlaceholder
 import git_it_kmp.feature.quiz.generated.resources.Res
 import git_it_kmp.feature.quiz.generated.resources.ic_quiz_create_check
 import git_it_kmp.feature.quiz.generated.resources.quiz_create_progress_description
@@ -76,9 +77,10 @@ internal fun QuizCreateProgressScreen(
             modifier = Modifier.align(Alignment.Center).padding(horizontal = 64.dp).padding(bottom = 30.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            QuizCreateImagePlaceholder(
+            GitItLottieAnimation(
+                animation = GitItAnimation.SetCreationLoading,
                 modifier = Modifier.size(128.dp),
-                cornerRadius = 24.dp,
+                loop = true,
             )
             Spacer(Modifier.height(44.dp))
             Text(

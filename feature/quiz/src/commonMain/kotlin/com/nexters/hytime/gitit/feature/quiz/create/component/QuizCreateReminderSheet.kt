@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.hytime.gitit.designsystem.GitItTheme
+import com.nexters.hytime.gitit.designsystem.animation.GitItAnimation
+import com.nexters.hytime.gitit.designsystem.animation.GitItLottieAnimation
 import com.nexters.hytime.gitit.designsystem.button.GitItButton
 import com.nexters.hytime.gitit.designsystem.button.GitItButtonStyle
 import git_it_kmp.feature.quiz.generated.resources.Res
@@ -85,9 +87,10 @@ private fun QuizCreateReminderSheetContent(
                 .padding(start = 20.dp, top = 12.dp, end = 20.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        QuizCreateImagePlaceholder(
+        GitItLottieAnimation(
+            animation = GitItAnimation.Notification,
             modifier = Modifier.size(128.dp),
-            cornerRadius = 24.dp,
+            loop = true,
         )
         Spacer(Modifier.height(32.dp))
         Text(
