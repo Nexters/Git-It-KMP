@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Git-It-KMP</string>
+    <string name="app_name">Git-It</string>
     <string name="notification_channel_learning">학습 알림</string>
 </resources>
