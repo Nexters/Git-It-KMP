@@ -15,8 +15,9 @@ import com.nexters.hytime.gitit.MainActivity
 import com.nexters.hytime.gitit.R
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.domain.model.DeviceInfo
+import com.nexters.hytime.gitit.domain.model.ProjectGenerationStatus
 import com.nexters.hytime.gitit.domain.repository.MemberRepository
-import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStore
+import com.nexters.hytime.gitit.feature.quiz.create.session.QuizCreateStatusSynchronizer
 import com.nexters.hytime.gitit.logging.gitItLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,8 +36,8 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
     /** API 호출 가능 여부를 확인할 로그인 세션 저장소다. */
     private val sessionStorage by inject<LoginSessionStorage>()
 
-    /** 문제 생성 완료·실패 신호를 앱 범위 생성 세션에 반영하는 Store다. */
-    private val quizCreateStore by inject<QuizCreateStore>()
+    /** 문제 생성 결과를 서버 상태와 맞춘 뒤 앱 범위 생성 세션에 반영한다. */
+    private val quizCreateStatusSynchronizer by inject<QuizCreateStatusSynchronizer>()
 
     /** 서비스 콜백 이후에도 기기 등록과 생성 결과 반영을 완료하는 코루틴 범위다. */
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -56,13 +57,16 @@ class GitItFirebaseMessagingService : FirebaseMessagingService() {
         val createResult = data.toQuizCreateResult()
         if (createResult != null) {
             serviceScope.launch {
-                when (createResult.status) {
-                    QuizCreateResultStatus.Success -> quizCreateStore.complete(createResult.projectId)
-                    QuizCreateResultStatus.Failed,
-                    QuizCreateResultStatus.Rejected,
-                    -> quizCreateStore.fail(createResult.projectId)
+                quizCreateStatusSynchronizer
+                    .sync(createResult.projectId)
+                    .onFailure { error ->
+                        logger.w(throwable = error) { "FCM 문제 생성 상태 API 동기화 실패" }
+                        quizCreateStatusSynchronizer.applyFallback(
+                            projectId = createResult.projectId,
+                            status = createResult.status.toProjectGenerationStatus(),
+                        )
+                    }
                 }
-            }
         } else if (hasCreateFields) {
             logger.w { "FCM 문제 생성 결과 payload의 projectId 또는 status가 올바르지 않습니다." }
         }
@@ -192,6 +196,14 @@ internal enum class QuizCreateResultStatus {
     /** 서버가 문제 생성 요청을 거절했다. */
     Rejected,
 }
+
+/** @return FCM 결과를 서버 상태 API와 같은 도메인 상태로 변환한 값 */
+private fun QuizCreateResultStatus.toProjectGenerationStatus(): ProjectGenerationStatus =
+    when (this) {
+        QuizCreateResultStatus.Success -> ProjectGenerationStatus.Completed
+        QuizCreateResultStatus.Failed -> ProjectGenerationStatus.Failed
+        QuizCreateResultStatus.Rejected -> ProjectGenerationStatus.Rejected
+    }
 
 /**
  * FCM으로 수신한 문제 생성 결과다.
