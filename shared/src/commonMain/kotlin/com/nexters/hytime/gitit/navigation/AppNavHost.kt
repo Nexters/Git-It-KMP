@@ -400,6 +400,7 @@ fun AppNavHost(
                         onBackClick = { backStack.removeLastOrNull() },
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToSavedQuestions = { backStack.add(AppRoute.Bookmark(route.projectId)) },
+                        onOpenGitHub = uriHandler::openUri,
                         onNavigateToLearningSet = { projectId, setId -> backStack.add(AppRoute.Quiz(projectId, setId)) },
                         onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )

@@ -73,6 +73,20 @@ class ProjectDetailViewModel(
     }
 
     /**
+     * GitHub에서 보기 인텐트. 현재 프로젝트의 저장소 링크를 연다.
+     */
+    fun onGitHubClick() {
+        val repositoryUrl =
+            _uiState.value.project
+                ?.repositoryUrl
+                .orEmpty()
+        if (repositoryUrl.isNotBlank()) {
+            onDismissMoreMenu()
+            emit(ProjectDetailEvent.OpenGitHub(repositoryUrl))
+        }
+    }
+
+    /**
      * 프로젝트를 서버에서 삭제하고 성공하면 홈 화면 이동 이벤트를 흘려보낸다.
      * 실패하면 화면을 유지하고 원인을 로그로 남긴다.
      */

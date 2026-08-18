@@ -178,6 +178,20 @@ class ProjectDetailViewModelTest {
         }
     }
 
+    /** GitHub 메뉴를 선택하면 상세 API의 저장소 링크를 여는 이벤트를 발행한다. */
+    @Test
+    fun onGitHubClick_저장소링크열기이벤트를발행한다() {
+        runTest(dispatcher) {
+            val viewModel = createViewModel()
+            runCurrent()
+            val event = async(start = CoroutineStart.UNDISPATCHED) { viewModel.events.first() }
+
+            viewModel.onGitHubClick()
+
+            assertEquals(ProjectDetailEvent.OpenGitHub(DETAIL.repositoryUrl), event.await())
+        }
+    }
+
     /** 스타 수 축약 표기의 경계 값을 검증한다. */
     @Test
     fun formatStarCount_경계값을_k표기로변환한다() {
