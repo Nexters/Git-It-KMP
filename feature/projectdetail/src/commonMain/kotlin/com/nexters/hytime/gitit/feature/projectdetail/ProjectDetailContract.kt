@@ -3,11 +3,6 @@ package com.nexters.hytime.gitit.feature.projectdetail
 /**
  * 프로젝트 상세 화면의 단일 UI 상태(MVI State)다.
  *
- * 도메인 모델이 아직 없으므로 presentation 레이어 임시 모델([ProjectInfo], [LearningSetItem])로
- * 채운다.
- *
- * TODO: domain/data 연동 시 도메인 모델로 교체한다.
- *
  * @property project 프로젝트 메타 정보. null이면 로딩 중
  * @property learningSets 학습 세트 목록
  * @property totalProgress 전체 학습 진행률(0..100)
@@ -24,12 +19,14 @@ data class ProjectDetailUiState(
  * 프로젝트 메타 정보를 담는 임시 presentation 모델이다.
  *
  * @property name 프로젝트 이름
+ * @property repositoryUrl GitHub 저장소 링크
  * @property thumbnailUrl 썸네일 이미지 URL
  * @property starCount GitHub 스타 수를 축약해 표시할 문자열
  * @property techStack 기술 스택 요약 문자열 (예: "Kotlin · Compose · Coroutines")
  */
 data class ProjectInfo(
     val name: String,
+    val repositoryUrl: String,
     val thumbnailUrl: String,
     val starCount: String,
     val techStack: String,
@@ -61,6 +58,15 @@ sealed interface ProjectDetailEvent {
 
     /** 저장한 문제 화면으로 이동. */
     data object NavigateToSavedQuestions : ProjectDetailEvent
+
+    /**
+     * GitHub 저장소를 외부 브라우저에서 연다.
+     *
+     * @property repositoryUrl 열 GitHub 저장소 링크
+     */
+    data class OpenGitHub(
+        val repositoryUrl: String,
+    ) : ProjectDetailEvent
 
     /** 홈 화면으로 이동. */
     data object NavigateToHome : ProjectDetailEvent

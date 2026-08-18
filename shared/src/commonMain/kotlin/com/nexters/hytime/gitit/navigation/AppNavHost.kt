@@ -131,7 +131,7 @@ internal fun AppRoute.sharedRepositoryAction(): SharedRepositoryAction =
  */
 internal fun AppRoute.navigationMotion(): AppNavigationMotion =
     when (this) {
-        AppRoute.Bookmark,
+        is AppRoute.Bookmark,
         AppRoute.Home,
         AppRoute.IntermediateSplash,
         AppRoute.My,
@@ -324,7 +324,7 @@ fun AppNavHost(
                             onNavigateToProjectLoad = { backStack.add(AppRoute.ProjectLoad()) },
                             onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                             onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
-                            onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                            onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark()) },
                             onNavigateToProjectDetail = { projectId -> backStack.add(AppRoute.ProjectDetail(projectId)) },
                             onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                         )
@@ -355,8 +355,9 @@ fun AppNavHost(
                         onDeleteAccountClick = {},
                     )
                 }
-                entry<AppRoute.Bookmark>(metadata = AppRoute.Bookmark.navigationMetadata()) {
+                entry<AppRoute.Bookmark>(metadata = { it.navigationMetadata() }) { route ->
                     BookmarkRoute(
+                        projectId = route.projectId,
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
                         onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
@@ -369,7 +370,7 @@ fun AppNavHost(
                     MyRoute(
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToProjectList = { navigateToMainRoute(AppRoute.ProjectList) },
-                        onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                        onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark()) },
                         onNavigateToSettings = { backStack.add(AppRoute.Settings) },
                     )
                 }
@@ -379,7 +380,7 @@ fun AppNavHost(
                         onBackClick = { backStack.removeLastOrNull() },
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
-                        onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                        onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark()) },
                         onNavigateToProjectDetail = { projectId -> backStack.add(AppRoute.ProjectDetail(projectId)) },
                         onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )
@@ -391,7 +392,7 @@ fun AppNavHost(
                         onBackClick = { backStack.removeLastOrNull() },
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
                         onNavigateToMy = { navigateToMainRoute(AppRoute.My) },
-                        onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark) },
+                        onNavigateToBookmark = { navigateToMainRoute(AppRoute.Bookmark()) },
                         onNavigateToProjectDetail = {},
                         onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )
@@ -401,7 +402,8 @@ fun AppNavHost(
                         projectId = route.projectId,
                         onBackClick = { backStack.removeLastOrNull() },
                         onNavigateToHome = { navigateToMainRoute(AppRoute.Home) },
-                        onNavigateToSavedQuestions = {},
+                        onNavigateToSavedQuestions = { backStack.add(AppRoute.Bookmark(route.projectId)) },
+                        onOpenGitHub = uriHandler::openUri,
                         onNavigateToLearningSet = { projectId, setId -> backStack.add(AppRoute.Quiz(projectId, setId)) },
                         onNavigateToQuiz = { projectId -> backStack.add(AppRoute.Quiz(projectId)) },
                     )

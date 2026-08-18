@@ -11,6 +11,7 @@ import com.nexters.hytime.gitit.domain.model.ProjectDetail
 internal fun ProjectDetail.toProjectInfo(): ProjectInfo =
     ProjectInfo(
         name = repositoryName,
+        repositoryUrl = repositoryUrl,
         thumbnailUrl = repositoryImageUrl,
         starCount = formatStarCount(starCount),
         techStack = techStack.joinToString(" · "),

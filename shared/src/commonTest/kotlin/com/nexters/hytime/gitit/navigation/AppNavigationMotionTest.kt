@@ -10,7 +10,7 @@ class AppNavigationMotionTest {
     fun navigationMotion_routeCategory_returnsExpectedMotion() {
         val expected =
             mapOf<AppRoute, AppNavigationMotion>(
-                AppRoute.Bookmark to AppNavigationMotion.Fade,
+                AppRoute.Bookmark() to AppNavigationMotion.Fade,
                 AppRoute.Home to AppNavigationMotion.Fade,
                 AppRoute.IntermediateSplash to AppNavigationMotion.Fade,
                 AppRoute.My to AppNavigationMotion.Fade,

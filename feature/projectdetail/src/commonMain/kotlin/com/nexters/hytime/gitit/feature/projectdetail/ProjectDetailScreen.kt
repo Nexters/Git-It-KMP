@@ -83,6 +83,7 @@ import git_it_kmp.feature.projectdetail.generated.resources.Res as ProjectDetail
  * @param onMoreMenuClick 더보기 메뉴 토글 콜백
  * @param onDismissMoreMenu 더보기 메뉴 닫기 콜백
  * @param onSavedQuestionsClick 저장한 문제 콜백
+ * @param onGitHubClick GitHub에서 보기 콜백
  * @param onQuestionSolvingClick 문제풀이 바로가기 콜백
  * @param onDeleteProjectClick 프로젝트 삭제 확인 콜백
  * @param onLearningSetClick 학습 세트 진입 콜백
@@ -95,6 +96,7 @@ fun ProjectDetailScreen(
     onMoreMenuClick: () -> Unit,
     onDismissMoreMenu: () -> Unit,
     onSavedQuestionsClick: () -> Unit,
+    onGitHubClick: () -> Unit,
     onQuestionSolvingClick: () -> Unit,
     onDeleteProjectClick: () -> Unit,
     onLearningSetClick: (String) -> Unit,
@@ -199,6 +201,7 @@ fun ProjectDetailScreen(
             )
             ProjectDetailMoreMenu(
                 onSavedQuestionsClick = onSavedQuestionsClick,
+                onGitHubClick = onGitHubClick,
                 onDeleteProjectClick = {
                     onDismissMoreMenu()
                     showDeleteSheet = true
@@ -435,6 +438,7 @@ private fun LearningSetCard(
  * 더보기 드롭다운 메뉴.
  *
  * @param onSavedQuestionsClick 저장한 문제 콜백
+ * @param onGitHubClick GitHub에서 보기 콜백
  * @param onDeleteProjectClick 삭제 콜백
  * @param modifier 메뉴의 크기와 화면 내 배치를 지정할 수식자
  * @param sky 뒤쪽 콘텐츠를 흐림 배경으로 읽을 Cloudy 상태
@@ -442,6 +446,7 @@ private fun LearningSetCard(
 @Composable
 private fun ProjectDetailMoreMenu(
     onSavedQuestionsClick: () -> Unit,
+    onGitHubClick: () -> Unit,
     onDeleteProjectClick: () -> Unit,
     modifier: Modifier = Modifier,
     sky: Sky? = null,
@@ -451,7 +456,7 @@ private fun ProjectDetailMoreMenu(
         sky = sky,
     ) {
         GitItLiquidGlassDropdownMenuItem(text = "저장한 문제", onClick = onSavedQuestionsClick)
-        GitItLiquidGlassDropdownMenuItem(text = "GitHub에서 보기", onClick = {})
+        GitItLiquidGlassDropdownMenuItem(text = "GitHub에서 보기", onClick = onGitHubClick)
         GitItLiquidGlassDropdownMenuItem(
             text = "삭제하기",
             color = GitItTheme.colors.error,
@@ -610,6 +615,7 @@ private fun ProjectDetailScreenPreview() {
                     project =
                         ProjectInfo(
                             name = "Nexters",
+                            repositoryUrl = "https://github.com/nexters/git-it-kmp",
                             thumbnailUrl = "",
                             starCount = "3.6k",
                             techStack = "Kotlin · Compose · Coroutines",
@@ -626,6 +632,7 @@ private fun ProjectDetailScreenPreview() {
             onMoreMenuClick = {},
             onDismissMoreMenu = {},
             onSavedQuestionsClick = {},
+            onGitHubClick = {},
             onQuestionSolvingClick = {},
             onDeleteProjectClick = {},
             onLearningSetClick = {},
