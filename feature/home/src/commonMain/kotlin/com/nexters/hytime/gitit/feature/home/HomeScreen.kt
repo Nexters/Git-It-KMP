@@ -88,7 +88,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .background(GitItTheme.colors.grey700),
     ) {
-        val viewportSize = DpSize(maxWidth, maxHeight)
+        val viewportWidth = maxWidth
 
         Column(
             modifier =
@@ -113,7 +113,7 @@ fun HomeScreen(
             Spacer(Modifier.height(40.dp))
             LearningSection(
                 uiState = uiState,
-                viewportSize = viewportSize,
+                viewportWidth = viewportWidth,
                 onIntent = onIntent,
             )
         }
@@ -207,7 +207,7 @@ private fun ProjectImport(
             Modifier
                 .padding(horizontal = 20.dp)
                 .fillMaxWidth()
-                .height(133.dp)
+                .height(201.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(GitItTheme.colors.grey600),
     ) {
@@ -276,13 +276,13 @@ private fun QuizCreateLoadingIndicator() {
  * 학습 중인 레포지토리 제목과 카드 또는 빈 상태를 표시한다.
  *
  * @param uiState 학습 카드 목록을 포함한 홈 상태
- * @param viewportSize 카드가 사용할 수 있는 화면 크기
+ * @param viewportWidth 카드가 사용할 수 있는 화면 너비
  * @param onIntent 카드와 전체 보기 입력을 전달할 콜백
  */
 @Composable
 private fun LearningSection(
     uiState: HomeUiState,
-    viewportSize: DpSize,
+    viewportWidth: Dp,
     onIntent: (HomeIntent) -> Unit,
 ) {
     Row(
@@ -328,7 +328,7 @@ private fun LearningSection(
             }
             LearningProjectPager(
                 projects = uiState.learningProjects,
-                viewportSize = viewportSize,
+                viewportWidth = viewportWidth,
                 onIntent = onIntent,
             )
         }
@@ -402,17 +402,17 @@ internal fun emptyLearningProjectCardCount(availableWidth: Dp): Int = (((availab
  * 카드를 수평으로 넘기며 현재 카드가 정면을 향하도록 회전시킨다.
  *
  * @param projects 표시할 학습 프로젝트 목록
- * @param viewportSize 카드 크기와 마지막 페이지 여백을 계산할 화면 크기
+ * @param viewportWidth 마지막 페이지 여백을 계산할 화면 너비
  * @param onIntent 카드 입력을 전달할 콜백
  */
 @Composable
 private fun LearningProjectPager(
     projects: List<HomeLearningProject>,
-    viewportSize: DpSize,
+    viewportWidth: Dp,
     onIntent: (HomeIntent) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = projects::size)
-    val cardSize = learningCardSize(viewportSize.height)
+    val cardSize = learningCardSize()
     // 실제 데이터의 개수와 무관하게 카드 순서대로 세 색상을 반복한다.
     val backgroundColors =
         listOf(
@@ -430,7 +430,7 @@ private fun LearningProjectPager(
         contentPadding =
             PaddingValues(
                 start = 20.dp,
-                end = (viewportSize.width - 20.dp - cardSize.width).coerceAtLeast(20.dp),
+                end = (viewportWidth - 20.dp - cardSize.width).coerceAtLeast(20.dp),
             ),
         pageSize = PageSize.Fixed(cardSize.width),
         beyondViewportPageCount = 2,
@@ -466,19 +466,11 @@ private fun LearningProjectPager(
 }
 
 /**
- * 화면 하단의 가용 공간에 맞춰 학습 카드 크기를 최소·최대 범위에서 확대한다.
+ * 학습 카드를 화면 크기와 무관하게 고정 크기로 표시한다.
  *
- * @param viewportHeight 홈 화면 전체 높이
- * @return 806dp 이하에서는 154×192dp, 874dp 이상에서는 209×260dp인 카드 크기
+ * @return 홈 화면에서 사용하는 154×192dp 카드 크기
  */
-internal fun learningCardSize(viewportHeight: Dp): DpSize {
-    val height = (viewportHeight - 614.dp).coerceIn(192.dp, 260.dp)
-    val growthFraction = (height - 192.dp) / 68.dp
-    return DpSize(
-        width = 154.dp + 55.dp * growthFraction,
-        height = height,
-    )
-}
+internal fun learningCardSize(): DpSize = DpSize(width = 154.dp, height = 192.dp)
 
 /**
  * 페이지 거리에 따라 Figma의 교차 카드 각도를 계산한다.

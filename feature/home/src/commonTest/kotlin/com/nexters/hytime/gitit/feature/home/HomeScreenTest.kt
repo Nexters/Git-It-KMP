@@ -42,12 +42,10 @@ class HomeScreenTest {
         Dispatchers.resetMain()
     }
 
-    /** 화면 높이에 따라 카드 크기가 Figma의 최소·최대 범위로 제한된다. */
+    /** 화면 크기와 무관하게 카드가 최소 크기로 고정된다. */
     @Test
-    fun learningCardSize_viewportHeight_returnsMinAndMaxSize() {
-        assertEquals(DpSize(154.dp, 192.dp), learningCardSize(700.dp))
-        assertEquals(DpSize(209.dp, 260.dp), learningCardSize(874.dp))
-        assertEquals(DpSize(209.dp, 260.dp), learningCardSize(1_000.dp))
+    fun learningCardSize_returnsFixedMinSize() {
+        assertEquals(DpSize(154.dp, 192.dp), learningCardSize())
     }
 
     /** 현재 카드와 다음 카드가 Figma에 정의된 각도를 사용한다. */
