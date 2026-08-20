@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -124,19 +125,25 @@ fun SolveQuizScreen(
                 onStartClick = { onIntent(SolveQuizIntent.Start) },
                 modifier = modifier,
             )
+        // 문제 번호를 key로 걸어 문제가 바뀔 때 화면 상태(Sky 캡처, 블러 캐시, 스크롤 위치)를 통째로 재생성한다.
+        // 같은 composition을 유지한 채 문제만 갈아끼우면 Cloudy가 이전 문제의 캡처를 계속 그려 잔상이 남는다.
         QuizStep.MultipleChoice ->
-            QuizQuestionScreen(
-                uiState = uiState,
-                onIntent = onIntent,
-                onSourceClick = { showSource = true },
-                modifier = modifier,
-            )
+            key(uiState.multipleChoiceQuestion.number) {
+                QuizQuestionScreen(
+                    uiState = uiState,
+                    onIntent = onIntent,
+                    onSourceClick = { showSource = true },
+                    modifier = modifier,
+                )
+            }
         QuizStep.Essay ->
-            QuizEssayScreen(
-                uiState = uiState,
-                onIntent = onIntent,
-                modifier = modifier,
-            )
+            key(uiState.essayQuestion.number) {
+                QuizEssayScreen(
+                    uiState = uiState,
+                    onIntent = onIntent,
+                    modifier = modifier,
+                )
+            }
         QuizStep.Completed ->
             QuizCompletionScreen(
                 questionCount = uiState.questions.size,
