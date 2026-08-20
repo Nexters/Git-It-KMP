@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -125,18 +126,22 @@ fun SolveQuizScreen(
                 modifier = modifier,
             )
         QuizStep.MultipleChoice ->
-            QuizQuestionScreen(
-                uiState = uiState,
-                onIntent = onIntent,
-                onSourceClick = { showSource = true },
-                modifier = modifier,
-            )
+            key(uiState.currentIndex) {
+                QuizQuestionScreen(
+                    uiState = uiState,
+                    onIntent = onIntent,
+                    onSourceClick = { showSource = true },
+                    modifier = modifier,
+                )
+            }
         QuizStep.Essay ->
-            QuizEssayScreen(
-                uiState = uiState,
-                onIntent = onIntent,
-                modifier = modifier,
-            )
+            key(uiState.currentIndex) {
+                QuizEssayScreen(
+                    uiState = uiState,
+                    onIntent = onIntent,
+                    modifier = modifier,
+                )
+            }
         QuizStep.Completed ->
             QuizCompletionScreen(
                 questionCount = uiState.questions.size,
