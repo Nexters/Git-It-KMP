@@ -3,6 +3,11 @@ package com.nexters.hytime.gitit.feature.projectlist
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
@@ -32,6 +37,12 @@ fun ProjectListRoute(
 ) {
     val viewModel = koinViewModel<ProjectListViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var screenKey by remember { mutableIntStateOf(0) }
+
+    LifecycleResumeEffect(Unit) {
+        screenKey++
+        onPauseOrDispose {}
+    }
 
     LaunchedEffect(Unit) {
         viewModel.refresh()
@@ -48,9 +59,11 @@ fun ProjectListRoute(
         }
     }
 
-    ProjectListScreen(
-        uiState = uiState,
-        isDeleteMode = isDeleteMode,
-        onIntent = viewModel::onIntent,
-    )
+    key(screenKey) {
+        ProjectListScreen(
+            uiState = uiState,
+            isDeleteMode = isDeleteMode,
+            onIntent = viewModel::onIntent,
+        )
+    }
 }

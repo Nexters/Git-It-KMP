@@ -203,6 +203,7 @@ class SolveQuizViewModel(
                     setState {
                         copy(
                             questions = questions.withEssayModelAnswer(currentIndex, result.rubric.fullMarkExample),
+                            essayAnswer = state.essayAnswer,
                             isEssaySubmitted = true,
                         )
                     }

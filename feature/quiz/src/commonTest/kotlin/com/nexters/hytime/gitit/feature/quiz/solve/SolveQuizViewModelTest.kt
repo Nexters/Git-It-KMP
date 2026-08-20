@@ -298,21 +298,23 @@ class SolveQuizViewModelTest {
         }
     }
 
-    /** 서술형 제출이 성공하면 만점 예시를 모범 답안으로 채운다. */
+    /** 서술형 제출 중 입력 상태가 바뀌어도 실제 제출한 답안과 만점 예시를 표시한다. */
     @Test
-    fun submit_서술형제출에성공하면_모범답안을채운다() {
+    fun submit_서술형제출중입력이바뀌어도_제출한답안을표시한다() {
         runTest(dispatcher) {
             val repository = repositoryWithEssayResult()
             val viewModel = essayViewModel(repository)
 
             viewModel.onIntent(SolveQuizIntent.EssayAnswerChange("라우터가 한곳에 모여 있습니다"))
             viewModel.onIntent(SolveQuizIntent.Submit)
+            viewModel.onIntent(SolveQuizIntent.EssayAnswerChange(""))
             runCurrent()
 
             val state = viewModel.uiState.value
             assertEquals("q2", repository.submittedEssayQuestionId)
             assertEquals("라우터가 한곳에 모여 있습니다", repository.submittedEssayText)
             assertTrue(state.isEssaySubmitted)
+            assertEquals("라우터가 한곳에 모여 있습니다", state.essayAnswer)
             assertEquals("만점 예시", state.essayQuestion.modelAnswer)
         }
     }
