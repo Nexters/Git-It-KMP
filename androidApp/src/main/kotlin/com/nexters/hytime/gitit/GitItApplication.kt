@@ -9,6 +9,7 @@ import com.nexters.hytime.gitit.auth.AndroidGoogleAuthenticator
 import com.nexters.hytime.gitit.auth.GoogleAuthenticator
 import com.nexters.hytime.gitit.auth.GoogleAuthTokenProvider
 import com.nexters.hytime.gitit.data.di.dataModule
+import com.nexters.hytime.gitit.data.di.fakeProjectModule
 import com.nexters.hytime.gitit.domain.auth.AuthTokenProvider
 import com.nexters.hytime.gitit.domain.auth.LoginSessionStorage
 import com.nexters.hytime.gitit.domain.model.LoginSession
@@ -48,6 +49,8 @@ class GitItApplication : Application() {
                 appModules +
                     onboardingModule +
                     dataModule +
+                    // TODO: 서버 연동 후 제거 — 프로젝트 화면 확인용 임시 더미 데이터
+                    fakeProjectModule +
                     platformModule(sessionStorage, currentActivityTracker::current) +
                     networkModule(
                         networkLogger = { message -> networkLogger.d { message } },
