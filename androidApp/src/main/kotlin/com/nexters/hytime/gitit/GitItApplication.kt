@@ -46,7 +46,11 @@ class GitItApplication : Application() {
                     networkModule(
                         networkLogger = { message -> networkLogger.d { message } },
                         baseUrl = BuildConfig.BACKEND_BASE_URL,
-                        accessTokenProvider = { sessionStorage.load()?.accessToken },
+                        accessTokenProvider = {
+                            sessionStorage.load()?.accessToken?.also { accessToken ->
+                                if (BuildConfig.DEBUG) networkLogger.d { "Access token: $accessToken" }
+                            }
+                        },
                     ),
             )
         }
