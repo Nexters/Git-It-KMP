@@ -1,7 +1,8 @@
 package com.nexters.hytime.gitit
 
+import android.app.Activity
 import android.app.Application
-import android.content.Context
+import android.os.Bundle
 import com.google.firebase.messaging.FirebaseMessaging
 import com.nexters.hytime.gitit.auth.AndroidLoginSessionStorage
 import com.nexters.hytime.gitit.auth.AndroidGoogleAuthenticator
@@ -17,15 +18,20 @@ import com.nexters.hytime.gitit.logging.gitItLogger
 import com.nexters.hytime.gitit.logging.initLogger
 import com.nexters.hytime.gitit.network.di.networkModule
 import com.nexters.hytime.gitit.notification.createLearningNotificationChannel
+import java.lang.ref.WeakReference
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
 /** Android 프로세스의 로깅, DI, FCM 기기 등록을 초기화한다. */
 class GitItApplication : Application() {
+    /** Google 로그인 UI를 띄울 현재 Activity를 추적한다. */
+    private val currentActivityTracker = CurrentActivityTracker()
+
     /** 앱 의존성을 구성한 뒤 현재 Firebase 앱 설치 등록을 요청한다. */
     override fun onCreate() {
         super.onCreate()
+        registerActivityLifecycleCallbacks(currentActivityTracker)
         initLogger(BuildConfig.DEBUG)
         createLearningNotificationChannel()
         val networkLogger = gitItLogger(tag = "🌐 Network")
@@ -42,7 +48,7 @@ class GitItApplication : Application() {
                 appModules +
                     onboardingModule +
                     dataModule +
-                    platformModule(sessionStorage) +
+                    platformModule(sessionStorage, currentActivityTracker::current) +
                     networkModule(
                         networkLogger = { message -> networkLogger.d { message } },
                         baseUrl = BuildConfig.BACKEND_BASE_URL,
@@ -62,19 +68,22 @@ class GitItApplication : Application() {
  * Android 인증 의존성을 등록한다.
  *
  * @param sessionStorage 네트워크 인증과 로그인에서 공유할 세션 저장소
+ * @param activityProvider Google 계정 선택 UI를 띄울 현재 Activity를 제공하는 함수
  * @return Android 인증 의존성이 등록된 Koin 모듈
  */
-private fun platformModule(sessionStorage: LoginSessionStorage) =
-    module {
-        single<GoogleAuthenticator> {
-            AndroidGoogleAuthenticator(
-                context = get<Context>(),
-                serverClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID,
-            )
-        }
-        single<AuthTokenProvider> { GoogleAuthTokenProvider(get()) }
-        single<LoginSessionStorage> { sessionStorage }
+private fun platformModule(
+    sessionStorage: LoginSessionStorage,
+    activityProvider: () -> Activity?,
+) = module {
+    single<GoogleAuthenticator> {
+        AndroidGoogleAuthenticator(
+            activityProvider = activityProvider,
+            serverClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID,
+        )
     }
+    single<AuthTokenProvider> { GoogleAuthTokenProvider(get()) }
+    single<LoginSessionStorage> { sessionStorage }
+}
 
 /**
  * 현재 앱 설치를 FCM에 등록하고 비동기 실패만 기록한다.
@@ -108,4 +117,44 @@ internal class RegistrationRequestingLoginSessionStorage(
     override suspend fun load(): LoginSession? = delegate.load()
 
     override suspend fun clear() = delegate.clear()
+}
+
+/**
+ * 현재 화면에 보이는 Activity를 약한 참조로 보관한다.
+ *
+ * Credential Manager는 Application context로는 계정 선택 UI를 띄우지 못하고 콜백도 돌려주지 않는다.
+ */
+internal class CurrentActivityTracker : Application.ActivityLifecycleCallbacks {
+    private var activityRef: WeakReference<Activity>? = null
+
+    /**
+     * @return 마지막으로 재개된 Activity. 앱이 백그라운드이거나 이미 소멸했으면 null
+     */
+    fun current(): Activity? = activityRef?.get()
+
+    override fun onActivityResumed(activity: Activity) {
+        activityRef = WeakReference(activity)
+    }
+
+    override fun onActivityDestroyed(activity: Activity) {
+        if (activityRef?.get() === activity) {
+            activityRef = null
+        }
+    }
+
+    override fun onActivityCreated(
+        activity: Activity,
+        savedInstanceState: Bundle?,
+    ) = Unit
+
+    override fun onActivityStarted(activity: Activity) = Unit
+
+    override fun onActivityPaused(activity: Activity) = Unit
+
+    override fun onActivityStopped(activity: Activity) = Unit
+
+    override fun onActivitySaveInstanceState(
+        activity: Activity,
+        outState: Bundle,
+    ) = Unit
 }
