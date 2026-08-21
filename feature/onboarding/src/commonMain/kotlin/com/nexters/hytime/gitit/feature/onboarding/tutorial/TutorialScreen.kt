@@ -45,14 +45,14 @@ import org.jetbrains.compose.resources.painterResource
  *
  * @property id 선택 상태와 LazyColumn key에 사용하는 화면 내 고유 식별자
  * @property title 선택지를 한 줄로 설명하는 제목
- * @property thumbnailRes 카드 왼쪽 52×52dp 영역에 표시할 이미지 리소스
+ * @property thumbnailRes 카드 왼쪽 52×52dp 영역에 표시할 선택적 이미지 리소스. null이면 이미지 영역을 두지 않는다
  * @property description 제목 아래에 표시할 선택적 한 줄 설명
  */
 @Immutable
 data class TutorialOption(
     val id: String,
     val title: String,
-    val thumbnailRes: DrawableResource,
+    val thumbnailRes: DrawableResource? = null,
     val description: String? = null,
 )
 
@@ -131,14 +131,18 @@ fun TutorialScreen(
                     selected = option.id == selectedOptionId,
                     onClick = { onOptionClick(option) },
                     modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Image(
-                        painter = painterResource(option.thumbnailRes),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
-                }
+                    thumbnail =
+                        option.thumbnailRes?.let { resource ->
+                            {
+                                Image(
+                                    painter = painterResource(resource),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            }
+                        },
+                )
             }
         }
         helperText?.let { text ->
@@ -178,10 +182,10 @@ fun TutorialScreen(
 /** 학습 분야 튜토리얼 프리뷰에서 사용하는 선택지다. */
 private val tutorialCategoryOptions =
     listOf(
-        TutorialOption(id = "frontend", title = "Front-end", thumbnailRes = Res.drawable.tutorial_preview_thumbnail),
-        TutorialOption(id = "backend", title = "Back-end", thumbnailRes = Res.drawable.tutorial_preview_thumbnail),
-        TutorialOption(id = "ios", title = "iOS", thumbnailRes = Res.drawable.tutorial_preview_thumbnail),
-        TutorialOption(id = "android", title = "Android", thumbnailRes = Res.drawable.tutorial_preview_thumbnail),
+        TutorialOption(id = "frontend", title = "Front-end"),
+        TutorialOption(id = "backend", title = "Back-end"),
+        TutorialOption(id = "ios", title = "iOS"),
+        TutorialOption(id = "android", title = "Android"),
     )
 
 /** 코드 이해 수준 튜토리얼 프리뷰에서 사용하는 선택지다. */

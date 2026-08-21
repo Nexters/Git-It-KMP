@@ -82,10 +82,10 @@ internal fun CurationContent(
 @Composable
 private fun positionOptions(): List<TutorialOption> =
     listOf(
-        TutorialOption(Position.FRONTEND.name, stringResource(Res.string.curation_frontend), Res.drawable.tutorial_preview_thumbnail),
-        TutorialOption(Position.BACKEND.name, stringResource(Res.string.curation_backend), Res.drawable.tutorial_preview_thumbnail),
-        TutorialOption(Position.IOS.name, stringResource(Res.string.curation_ios), Res.drawable.tutorial_preview_thumbnail),
-        TutorialOption(Position.ANDROID.name, stringResource(Res.string.curation_android), Res.drawable.tutorial_preview_thumbnail),
+        TutorialOption(Position.FRONTEND.name, stringResource(Res.string.curation_frontend)),
+        TutorialOption(Position.BACKEND.name, stringResource(Res.string.curation_backend)),
+        TutorialOption(Position.IOS.name, stringResource(Res.string.curation_ios)),
+        TutorialOption(Position.ANDROID.name, stringResource(Res.string.curation_android)),
     )
 
 /** 코드 이해 수준 선택 화면에 표시할 옵션을 만든다. */
