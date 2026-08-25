@@ -65,7 +65,7 @@ android {
 
     defaultConfig {
         applicationId = "com.nexters.hytime.gitit"
-        versionCode = 2
+        versionCode = 3
         versionName = "1.0.0"
 
         // local.properties에서 주입되는 설정 값들
