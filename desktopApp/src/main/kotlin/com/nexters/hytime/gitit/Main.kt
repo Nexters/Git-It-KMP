@@ -13,9 +13,11 @@ import com.nexters.hytime.gitit.feature.onboarding.onboardingModule
 import com.nexters.hytime.gitit.logging.gitItLogger
 import com.nexters.hytime.gitit.logging.initLogger
 import com.nexters.hytime.gitit.network.di.networkModule
+import io.kotzilla.generated.monitoring
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
+/** 데스크톱 앱의 로깅, DI, Kotzilla 모니터링과 UI를 초기화한다. */
 fun main() {
     initLogger(isDebug = true)
     val logger = gitItLogger(tag = "🌐 Network")
@@ -32,6 +34,7 @@ fun main() {
                     accessTokenProvider = { sessionStorage.load()?.accessToken },
                 ),
         )
+        monitoring()
     }
 
     application {

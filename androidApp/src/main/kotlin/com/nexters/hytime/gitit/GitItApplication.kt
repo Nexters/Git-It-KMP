@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import com.google.firebase.messaging.FirebaseMessaging
+import io.kotzilla.generated.monitoring
 import com.nexters.hytime.gitit.auth.AndroidLoginSessionStorage
 import com.nexters.hytime.gitit.auth.AndroidGoogleAuthenticator
 import com.nexters.hytime.gitit.auth.GoogleAuthenticator
@@ -55,6 +56,7 @@ class GitItApplication : Application() {
                         accessTokenProvider = { sessionStorage.load()?.accessToken },
                     ),
             )
+            monitoring()
         }
         requestRegistration()
     }

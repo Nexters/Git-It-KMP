@@ -7,6 +7,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.kermit)
             implementation(libs.koin.core)
+            implementation(libs.kotzilla.sdk)
         }
     }
 }

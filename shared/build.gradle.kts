@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.gitit.kmp.library.compose)
+    alias(libs.plugins.gitit.kmp.library.compose.kotzilla)
     alias(libs.plugins.kotlinSerialization)
 }
 
